@@ -212,3 +212,53 @@ def hybrid_similarity(P, Q, w=[0.3, 0.4, 0.3]):
     
     return dist_H, dist_DTW, dist_Cos
 ```
+
+---
+
+## 6. Experimental Protocol (Revised)
+
+### 6.1 Nested Cross-Validation
+
+To eliminate selection leakage, all hyperparameter tuning is performed within a nested cross-validation framework:
+
+- **Outer Loop:** 5-fold Stratified K-Fold for unbiased performance reporting.
+- **Inner Loop:** 3-fold Stratified K-Fold on each outer training fold for hyperparameter selection.
+
+**Hyperparameter Search Space:**
+
+| Parameter | Values |
+|-----------|--------|
+| Segmentation penalty/window (`param`) | 1.0, 1.5, 2.0, 2.5 |
+| Fuzzy envelope width (`z`) | 0.5, 1.0, 1.96 |
+| KNN neighbors (`k`) | 1, 3, 5 |
+| Fusion weights (`w_H, w_{DTW}, w_{Cos}`) | [0.1,0.8,0.1], [0.3,0.4,0.3], [0.2,0.6,0.2] |
+| Classifier | KNN, Kernel SVM |
+
+### 6.2 Automatic Segmentation Strategy Selection
+
+Segmentation strategy is selected automatically using only training data:
+
+1. Compute lag-1 autocorrelation $r_i = \text{corr}(x_i[1:N-1], x_i[2:N])$ for each training sample $i$.
+2. Compute variance of autocorrelations: $\sigma^2_r = \text{Var}(\{r_1, r_2, \ldots, r_M\})$.
+3. Decision rule:
+   - $\sigma^2_r > 0.05$: Use CPD segmentation (phase-shifted data).
+   - $\sigma^2_r \le 0.05$: Use fixed-window segmentation (phase-aligned data).
+
+### 6.3 Fusion Weight Learning
+
+The hybrid similarity fusion weights $w_H, w_{DTW}, w_{Cos}$ are learned from training data:
+
+**Method A — Logistic Regression:**
+For each training pair $(i, j)$, construct feature vector $[d_H^{\text{norm}}, d_{DTW}^{\text{norm}}, d_{Cos}^{\text{norm}}]$ and label $l = \mathbb{1}[y_i = y_j]$. Fit logistic regression and normalize $|\beta|$ to sum to 1.
+
+**Method B — Grid Search:**
+Evaluate predefined weight combinations via inner CV with KNN classifier. Select weights maximizing mean accuracy.
+
+### 6.4 Statistical Testing
+
+With 23 datasets, the Friedman chi-square test replaces the Wilcoxon signed-rank test. Post-hoc analysis uses the Nemenyi test with critical difference diagrams (Demšar, 2006).
+
+### 6.5 Repeated Evaluation
+
+All metrics are reported as mean ± std over 10 stratified train/test splits per dataset.
+

@@ -148,6 +148,77 @@ def fuse_borda_ranks(D_H, D_DTW, D_Cos):
         
     return Fused_Ranks
 
+def learn_fusion_weights(D_H_train, D_DTW_train, D_Cos_train, y_train):
+    """
+    Learns optimal fusion weights from training data using logistic regression
+    on pairwise same-class labels.
+
+    For each pair (i, j) in training set:
+    - Label = 1 if y_i == y_j (same class), else 0
+    - Features = [normalized_d_H, normalized_d_DTW, normalized_d_Cos]
+
+    Fits LogisticRegression, extracts coefficients, and normalizes them to sum to 1.
+    Returns learned weights as list of 3 floats.
+    """
+    from sklearn.linear_model import LogisticRegression
+
+    D_H_norm, _, _ = min_max_normalize(D_H_train)
+    D_DTW_norm, _, _ = min_max_normalize(D_DTW_train)
+    D_Cos_norm, _, _ = min_max_normalize(D_Cos_train)
+
+    y = np.asarray(y_train)
+    n = len(y)
+    features, labels = [], []
+    for i in range(n):
+        for j in range(i + 1, n):
+            features.append([D_H_norm[i, j], D_DTW_norm[i, j], D_Cos_norm[i, j]])
+            labels.append(1 if y[i] == y[j] else 0)
+
+    clf = LogisticRegression(max_iter=1000).fit(features, labels)
+    raw = np.abs(clf.coef_[0])
+    weights = raw / raw.sum()
+    return weights.tolist()
+
+
+def learn_fusion_weights_grid(D_H_train, D_DTW_train, D_Cos_train, y_train, k=3, cv=3):
+    """
+    Learns optimal fusion weights via grid search on inner CV.
+
+    Weight grid: predefined list of weight combinations that sum to 1.
+    For each weight combo, fuse training distances, run KNN(k) with
+    StratifiedKFold(cv), and measure mean accuracy.
+    Returns best weights as list of 3 floats.
+    """
+    from sklearn.model_selection import StratifiedKFold
+    from src.classifiers.models import CustomDistanceKNN
+
+    weight_grid = [
+        [0.1, 0.8, 0.1], [0.2, 0.6, 0.2], [0.3, 0.4, 0.3],
+        [0.33, 0.34, 0.33], [0.1, 0.1, 0.8], [0.8, 0.1, 0.1],
+        [0.4, 0.4, 0.2], [0.2, 0.4, 0.4], [0.4, 0.2, 0.4],
+    ]
+
+    y = np.asarray(y_train)
+    skf = StratifiedKFold(n_splits=cv, shuffle=True, random_state=42)
+
+    best_weights, best_acc = [0.3, 0.4, 0.3], -1.0
+    for w in weight_grid:
+        D_fused, _ = fuse_distances(D_H_train, D_DTW_train, D_Cos_train, weights=w)
+        accs = []
+        for train_idx, val_idx in skf.split(D_fused, y):
+            D_val = D_fused[np.ix_(val_idx, train_idx)]
+            knn = CustomDistanceKNN(n_neighbors=k)
+            knn.fit(y[train_idx])
+            preds = knn.predict(D_val)
+            accs.append(np.mean(preds == y[val_idx]))
+        mean_acc = np.mean(accs)
+        if mean_acc > best_acc:
+            best_acc = mean_acc
+            best_weights = w
+
+    return list(best_weights)
+
+
 if __name__ == "__main__":
     # Test script
     np.random.seed(42)

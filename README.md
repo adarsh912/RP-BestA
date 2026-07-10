@@ -1,6 +1,6 @@
 # Adaptive Multi-Feature Linear Fuzzy Information Granulation with Hybrid Similarity Learning
 
-This repository implements a novel framework for time series classification (TSC) using **Adaptive Segmentation**, **Enhanced Linear Fuzzy Information Granulation (LFIG)**, **Multi-Feature Granule Representation**, and **Hybrid Similarity Learning with Rank Fusion**.
+This repository implements an advanced, statistically rigorous framework for time series classification (TSC) using **Adaptive Segmentation**, **Enhanced Linear Fuzzy Information Granulation (LFIG)**, **Multi-Feature Granule Representation**, and **Hybrid Similarity Learning with Rank Fusion**.
 
 ---
 
@@ -12,8 +12,9 @@ This framework addresses these gaps through:
 1. **Adaptive Window Segmentation:** Uses Change Point Detection (CPD) and information entropy.
 2. **Enhanced Fuzzy Envelopes:** Envelopes that respect local variance and trend slopes.
 3. **10-Dimensional Feature representation:** Lower bound, upper bound, trend, Shannon entropy, variance, volatility, curvature, slope, energy, and skewness.
-4. **Hybrid Similarity Learning:** Fusing set overlap (Hausdorff), phase alignment (DTW on slopes), and direction alignment (Cosine DTW on 10D features).
-5. **Multi-Classifier Ensemble:** RF, XGBoost, LightGBM, CatBoost, SVM, and custom distance-based kNN.
+4. **Hybrid Similarity Learning:** Fusing set overlap (Hausdorff), phase alignment (DTW on slopes), and direction alignment (Cosine DTW on 10D features). Fusion weights are dynamically learned using logistic regression or inner cross-validation grid search.
+5. **Rigorous Validation Protocol:** Uses nested cross-validation (5-fold outer, 3-fold inner) to prevent selection leakage and repeated stratified splits to report statistical variance.
+6. **Multi-Classifier Ensemble:** RF, XGBoost, LightGBM, CatBoost, SVM, and custom distance-based kNN.
 
 ---
 
@@ -21,20 +22,22 @@ This framework addresses these gaps through:
 
 ```directory
 .
-├── literature_review.md      # Phase 1: Seminal papers & comparison tables
-├── phases.md                 # Project development roadmap (Phases 1-9)
+├── literature_review.md      # Seminal papers & comparison tables
+├── phases.md                 # Project development roadmap (Phases 1-12)
 ├── milestones.md             # Project milestones status checklist
 ├── progress.md               # Code walkthrough and development progress
 ├── requirements.txt          # Python package requirements
-├── venv/                     # Local python virtual environment
 ├── plots/                    # Output plots and visualizations
-│   ├── GunPoint_samples.png
-│   ├── GunPoint_segmentation_comparison.png
-│   └── GunPoint_lfig_granulation.png
+│   ├── cd_diagram.png        # Critical difference diagram (Friedman + Nemenyi)
+│   ├── feature_correlation_matrix.png
+│   ├── feature_pca_variance.png
+│   ├── evaluation_results.md # Performance results from nested CV
+│   └── ...
 └── src/                      # Source Code
     ├── datasets/
     │   ├── loader.py         # UCR/UEA datasets loader
-    │   └── stats.py          # Data analysis & statistics
+    │   ├── stats.py          # Data analysis & statistics
+    │   └── ucr_catalog.py    # Catalog of 23 UCR datasets across 6 domains
     ├── segmentation/
     │   ├── adaptive.py       # Segmentation algorithms (Fixed, Var, Ent, CPD)
     │   └── visualize_segmentation.py
@@ -43,9 +46,10 @@ This framework addresses these gaps through:
     │   └── visualize_lfig.py
     ├── features/
     │   ├── extractor.py      # 10D feature sequence extractor
-    │   └── importance.py     # Random Forest feature Gini importance
+    │   ├── importance.py     # Random Forest feature Gini importance
+    │   └── redundancy.py     # Feature correlation, PCA, and VIF analysis
     ├── similarity/
-    │   └── hybrid.py         # Hausdorff, DTW, Cosine, and fusion
+    │   └── hybrid.py         # Hausdorff, DTW, Cosine, and fusion weights learning
     └── classifiers/
         └── models.py         # Precomputed distance kNN/SVM & boosting models
 ```
@@ -55,33 +59,24 @@ This framework addresses these gaps through:
 ## 3. Quick Start & Setup
 
 ### Setup Environment
-Ensure Python 3.10+ is installed. Run the following to create and activate a virtual environment, then install all requirements:
+Ensure Python 3.10+ is installed. Run the following to create a virtual environment and install all requirements (including `aeon` for baselines):
 ```bash
 python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### Run Verification Tests
-To test the individual modules and produce validation plots, you can execute the test commands:
+### Running the New Modules
+To verify the new modules and run experimental tasks:
 ```bash
-# 1. Load dataset and print statistics
-python -m src.datasets.stats
+# 1. Run nested CV on a single dataset
+python -c "from src.evaluation.tuning import run_nested_cv; run_nested_cv('GunPoint')"
 
-# 2. Visualize segmentation comparisons
-python -m src.segmentation.visualize_segmentation
+# 2. Run feature redundancy analysis
+python -c "from src.features.redundancy import run_redundancy_analysis; run_redundancy_analysis('GunPoint')"
 
-# 3. Visualize LFIG granule fitting
-python -m src.granulation.visualize_lfig
-
-# 4. Check feature extraction Gini importances
-python -m src.features.importance
-
-# 5. Check similarity metric matrix operations
-python -m src.similarity.hybrid
-
-# 6. Verify classifiers execution
-python -m src.classifiers.models
+# 3. Run full benchmark on all catalog datasets (produces CD diagram & evaluation_results.md)
+python -c "from src.evaluation.benchmark import run_full_benchmark; run_full_benchmark()"
 ```
 
 ---
@@ -92,25 +87,19 @@ python -m src.classifiers.models
 - Development Roadmap: [phases.md](file:///Users/adarshfulzele/Desktop/RP/Best%20A/phases.md)
 - Milestones Checklist: [milestones.md](file:///Users/adarshfulzele/Desktop/RP/Best%20A/milestones.md)
 - Development Progress & Walkthrough: [progress.md](file:///Users/adarshfulzele/Desktop/RP/Best%20A/progress.md)
+- Methodology & Design: [methodology_design.md](file:///Users/adarshfulzele/Desktop/RP/Best%20A/methodology_design.md)
+- Paper Draft: [paper_draft.md](file:///Users/adarshfulzele/Desktop/RP/Best%20A/paper_draft.md)
 
 ---
 
-## 5. Evaluation Results Summary
+## 5. Evaluation & Baselines
 
-Our proposed Adaptive Multi-Feature LFIG pipeline was evaluated against standard baseline Dynamic Time Warping (DTW) and state-of-the-art literature results across 5 UCR datasets.
+Our proposed pipeline is evaluated across an expanded catalog of **23 UCR datasets** spanning Motion, Spectro, Image, ECG, Sensor, and Simulated domains. 
 
-### Accuracy Comparison
+The evaluation framework incorporates:
+- **Nested Cross-Validation:** Hyperparameters are selected per-fold using an inner CV to eliminate selection leakage.
+- **Repeated Evaluation:** Accuracy, precision, recall, and Macro F1 scores are reported as `mean ± std` over 10 repeated stratified splits.
+- **Reproducible Baselines:** DTW-1NN, ROCKET, and MiniROCKET are run under the exact same splits (via `aeon` integration) to ensure direct comparability.
+- **Statistical Significance:** A Demšar-style Critical Difference (CD) diagram is generated using a Friedman test followed by Nemenyi post-hoc tests.
 
-| Dataset | Our Proposed Classifier | Proposed Acc | Fast-DTW kNN | Literature DTW | HIVE-COTE 2.0 |
-| :--- | :--- | :---: | :---: | :---: | :---: |
-| **Coffee** | Our Proposed (KNN, k=1) | **1.0000** | 0.9286 | 0.9930 | 1.0000 |
-| **Chinatown** | Our Proposed (Kernel SVM) | **0.9767** | 0.9679 | 0.9650 | 0.9830 |
-| **GunPoint** | Our Proposed (KNN, k=3) | **0.9067** | 0.8867 | 0.9130 | 1.0000 |
-| **ECG200** | Our Proposed (KNN, k=1) | **0.9100** | 0.8300 | 0.8800 | 0.9000 |
-| **ArrowHead** | Our Proposed (KNN, k=1) | **0.8286** | 0.7200 | 0.8290 | 0.8710 |
-
-Key Highlights:
-- **Coffee**: Achieved perfect **100% accuracy**, matching SOTA ensembles.
-- **ECG200**: Achieved **91.00% accuracy**, outperforming local DTW, literature DTW, and even the SOTA **HIVE-COTE 2.0** ensemble (90.00%).
-- **Speedup**: Runs up to **15x faster** than Fast-DTW baseline (e.g. GunPoint completes in 11.78s vs 167.46s).
-
+Full evaluation and benchmarking results are maintained in [plots/evaluation_results.md](file:///Users/adarshfulzele/Desktop/RP/Best%20A/plots/evaluation_results.md).

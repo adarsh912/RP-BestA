@@ -67,3 +67,38 @@ This document details the code development progress, module verification results
 ## 2. Overall Status Summary
 
 All core algorithmic and evaluation modules (Phases 1-9, Milestones 1-7) have been fully coded, integrated, and validated on the 5-dataset benchmark. The framework is highly performant, computationally efficient, and outperforms baseline methods. The project has been completed successfully.
+
+---
+
+## 3. Protocol Revision Progress
+
+### 3.1 Phase 10: Experimental Protocol Fixes
+* **Step 1 — Selection Leakage Eliminated:** Removed hardcoded per-dataset hyperparameters from `benchmark.py`. All tuning now uses nested cross-validation (5-fold outer for reporting, 3-fold inner for tuning). Implemented automatic segmentation strategy selection using lag-1 autocorrelation variance computed solely on training data.
+  * **Code:** [tuning.py](file:///Users/adarshfulzele/Desktop/RP/Best%20A/src/evaluation/tuning.py)
+
+* **Step 2 — Repeated Evaluation:** Added `run_repeated_evaluation()` with 10 stratified train/test splits per dataset. All metrics now reported as mean ± std.
+  * **Code:** [benchmark.py](file:///Users/adarshfulzele/Desktop/RP/Best%20A/src/evaluation/benchmark.py)
+
+* **Step 3 — Baselines Fixed:** ROCKET, MiniROCKET, and DTW-1NN now reproduced via `aeon` library under identical evaluation protocol. HIVE-COTE 2.0 and DrCIF marked as "literature-reported†" with explicit caveats.
+  * **Code:** [baselines.py](file:///Users/adarshfulzele/Desktop/RP/Best%20A/src/evaluation/baselines.py)
+
+### 3.2 Phase 11: Evidence Scaling
+* **Step 4 — Dataset Expansion:** Expanded from 5 to 23 UCR datasets spanning 6 domains (Motion, Spectro, Image, ECG, Sensor, Simulated).
+  * **Code:** [ucr_catalog.py](file:///Users/adarshfulzele/Desktop/RP/Best%20A/src/datasets/ucr_catalog.py)
+
+* **Step 5 — Auto-Segmentation Validated:** `validate_strategy_selection()` function compares automatic strategy selection against human expectations across all 23 datasets.
+  * **Code:** [tuning.py](file:///Users/adarshfulzele/Desktop/RP/Best%20A/src/evaluation/tuning.py)
+
+* **Demšar CD Diagrams:** Implemented Friedman test + Nemenyi post-hoc critical difference diagrams replacing the previous Wilcoxon test.
+  * **Code:** [critical_difference.py](file:///Users/adarshfulzele/Desktop/RP/Best%20A/src/evaluation/critical_difference.py)
+
+### 3.3 Phase 12: Method Strengthening
+* **Step 6 — Hybrid Similarity Learning Defined:** Added `learn_fusion_weights()` (logistic regression on pairwise same-class labels) and `learn_fusion_weights_grid()` (grid search with inner CV). Weights are now learned from training data, not hardcoded.
+  * **Code:** [hybrid.py](file:///Users/adarshfulzele/Desktop/RP/Best%20A/src/similarity/hybrid.py)
+
+* **Step 7 — Fine-Grained Ablation:** Implemented leave-one-feature-out ablation with 10 repeats per dataset. Each of the 10 features is zeroed out individually to measure accuracy delta.
+  * **Code:** [benchmark.py](file:///Users/adarshfulzele/Desktop/RP/Best%20A/src/evaluation/benchmark.py)
+
+* **Step 8 — Feature Redundancy Checked:** Implemented Pearson correlation matrix, PCA explained variance analysis, and Variance Inflation Factor (VIF) analysis for the 10 granule features.
+  * **Code:** [redundancy.py](file:///Users/adarshfulzele/Desktop/RP/Best%20A/src/features/redundancy.py)
+

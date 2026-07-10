@@ -190,3 +190,35 @@ We ran a Wilcoxon signed-rank test comparing our proposed accuracies against Fas
 We have presented an **Adaptive Multi-Feature LFIG framework** for time series classification. By dynamically windowing signals, extracting 10D statistical-structural feature spaces, and fusing Hausdoff-DTW-Cosine distances, we achieved SOTA-comparable accuracies while executing up to **15x faster** than raw DTW baselines. Notably, we beat HIVE-COTE 2.0 SOTA accuracy on ECG200 (**91.00%** vs. **90.00%**). 
 
 Future work will expand this framework to **multivariate time series classification** (MTSC) and evaluate on larger datasets from the UEA Multivariate Archive.
+
+---
+
+## 8. Revised Experimental Protocol (Addendum)
+
+> **Note:** This section documents protocol improvements implemented after the initial draft. All subsequent experimental results should use this revised protocol.
+
+### Protocol Changes Summary
+
+1. **Nested Cross-Validation:** All hyperparameter selection (segmentation strategy, penalty/window size, z, k, fusion weights, classifier type) is now performed within a nested CV framework (5-fold outer for reporting, 3-fold inner for tuning). This eliminates selection leakage from the original per-dataset manual tuning.
+
+2. **Automatic Segmentation Strategy:** The choice between CPD and fixed-window segmentation is determined automatically using a training-data-only statistic (variance of lag-1 autocorrelation across training samples), replacing the manual domain-knowledge-based selection.
+
+3. **Fusion Weight Learning:** The hybrid similarity fusion weights ($w_H, w_{DTW}, w_{Cos}$) are now learned from training data via logistic regression on pairwise same-class distances, or selected via grid search with inner CV. This replaces the previously hardcoded weights [0.1, 0.8, 0.1].
+
+4. **Repeated Evaluation:** All metrics are reported as mean ± std over 10 stratified train/test splits, replacing single-seed evaluation.
+
+5. **Reproducible Baselines:** ROCKET, MiniROCKET, and DTW-1NN are now reproduced via the `aeon` library under identical evaluation protocol. HIVE-COTE 2.0 and DrCIF are retained as literature-reported values, explicitly marked with † to indicate they were not reproduced under our protocol.
+
+6. **Dataset Expansion:** Evaluation expanded from 5 to 23 UCR archive datasets spanning 6 domains (Motion, Spectro, Image, ECG, Sensor, Simulated).
+
+7. **Statistical Testing:** The Wilcoxon signed-rank test (limited by n=5 minimum p-value floor) is replaced by the Friedman chi-square test with Nemenyi post-hoc analysis and critical difference diagrams (Demšar, 2006).
+
+8. **Leave-One-Feature-Out Ablation:** The coarse 10-feature vs. 3-feature ablation is supplemented with a fine-grained leave-one-feature-out analysis, providing per-feature accuracy deltas with mean ± std over 10 repeated splits.
+
+9. **Feature Redundancy Analysis:** Pearson correlation matrices, PCA explained variance curves, and Variance Inflation Factors (VIF) are computed to assess multicollinearity among the 10 granule features.
+
+### Impact on Reported Results
+
+> [!WARNING]
+> The corrected protocol is expected to yield lower accuracy numbers than the original evaluation, as the original results were inflated by selection leakage (hyperparameters were tuned with knowledge of test performance). The corrected numbers represent unbiased estimates of generalization performance.
+

@@ -1,12 +1,20 @@
+"""
+Benchmark evaluation for the Adaptive Multi-Feature LFIG pipeline.
+Supports nested CV, repeated evaluation, reproducible baselines, CD diagrams,
+and fine-grained leave-one-feature-out ablation.
+"""
+
 import os
 import time
 import tracemalloc
 import numpy as np
 import pandas as pd
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import seaborn as sns
-from scipy.stats import wilcoxon
 from sklearn.metrics import accuracy_score, precision_recall_fscore_support
+from sklearn.model_selection import StratifiedShuffleSplit
 
 from src.datasets.loader import load_ucr_dataset
 from src.segmentation.adaptive import segment_time_series
@@ -14,306 +22,370 @@ from src.features.extractor import extract_granular_sequence
 from src.similarity.hybrid import compute_pairwise_distances, fuse_distances, fuse_borda_ranks
 from src.classifiers.models import CustomDistanceKNN, train_and_evaluate_tabular
 
-# Literature accuracies for benchmarks
-LITERATURE_ACCURACIES = {
-    "GunPoint": {
-        "HIVE-COTE 2.0": 1.000,
-        "MultiROCKET": 1.000,
-        "MiniROCKET": 1.000,
-        "DrCIF": 0.987,
-        "Shapelets": 1.000,
-        "DTW (Literature)": 0.913
-    },
-    "Coffee": {
-        "HIVE-COTE 2.0": 1.000,
-        "MultiROCKET": 1.000,
-        "MiniROCKET": 1.000,
-        "DrCIF": 0.993,
-        "Shapelets": 0.986,
-        "DTW (Literature)": 0.993
-    },
-    "ArrowHead": {
-        "HIVE-COTE 2.0": 0.871,
-        "MultiROCKET": 0.865,
-        "MiniROCKET": 0.860,
-        "DrCIF": 0.852,
-        "DTW (Literature)": 0.829
-    },
-    "ECG200": {
-        "HIVE-COTE 2.0": 0.900,
-        "MultiROCKET": 0.890,
-        "MiniROCKET": 0.880,
-        "DrCIF": 0.870,
-        "DTW (Literature)": 0.880
-    },
-    "Chinatown": {
-        "HIVE-COTE 2.0": 0.983,
-        "MultiROCKET": 0.981,
-        "MiniROCKET": 0.978,
-        "DrCIF": 0.975,
-        "DTW (Literature)": 0.965
-    }
+# Literature-only baselines (NOT reproduced under our protocol).
+# Clearly labeled as sourced from published papers.
+LITERATURE_ONLY_BASELINES = {
+    "GunPoint": {"HIVE-COTE 2.0*": 1.000, "DrCIF*": 0.987},
+    "Coffee": {"HIVE-COTE 2.0*": 1.000, "DrCIF*": 0.993},
+    "ArrowHead": {"HIVE-COTE 2.0*": 0.871, "DrCIF*": 0.852},
+    "ECG200": {"HIVE-COTE 2.0*": 0.900, "DrCIF*": 0.870},
+    "Chinatown": {"HIVE-COTE 2.0*": 0.983, "DrCIF*": 0.975},
 }
 
-def run_proposed_pipeline(X_train, y_train, X_test, y_test, method="cpd", param=2.5, z=1.96, use_ablation=False, k=3, weights=[0.3, 0.4, 0.3], clf_type="KNN"):
+FEATURE_NAMES = [
+    'Lower Bound', 'Upper Bound', 'Trend Slope', 'Shannon Entropy',
+    'Variance', 'Volatility', 'Curvature', 'Intercept', 'Energy', 'Skewness'
+]
+
+
+def run_proposed_pipeline(X_train, y_train, X_test, y_test,
+                          method="cpd", param=2.5, z=1.96,
+                          use_ablation=False, k=3,
+                          weights=[0.3, 0.4, 0.3], clf_type="KNN",
+                          exclude_feature_idx=None):
     """
-    Runs our proposed Adaptive Multi-Feature LFIG pipeline.
-    If use_ablation is True, we only use standard 3 features (Lower, Upper, Trend).
+    Runs the Adaptive Multi-Feature LFIG pipeline.
+
+    Args:
+        exclude_feature_idx: If set, zero-out that feature column (for leave-one-out ablation).
+        use_ablation: If True, use only 3 standard features (Lower, Upper, Trend).
     """
-    # 1. Granularization & Feature Extraction
     train_granules = []
     for x in X_train:
         bounds = segment_time_series(x, method=method, param=param)
         seq = extract_granular_sequence(x, bounds, z=z)
         if use_ablation:
-            seq = seq[:, 0:3] # Only use Lower, Upper, Trend
+            seq = seq[:, 0:3]
+        elif exclude_feature_idx is not None:
+            seq = seq.copy()
+            seq[:, exclude_feature_idx] = 0.0
         train_granules.append(seq)
-        
+
     test_granules = []
     for x in X_test:
         bounds = segment_time_series(x, method=method, param=param)
         seq = extract_granular_sequence(x, bounds, z=z)
         if use_ablation:
             seq = seq[:, 0:3]
+        elif exclude_feature_idx is not None:
+            seq = seq.copy()
+            seq[:, exclude_feature_idx] = 0.0
         test_granules.append(seq)
-        
-    # 2. Pairwise Distance Matrices
-    # Train-Train distances
+
+    # Pairwise distances
     D_H_tr, D_DTW_tr, D_Cos_tr = compute_pairwise_distances(train_granules)
-    # Test-Train distances
     D_H_te, D_DTW_te, D_Cos_te = compute_pairwise_distances(test_granules, train_granules)
-    
-    # 3. Distance Fusion
+
+    # Distance fusion
     D_Fused_tr, params = fuse_distances(D_H_tr, D_DTW_tr, D_Cos_tr, weights=weights)
     D_Fused_te, _ = fuse_distances(D_H_te, D_DTW_te, D_Cos_te, weights=weights, min_max_params=params)
-    
-    # 4. Classification
+
+    # Classification
     if clf_type == "KNN":
         knn = CustomDistanceKNN(n_neighbors=k)
         knn.fit(y_train)
         preds = knn.predict(D_Fused_te)
+    elif clf_type == "Kernel SVM":
+        from sklearn.svm import SVC
+        median_d = np.median(D_Fused_tr)
+        gamma = 1.0 / (2.0 * (median_d ** 2)) if median_d > 0 else 1.0
+        K_train = np.exp(-gamma * (D_Fused_tr ** 2))
+        K_test = np.exp(-gamma * (D_Fused_te ** 2))
+        svm = SVC(kernel='precomputed', random_state=42)
+        svm.fit(K_train, y_train)
+        preds = svm.predict(K_test)
     else:
         from src.classifiers.models import train_and_evaluate_distance_space
         res = train_and_evaluate_distance_space(D_Fused_tr, y_train, D_Fused_te, y_test)
-        if clf_type in res:
-            preds = res[clf_type]["predictions"]
-        else:
-            # Fallback to Distance kNN if not found
-            preds = res["Distance kNN"]["predictions"]
-            
+        preds = res.get(clf_type, res.get("Distance kNN", {})).get("predictions", np.array([]))
+
     return preds
 
+
 def run_dtw_baseline(X_train, X_test, y_train, y_test):
-    """
-    Runs baseline DTW-kNN (k=3) classifier on raw time series.
-    """
+    """Runs baseline Fast-DTW kNN (k=3) classifier on raw time series."""
     from fastdtw import fastdtw
-    n_train = len(X_train)
-    n_test = len(X_test)
-    
+    n_train, n_test = len(X_train), len(X_test)
     D_test_train = np.zeros((n_test, n_train))
     for i in range(n_test):
         for j in range(n_train):
             d, _ = fastdtw(X_test[i], X_train[j])
             D_test_train[i, j] = d
-            
+
     knn = CustomDistanceKNN(n_neighbors=3)
     knn.fit(y_train)
-    preds = knn.predict(D_test_train)
-    return preds
+    return knn.predict(D_test_train)
+
 
 def evaluate_metrics(y_true, y_pred):
-    """
-    Computes accuracy, precision, recall, and Macro F1 scores.
-    """
+    """Computes accuracy, precision, recall, and Macro F1 scores."""
     acc = accuracy_score(y_true, y_pred)
     prec, rec, f1, _ = precision_recall_fscore_support(y_true, y_pred, average='macro', zero_division=0)
     return acc, prec, rec, f1
 
-def run_evaluation(dataset_names=["GunPoint", "Coffee", "ArrowHead", "ECG200", "Chinatown"]):
+
+# ---------------------------------------------------------------------------
+# Step 2: Repeated evaluation with stratified splits
+# ---------------------------------------------------------------------------
+
+def run_repeated_evaluation(dataset_name, n_repeats=10, test_size=0.3, data_dir='data'):
     """
-    Executes the benchmark evaluation and ablation study.
+    Runs repeated stratified train/test splits for a single dataset.
+    Uses nested CV (via tuning module) to select hyperparameters on each split.
+
+    Returns dict with mean ± std for accuracy, precision, recall, f1.
     """
-    results_list = []
-    ablation_results = []
-    
+    from src.evaluation.tuning import select_segmentation_strategy, run_inner_cv
+
+    X_train, y_train, X_test, y_test = load_ucr_dataset(dataset_name, data_dir=data_dir)
+    X_full = np.concatenate([X_train, X_test], axis=0)
+    y_full = np.concatenate([y_train, y_test], axis=0)
+
+    splitter = StratifiedShuffleSplit(n_splits=n_repeats, test_size=test_size, random_state=42)
+
+    param_grid = {
+        'param': [1.0, 1.5, 2.0],
+        'z': [0.5, 1.0, 1.96],
+        'k': [1, 3, 5],
+        'weights': [[0.1, 0.8, 0.1], [0.3, 0.4, 0.3], [0.2, 0.6, 0.2]],
+        'clf_type': ['KNN', 'Kernel SVM']
+    }
+
+    metrics = {'accuracy': [], 'precision': [], 'recall': [], 'f1': []}
+
+    for split_i, (train_idx, test_idx) in enumerate(splitter.split(X_full, y_full)):
+        X_tr, X_te = X_full[train_idx], X_full[test_idx]
+        y_tr, y_te = y_full[train_idx], y_full[test_idx]
+
+        # Auto-select segmentation strategy
+        method, _ = select_segmentation_strategy(X_tr, y_tr)
+
+        # Inner CV for hyperparameters
+        best_params = run_inner_cv(X_tr, y_tr, method, param_grid, n_inner_folds=3)
+
+        # Evaluate
+        preds = run_proposed_pipeline(
+            X_tr, y_tr, X_te, y_te,
+            method=method, param=best_params['param'], z=best_params['z'],
+            k=best_params['k'], weights=best_params['weights'], clf_type=best_params['clf_type']
+        )
+        acc, prec, rec, f1 = evaluate_metrics(y_te, preds)
+        metrics['accuracy'].append(acc)
+        metrics['precision'].append(prec)
+        metrics['recall'].append(rec)
+        metrics['f1'].append(f1)
+        print(f"  Split {split_i + 1}/{n_repeats}: acc={acc:.4f}")
+
+    return {
+        'dataset': dataset_name,
+        'accuracy_mean': np.mean(metrics['accuracy']),
+        'accuracy_std': np.std(metrics['accuracy']),
+        'precision_mean': np.mean(metrics['precision']),
+        'precision_std': np.std(metrics['precision']),
+        'recall_mean': np.mean(metrics['recall']),
+        'recall_std': np.std(metrics['recall']),
+        'f1_mean': np.mean(metrics['f1']),
+        'f1_std': np.std(metrics['f1']),
+    }
+
+
+# ---------------------------------------------------------------------------
+# Step 7: Leave-one-feature-out ablation
+# ---------------------------------------------------------------------------
+
+def run_leave_one_feature_out_ablation(dataset_name, method="cpd", param=1.5,
+                                        z=1.96, k=3, weights=[0.1, 0.8, 0.1],
+                                        clf_type="KNN", n_repeats=10,
+                                        test_size=0.3, data_dir='data'):
+    """
+    Leave-one-feature-out ablation: for each of the 10 features,
+    zero it out and measure accuracy delta vs. the full model.
+
+    Returns DataFrame with columns: Feature, Full_Acc, Ablated_Acc, Delta, per dataset.
+    """
+    X_train, y_train, X_test, y_test = load_ucr_dataset(dataset_name, data_dir=data_dir)
+    X_full = np.concatenate([X_train, X_test], axis=0)
+    y_full = np.concatenate([y_train, y_test], axis=0)
+
+    splitter = StratifiedShuffleSplit(n_splits=n_repeats, test_size=test_size, random_state=42)
+
+    # Collect per-split results
+    full_accs = []
+    feature_accs = {i: [] for i in range(10)}
+
+    for train_idx, test_idx in splitter.split(X_full, y_full):
+        X_tr, X_te = X_full[train_idx], X_full[test_idx]
+        y_tr, y_te = y_full[train_idx], y_full[test_idx]
+
+        # Full model
+        preds_full = run_proposed_pipeline(X_tr, y_tr, X_te, y_te,
+                                           method=method, param=param, z=z,
+                                           k=k, weights=weights, clf_type=clf_type)
+        full_accs.append(accuracy_score(y_te, preds_full))
+
+        # Ablate each feature
+        for feat_idx in range(10):
+            preds_abl = run_proposed_pipeline(X_tr, y_tr, X_te, y_te,
+                                              method=method, param=param, z=z,
+                                              k=k, weights=weights, clf_type=clf_type,
+                                              exclude_feature_idx=feat_idx)
+            feature_accs[feat_idx].append(accuracy_score(y_te, preds_abl))
+
+    # Compile results
+    rows = []
+    mean_full = np.mean(full_accs)
+    for feat_idx in range(10):
+        mean_abl = np.mean(feature_accs[feat_idx])
+        rows.append({
+            'Feature': FEATURE_NAMES[feat_idx],
+            'Full_Acc': f"{mean_full:.4f}±{np.std(full_accs):.4f}",
+            'Ablated_Acc': f"{mean_abl:.4f}±{np.std(feature_accs[feat_idx]):.4f}",
+            'Delta': mean_full - mean_abl,
+        })
+
+    df = pd.DataFrame(rows)
+    print(f"\n=== Leave-One-Feature-Out Ablation: {dataset_name} ===")
+    print(df.to_string(index=False))
+    return df
+
+
+# ---------------------------------------------------------------------------
+# Full benchmark: nested CV + baselines + CD diagram
+# ---------------------------------------------------------------------------
+
+def run_full_benchmark(dataset_names=None, n_repeats=10, data_dir='data'):
+    """
+    Runs the full benchmark pipeline across all datasets:
+    1. Nested CV evaluation for our proposed method
+    2. Reproducible baselines (ROCKET, MiniROCKET, DTW-1NN via aeon)
+    3. Fast-DTW kNN baseline (reproduced)
+    4. Literature-only baselines (HIVE-COTE, DrCIF — clearly labeled)
+    5. Demšar critical-difference diagram
+    6. Standard 3-feature vs 10-feature ablation
+    """
+    from src.datasets.ucr_catalog import get_dataset_names as catalog_names
+    from src.evaluation.tuning import run_nested_cv
+    from src.evaluation.critical_difference import run_cd_analysis
+
+    if dataset_names is None:
+        dataset_names = catalog_names()
+
+    os.makedirs("plots", exist_ok=True)
+    all_results = []
+    accuracy_for_cd = {}  # {dataset: {classifier: accuracy}}
+
     for dataset in dataset_names:
-        print(f"\nEvaluating dataset: {dataset}...")
-        X_train, y_train, X_test, y_test = load_ucr_dataset(dataset)
-        
-        # Select best dataset-specific parameters from grid search tuning
-        if dataset == "GunPoint":
-            best_method = "cpd"
-            best_param = 1.5
-            best_z = 1.96
-            best_k = 3
-            best_w = [0.1, 0.8, 0.1]
-            best_clf = "KNN"
-        elif dataset == "Coffee":
-            best_method = "cpd"
-            best_param = 1.5
-            best_z = 1.0
-            best_k = 1
-            best_w = [0.1, 0.8, 0.1]
-            best_clf = "KNN"
-        elif dataset == "ArrowHead":
-            best_method = "fixed"
-            best_param = 20
-            best_z = 1.0
-            best_k = 1
-            best_w = [0.1, 0.8, 0.1]
-            best_clf = "KNN"
-        elif dataset == "ECG200":
-            best_method = "fixed"
-            best_param = 10
-            best_z = 0.5
-            best_k = 1
-            best_w = [0.1, 0.8, 0.1]
-            best_clf = "KNN"
-        elif dataset == "Chinatown":
-            best_method = "fixed"
-            best_param = 8
-            best_z = 0.5
-            best_k = 1
-            best_w = [0.1, 0.8, 0.1]
-            best_clf = "Kernel SVM"
-            
-        # --- 1. Evaluate Proposed Model ---
-        tracemalloc.start()
-        start_time = time.time()
-        
-        preds_proposed = run_proposed_pipeline(X_train, y_train, X_test, y_test, 
-                                               method=best_method, param=best_param, z=best_z, k=best_k, weights=best_w, clf_type=best_clf)
-        
-        end_time = time.time()
-        current_mem, peak_mem = tracemalloc.get_traced_memory()
-        tracemalloc.stop()
-        
-        acc, prec, rec, f1 = evaluate_metrics(y_test, preds_proposed)
-        runtime = end_time - start_time
-        peak_mem_mb = peak_mem / (1024 * 1024)
-        
-        results_list.append({
-            "Dataset": dataset,
-            "Classifier": f"Our Proposed ({best_clf})",
-            "Accuracy": acc,
-            "Precision": prec,
-            "Recall": rec,
-            "Macro F1": f1,
-            "Runtime (s)": runtime,
-            "Peak Memory (MB)": peak_mem_mb
-        })
-        
-        # --- 2. Evaluate Ablation Model (Only 3 Standard Features) ---
-        start_time = time.time()
-        preds_ablation = run_proposed_pipeline(X_train, y_train, X_test, y_test, use_ablation=True,
-                                               method=best_method, param=best_param, z=best_z, k=best_k, weights=best_w, clf_type=best_clf)
-        runtime_ab = time.time() - start_time
-        acc_ab, _, _, f1_ab = evaluate_metrics(y_test, preds_ablation)
-        
-        ablation_results.append({
-            "Dataset": dataset,
-            "Standard LFIG (3 Feat) Acc": acc_ab,
-            "Our Enhanced LFIG (10 Feat) Acc": acc,
-            "Ablation Acc Drop": acc - acc_ab,
-            "Standard LFIG (3 Feat) F1": f1_ab,
-            "Our Enhanced LFIG (10 Feat) F1": f1
-        })
-        
-        # --- 3. Evaluate Local DTW-kNN Baseline ---
-        print(f"Running DTW baseline on {dataset}...")
-        tracemalloc.start()
-        start_time = time.time()
-        
-        preds_dtw = run_dtw_baseline(X_train, X_test, y_train, y_test)
-        
-        end_time = time.time()
-        _, peak_mem_dtw = tracemalloc.get_traced_memory()
-        tracemalloc.stop()
-        
-        acc_dtw, prec_dtw, rec_dtw, f1_dtw = evaluate_metrics(y_test, preds_dtw)
-        runtime_dtw = end_time - start_time
-        peak_mem_dtw_mb = peak_mem_dtw / (1024 * 1024)
-        
-        results_list.append({
-            "Dataset": dataset,
-            "Classifier": "Fast-DTW kNN",
-            "Accuracy": acc_dtw,
-            "Precision": prec_dtw,
-            "Recall": rec_dtw,
-            "Macro F1": f1_dtw,
-            "Runtime (s)": runtime_dtw,
-            "Peak Memory (MB)": peak_mem_dtw_mb
-        })
-        
-        # --- 4. Add Literature Baselines ---
-        if dataset in LITERATURE_ACCURACIES:
-            for clf_name, lit_acc in LITERATURE_ACCURACIES[dataset].items():
-                results_list.append({
+        print(f"\n{'='*60}")
+        print(f"Evaluating: {dataset}")
+        print(f"{'='*60}")
+
+        try:
+            X_train, y_train, X_test, y_test = load_ucr_dataset(dataset, data_dir=data_dir)
+        except Exception as e:
+            print(f"  SKIPPED: {e}")
+            continue
+
+        accuracy_for_cd[dataset] = {}
+
+        # --- 1. Our Proposed (Nested CV) ---
+        try:
+            ncv_result = run_nested_cv(dataset, data_dir=data_dir)
+            acc_str = f"{ncv_result['accuracy_mean']:.4f}±{ncv_result['accuracy_std']:.4f}"
+            all_results.append({
+                "Dataset": dataset,
+                "Classifier": "Proposed (Nested CV)",
+                "Accuracy": acc_str,
+                "Accuracy_Mean": ncv_result['accuracy_mean'],
+                "F1": f"{ncv_result['f1_mean']:.4f}±{ncv_result['f1_std']:.4f}",
+            })
+            accuracy_for_cd[dataset]["Proposed"] = ncv_result['accuracy_mean']
+        except Exception as e:
+            print(f"  Nested CV failed: {e}")
+
+        # --- 2. Reproducible baselines (aeon) ---
+        try:
+            from src.evaluation.baselines import run_all_baselines
+            baseline_results = run_all_baselines(X_train, y_train, X_test, y_test)
+            for name, res in baseline_results.items():
+                all_results.append({
+                    "Dataset": dataset,
+                    "Classifier": f"{name} (reproduced)",
+                    "Accuracy": f"{res['accuracy']:.4f}",
+                    "Accuracy_Mean": res['accuracy'],
+                    "F1": "—",
+                })
+                accuracy_for_cd[dataset][name] = res['accuracy']
+        except Exception as e:
+            print(f"  Baselines failed: {e}")
+
+        # --- 3. Fast-DTW kNN (reproduced) ---
+        try:
+            tracemalloc.start()
+            t0 = time.time()
+            preds_dtw = run_dtw_baseline(X_train, X_test, y_train, y_test)
+            runtime_dtw = time.time() - t0
+            _, peak_mem = tracemalloc.get_traced_memory()
+            tracemalloc.stop()
+
+            acc_dtw, _, _, f1_dtw = evaluate_metrics(y_test, preds_dtw)
+            all_results.append({
+                "Dataset": dataset,
+                "Classifier": "Fast-DTW kNN (reproduced)",
+                "Accuracy": f"{acc_dtw:.4f}",
+                "Accuracy_Mean": acc_dtw,
+                "F1": f"{f1_dtw:.4f}",
+            })
+            accuracy_for_cd[dataset]["Fast-DTW kNN"] = acc_dtw
+        except Exception as e:
+            print(f"  DTW baseline failed: {e}")
+
+        # --- 4. Literature-only baselines ---
+        if dataset in LITERATURE_ONLY_BASELINES:
+            for clf_name, lit_acc in LITERATURE_ONLY_BASELINES[dataset].items():
+                all_results.append({
                     "Dataset": dataset,
                     "Classifier": clf_name,
-                    "Accuracy": lit_acc,
-                    "Precision": np.nan,
-                    "Recall": np.nan,
-                    "Macro F1": np.nan,
-                    "Runtime (s)": np.nan,
-                    "Peak Memory (MB)": np.nan
+                    "Accuracy": f"{lit_acc:.4f}†",
+                    "Accuracy_Mean": lit_acc,
+                    "F1": "—",
                 })
-                
-    # --- 5. Compile Tables ---
-    df_results = pd.DataFrame(results_list)
-    df_ablation = pd.DataFrame(ablation_results)
-    
-    # Save Results Table to plots/evaluation_results.md
-    os.makedirs("plots", exist_ok=True)
+                # Note: these are NOT included in CD diagram since they are not reproduced
+
+    # --- 5. Compile results ---
+    df_results = pd.DataFrame(all_results)
+
     with open("plots/evaluation_results.md", "w") as f:
-        f.write("# Phase 9: Evaluation and Benchmark Results\n\n")
-        f.write("## 1. Classification Performance Comparison\n\n")
-        f.write(df_results.to_markdown(index=False))
-        f.write("\n\n## 2. Ablation Study: 3-Feature Standard LFIG vs. 10-Feature Enhanced LFIG\n\n")
-        f.write(df_ablation.to_markdown(index=False))
-        
-    print("\nBenchmark Evaluation completed successfully. Results written to: plots/evaluation_results.md")
-    
-    # --- 6. Plotting Graphs ---
-    plt.figure(figsize=(10, 6))
-    # Filter out NaNs for plotting accuracy comparisons
-    plot_df = df_results.dropna(subset=["Accuracy"])
-    sns.barplot(x="Accuracy", y="Classifier", hue="Dataset", data=plot_df, palette="muted")
-    plt.title("Classification Accuracy Comparison Across Models")
-    plt.xlabel("Accuracy")
-    plt.ylabel("Classifier Model")
-    plt.xlim(0.5, 1.02)
-    plt.grid(True, alpha=0.3)
-    plt.tight_layout()
-    plt.savefig("plots/accuracy_comparison.png", dpi=150)
-    plt.close()
-    print("Saved accuracy comparison plot to: plots/accuracy_comparison.png")
-    
-    # --- 7. Statistical Test ---
-    # Wilcoxon signed-rank test comparing our model's accuracy vs. DTW baseline
-    our_accs = df_results[df_results["Classifier"].str.startswith("Our Proposed")]["Accuracy"].values
-    dtw_accs = df_results[df_results["Classifier"] == "Fast-DTW kNN"]["Accuracy"].values
-    
-    print("\n" + "="*50)
-    print("Statistical Significance Test (Proposed vs. DTW Baseline)")
-    print("="*50)
-    print(f"Our Accuracies: {our_accs}")
-    print(f"DTW Accuracies: {dtw_accs}")
-    
-    # Wilcoxon requires differences to be non-zero, let's run a simple paired t-test or Wilcoxon if n >= 2
-    if len(our_accs) >= 2:
-        diffs = our_accs - dtw_accs
-        if np.any(diffs != 0):
-            stat, p_val = wilcoxon(our_accs, dtw_accs, zero_method='pratt')
-            print(f"Wilcoxon signed-rank test statistic: {stat:.4f}, p-value: {p_val:.4f}")
-            if p_val < 0.05:
-                print("Verdict: The difference in performance is statistically significant (p < 0.05).")
+        f.write("# Evaluation and Benchmark Results\n\n")
+        f.write("> **†** = Literature-reported accuracy, not reproduced under our protocol.\n")
+        f.write("> All other results are reproduced under identical evaluation protocol.\n\n")
+        f.write("## Classification Performance Comparison\n\n")
+        f.write(df_results[['Dataset', 'Classifier', 'Accuracy', 'F1']].to_markdown(index=False))
+        f.write("\n")
+
+    print("\nResults written to: plots/evaluation_results.md")
+
+    # --- 6. CD Diagram (only for reproduced classifiers) ---
+    try:
+        # Build accuracy matrix for reproduced classifiers only
+        cd_rows = []
+        for ds, clfs in accuracy_for_cd.items():
+            cd_rows.append(clfs)
+        if cd_rows:
+            cd_df = pd.DataFrame(cd_rows, index=list(accuracy_for_cd.keys()))
+            cd_df = cd_df.dropna(axis=1, how='any')  # Only keep classifiers present for all datasets
+            if len(cd_df.columns) >= 2 and len(cd_df) >= 3:
+                cd_result = run_cd_analysis(cd_df, output_path='plots/cd_diagram.png')
+                print(f"CD diagram generated. Friedman p={cd_result['friedman_p']:.6f}")
             else:
-                print("Verdict: No statistically significant difference detected (p >= 0.05).")
-        else:
-            print("Verdict: Accuracies are identical across datasets; Wilcoxon cannot be computed.")
-    print("="*50)
+                print("Not enough classifiers/datasets for CD diagram.")
+    except Exception as e:
+        print(f"CD analysis failed: {e}")
+
+    return df_results
+
 
 if __name__ == "__main__":
-    run_evaluation()
+    # Run on the original 5 datasets for a quick sanity check
+    run_full_benchmark(
+        dataset_names=["GunPoint", "Coffee", "ArrowHead", "ECG200", "Chinatown"]
+    )

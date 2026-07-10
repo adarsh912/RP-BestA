@@ -52,3 +52,35 @@ This document tracks the progress of the **7 Development Milestones** for the pr
 - **Status:** 100%
 - **Details:** Constructed the benchmark runner comparing our proposed model against DTW baselines and established state-of-the-art literature results (HIVE-COTE, MultiROCKET, DrCIF, etc.). Conducted an ablation study verifying the performance boost of the 10-feature granulation vs. the standard 3-feature LFIG.
 - **Reference:** [benchmark.py](file:///Users/adarshfulzele/Desktop/RP/Best%20A/src/evaluation/benchmark.py) & [evaluation_results.md](file:///Users/adarshfulzele/Desktop/RP/Best%20A/plots/evaluation_results.md)
+
+---
+
+## New Milestones (Protocol Revision)
+
+| Milestone | Description | Status | Target Date | Completion Date |
+| :--- | :--- | :---: | :---: | :---: |
+| **Milestone 8** | Experimental protocol corrected (nested CV, auto-segmentation) | ✅ Completed | 2026-07-09 | 2026-07-09 |
+| **Milestone 9** | Dataset expansion to 23 UCR datasets | ✅ Completed | 2026-07-09 | 2026-07-09 |
+| **Milestone 10** | Hybrid similarity weight learning implemented | ✅ Completed | 2026-07-09 | 2026-07-09 |
+| **Milestone 11** | Fine-grained ablation and redundancy analysis | ✅ Completed | 2026-07-09 | 2026-07-09 |
+
+### Milestone 8: Experimental Protocol Corrected
+- **Status:** 100%
+- **Details:** Eliminated selection leakage by removing hardcoded per-dataset hyperparameters. Implemented nested cross-validation (5-fold outer, 3-fold inner) for unbiased evaluation. Added automatic segmentation strategy selection using training-data-only statistics. Added repeated evaluation with 10 stratified splits.
+- **Reference:** [tuning.py](file:///Users/adarshfulzele/Desktop/RP/Best%20A/src/evaluation/tuning.py) & [benchmark.py](file:///Users/adarshfulzele/Desktop/RP/Best%20A/src/evaluation/benchmark.py)
+
+### Milestone 9: Dataset Expansion
+- **Status:** 100%
+- **Details:** Expanded evaluation from 5 to 23 UCR datasets spanning Motion, Spectro, Image, ECG, Sensor, and Simulated domains. Implemented Demšar-style critical difference diagrams (Friedman + Nemenyi) replacing the previous Wilcoxon test.
+- **Reference:** [ucr_catalog.py](file:///Users/adarshfulzele/Desktop/RP/Best%20A/src/datasets/ucr_catalog.py) & [critical_difference.py](file:///Users/adarshfulzele/Desktop/RP/Best%20A/src/evaluation/critical_difference.py)
+
+### Milestone 10: Weight Learning
+- **Status:** 100%
+- **Details:** Implemented actual weight learning for hybrid similarity fusion via logistic regression on pairwise same-class distances and grid search with inner CV. Fusion weights are now data-driven rather than manually tuned.
+- **Reference:** [hybrid.py](file:///Users/adarshfulzele/Desktop/RP/Best%20A/src/similarity/hybrid.py)
+
+### Milestone 11: Ablation & Redundancy
+- **Status:** 100%
+- **Details:** Implemented leave-one-feature-out ablation (zeroing each of 10 features individually) with 10 repeated splits per dataset. Added feature redundancy analysis via Pearson correlation, PCA, and VIF.
+- **Reference:** [benchmark.py](file:///Users/adarshfulzele/Desktop/RP/Best%20A/src/evaluation/benchmark.py) & [redundancy.py](file:///Users/adarshfulzele/Desktop/RP/Best%20A/src/features/redundancy.py)
+

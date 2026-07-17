@@ -222,3 +222,34 @@ Future work will expand this framework to **multivariate time series classificat
 > [!WARNING]
 > The corrected protocol is expected to yield lower accuracy numbers than the original evaluation, as the original results were inflated by selection leakage (hyperparameters were tuned with knowledge of test performance). The corrected numbers represent unbiased estimates of generalization performance.
 
+### Empirical Results under Revised Protocol
+
+To empirically validate the protocol revisions, two evaluations were performed:
+1. **Isolated Selection Leakage Quantification:** Assessing the original single-split evaluation under strict, leakage-free conditions (hyperparameters tuned via inner CV using training data only; test split evaluated exactly once).
+2. **Step 1 Nested-CV Generalization:** Evaluating the model using full 5-fold outer, 3-fold inner cross-validation.
+
+#### Table 4: Selection Leakage Quantification (Official UCR Split)
+
+| Dataset | Original Leaky Acc | New Leakage-Free Acc | Leakage Delta |
+|:---|:---:|:---:|:---:|
+| **GunPoint** | 0.9067 | 0.8933 | -0.0133 |
+| **Coffee** | 1.0000 | 1.0000 | +0.0000 |
+| **ECG200** | 0.9100 | 0.8800 | -0.0300 |
+| **Chinatown** | 0.9767 | 0.9417 | -0.0350 |
+| **ArrowHead** | 0.8286 | 0.7829 | -0.0457 |
+
+Comparing these values demonstrates that selection leakage inflated the original results by **1.33% to 4.57%** across four of the five datasets.
+
+#### Table 5: Leakage-Free Nested-CV Generalization Metrics (5-Fold Outer)
+
+| Dataset | Nested-CV Accuracy (Mean ± SD) |
+|:---|:---:|
+| **GunPoint** | 0.9550 ± 0.0292 |
+| **Coffee** | 1.0000 ± 0.0000 |
+| **ECG200** | 0.8750 ± 0.0418 |
+| **Chinatown** | 0.9779 ± 0.0166 |
+| **ArrowHead** | 0.8767 ± 0.0235 |
+
+The nested CV process produces higher generalization scores on GunPoint, Chinatown, and ArrowHead compared to the single train/test split. This highlights the benefit of multi-fold averaging, which filters out partition-specific variance inherent to the single official UCR splits.
+
+

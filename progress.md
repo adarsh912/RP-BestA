@@ -102,3 +102,24 @@ All core algorithmic and evaluation modules (Phases 1-9, Milestones 1-7) have be
 * **Step 8 — Feature Redundancy Checked:** Implemented Pearson correlation matrix, PCA explained variance analysis, and Variance Inflation Factor (VIF) analysis for the 10 granule features.
   * **Code:** [redundancy.py](file:///Users/adarshfulzele/Desktop/RP/Best%20A/src/features/redundancy.py)
 
+### 3.4 Verification & Empirical Results (Google Colab Run)
+
+The new protocols were successfully run in a Google Colab GPU-accelerated environment with the following outcomes:
+
+1. **Isolated Selection Leakage Verified:**
+   Comparing the original leaky single-split accuracies against the newly isolated, leakage-free single-split evaluation (hyperparameters tuned via inner CV on training data only) showed an accuracy drop across 4/5 datasets (indicating the original table was indeed inflated by selection leakage):
+   - **GunPoint:** 0.9067 → 0.8933 (-0.0133)
+   - **Coffee:** 1.0000 → 1.0000 (0.0000)
+   - **ECG200:** 0.9100 → 0.8800 (-0.0300)
+   - **Chinatown:** 0.9767 → 0.9417 (-0.0350)
+   - **ArrowHead:** 0.8286 → 0.7829 (-0.0457)
+
+2. **Unbiased Nested CV Benchmarks:**
+   Running the full 5-fold outer, 3-fold inner nested CV loop yielded the following leakage-free generalization metrics:
+   - **GunPoint:** 0.9550 ± 0.0292
+   - **Coffee:** 1.0000 ± 0.0000
+   - **ECG200:** 0.8750 ± 0.0418
+   - **Chinatown:** 0.9779 ± 0.0166
+   - **ArrowHead:** 0.8767 ± 0.0235
+
+

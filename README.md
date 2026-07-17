@@ -50,8 +50,13 @@ This framework addresses these gaps through:
     │   └── redundancy.py     # Feature correlation, PCA, and VIF analysis
     ├── similarity/
     │   └── hybrid.py         # Hausdorff, DTW, Cosine, and fusion weights learning
-    └── classifiers/
-        └── models.py         # Precomputed distance kNN/SVM & boosting models
+    ├── classifiers/
+    │   └── models.py         # Precomputed distance kNN/SVM & boosting models
+    └── evaluation/
+        ├── tuning.py         # Nested CV & auto-segmentation selector
+        ├── baselines.py      # Reproducible aeon baselines
+        ├── critical_difference.py # Demšar CD diagrams
+        └── benchmark.py      # Benchmark runner and ablation harness
 ```
 
 ---

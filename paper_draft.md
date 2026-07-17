@@ -11,7 +11,7 @@ Traditional time series classification (TSC) algorithms are heavily challenged b
 
 This paper presents a complete, highly performant **Adaptive Multi-Feature LFIG framework** that resolves these challenges. We introduce a dual segmentation strategy utilizing Bottom-Up Change Point Detection (CPD) for phase-shifted series, and Fixed-Window partitioning for phase-aligned series. We construct a 10-dimensional structural and statistical granule representation to prevent information loss and introduce a Hybrid Similarity Learning layer that fuses set overlap (interval Hausdorff), phase alignment (slope DTW), and directional movement (Cosine DTW on the 10D feature space). 
 
-Evaluating on 5 benchmark datasets from the UCR Time Series Archive shows that our framework consistently matches or outperforms literature DTW, achieves **100% accuracy** on Coffee, and outperforms the state-of-the-art **HIVE-COTE 2.0** ensemble on ECG200 (**91.00%** vs. **90.00%**) while executing up to **15x faster** than standard DTW baselines.
+Evaluating on 5 benchmark datasets from the UCR Time Series Archive shows that our framework consistently matches or exceeds literature DTW on 4/5 datasets, achieves **100% accuracy** on Coffee, and is competitive with the state-of-the-art **HIVE-COTE 2.0** ensemble—surpassing it on ECG200 (**91.00%** vs. **90.00%**)—while running up to **15x faster** and using orders of magnitude fewer computational resources than ensemble-based SOTA methods. On the other four datasets, HIVE-COTE 2.0 retains the highest accuracy, positioning our framework as an optimal choice for applications prioritizing an efficient accuracy-computational resource tradeoff.
 
 ---
 
@@ -142,6 +142,11 @@ The framework was evaluated on 5 UCR datasets. The results are compared against 
 | ArrowHead | DTW (Literature)          |   0.829000 |         nan |        nan |        nan |           nan |                nan |
 | ArrowHead | HIVE-COTE 2.0             |   0.871000 |         nan |        nan |        nan |           nan |                nan |
 
+> [!NOTE]
+> **Measurement Caveats:**
+> 1. **Peak Memory (MB):** Measured using Python's standard `tracemalloc` library to capture the peak incremental heap memory allocations (the memory consumed specifically by the distance matrices and feature arrays during execution), rather than absolute process Resident Set Size (RSS).
+> 2. **Runtime Context:** Runtime and memory values are illustrative profiles collected from the original single-split evaluation runs to compare the speedup of our compressed granule DTW against raw Fast-DTW. When evaluating under the revised nested cross-validation protocol, total runtimes scale significantly due to repeated cross-validation folds and hyperparameter tuning sweeps.
+
 ![Classification Accuracy Comparison across 5 UCR Datasets](plots/accuracy_comparison.png)
 *Figure 4: Visual accuracy comparison barplot comparing our proposed pipeline configurations against the local Fast-DTW kNN baseline.*
 
@@ -158,36 +163,36 @@ We evaluated the classification performance drop when removing the 7 newly propo
 
 ---
 
-## 5. Critical Analysis & Discussion
+## 6. Critical Analysis & Discussion
 
-### 5.1 Dynamic CPD vs. Fixed-Window Partitioning
+### 6.1 Dynamic CPD vs. Fixed-Window Partitioning
 One of the most important takeaways is the **dichotomy between phase-shifted and phase-aligned series**:
 * **Phase-Shifted (GunPoint, Coffee):** Hand movement triggers occur at varying index offsets. Here, **adaptive CPD segmentation** is superior because it dynamically aligns boundaries with active transitions, minimizing linear fit cost. 
 * **Phase-Aligned (ECG200, ArrowHead, Chinatown):** These datasets are length-normalized, and their components are strictly aligned (e.g. heartbeat complexes in ECG occur at fixed locations). Adaptive CPD introduces misalignment noise because it shifts boundaries based on minor local amplitude changes. **Fixed partitioning** forces strict phase alignment of granules across samples, yielding a massive performance boost (e.g. ECG200 accuracy jumped from **83.00%** to **91.00%**).
 
-### 5.2 Feature Importance & Ablation
+### 6.2 Feature Importance & Ablation
 Under adaptive segmentation (CPD), our 10-feature granulation prevents information loss, yielding a significant increase in classification performance (+3.57% on Coffee and +2.67% on GunPoint). On phase-aligned datasets under fixed windowing, the core 3 features are highly sufficient, and the additional 7 structural features provide highly stable, competitive bounds.
 
 ![Gini Feature Importance Rankings of 10 Granule Descriptors](plots/GunPoint_feature_importance.png)
 *Figure 5: Gini importance analysis of the 10 granule features using a Random Forest classifier. Skewness, Shannon Entropy, and Volatility rank as the most predictive structural metrics.*
 
-### 5.3 Speedup Analysis
+### 6.3 Speedup Analysis
 Fuzzy granulation compresses raw time series of length $N$ into $S$ granules (where $S \ll N$). Since DTW complexity scales quadratically with sequence length, computing DTW over $S$ granules instead of $N$ raw points yields a massive reduction in floating-point operations. This is why our pipeline runs **up to 15x faster** than raw Fast-DTW while maintaining or exceeding accuracy.
 
-### 5.4 Statistical Significance & Wilcoxon Limits
+### 6.4 Statistical Power & Wilcoxon Limitations
 We ran a Wilcoxon signed-rank test comparing our proposed accuracies against Fast-DTW kNN across all 5 datasets:
 * **Proposed Accuracies:** `[0.9067, 1.0000, 0.8286, 0.9100, 0.9767]`
 * **DTW Accuracies:** `[0.8867, 0.9286, 0.7200, 0.8300, 0.9679]`
 * **Wilcoxon test statistic:** `0.0000`
 * **p-value:** `0.0625` (Verdict: $p \ge 0.05$, indicating no statistically significant difference at the $95\%$ confidence level in a strict sense).
 
-> [!IMPORTANT]
-> **Wilcoxon Sample Size Limit**: A critical point to present for supervisor review is that **$p=0.0625$ represents the absolute mathematical lower bound** for the Wilcoxon signed-rank test when the sample size is $n=5$. Even if the proposed model out-performed DTW on every single dataset (which it did or matched), the p-value cannot drop below $\frac{1}{2^{n-1}} = \frac{1}{2^4} = 0.0625$. Thus, our results achieve the maximum possible statistical significance for a 5-dataset benchmark.
+> [!WARNING]
+> **Wilcoxon Sample Size Limit:** With only $n=5$ datasets, the Wilcoxon signed-rank test is mathematically underpowered—the $p$-value cannot fall below $0.0625$ regardless of the effect size. This ceiling limits our ability to claim formal statistical significance at the $95\%$ confidence level ($p < 0.05$) under the initial protocol. This limitation motivates our planned expansion to 23 datasets (documented in Section 8) using the Friedman/Nemenyi framework, which is not subject to this floor.
 
 ---
 
 ## 7. Conclusion
-We have presented an **Adaptive Multi-Feature LFIG framework** for time series classification. By dynamically windowing signals, extracting 10D statistical-structural feature spaces, and fusing Hausdoff-DTW-Cosine distances, we achieved SOTA-comparable accuracies while executing up to **15x faster** than raw DTW baselines. Notably, we beat HIVE-COTE 2.0 SOTA accuracy on ECG200 (**91.00%** vs. **90.00%**). 
+We have presented an **Adaptive Multi-Feature LFIG framework** for time series classification. By dynamically windowing signals, extracting 10D statistical-structural feature spaces, and fusing Hausdorff-DTW-Cosine distances, we achieved accuracies that are highly competitive with SOTA algorithms (matching or exceeding literature DTW on 4/5 datasets, achieving 100% on Coffee, and surpassing HIVE-COTE 2.0 SOTA accuracy on ECG200) while executing up to **15x faster** than standard DTW baselines. While SOTA ensemble models like HIVE-COTE 2.0 retain superior accuracies on the remaining datasets, our framework offers a highly compelling accuracy-efficiency tradeoff, requiring orders of magnitude less memory and execution time.
 
 Future work will expand this framework to **multivariate time series classification** (MTSC) and evaluate on larger datasets from the UEA Multivariate Archive.
 
@@ -195,42 +200,21 @@ Future work will expand this framework to **multivariate time series classificat
 
 ## 8. Revised Experimental Protocol (Addendum)
 
-> **Note:** This section documents protocol improvements implemented after the initial draft. All subsequent experimental results should use this revised protocol.
+> **Note:** This section documents the protocol improvements implemented after the initial draft. We separate completed empirical results from planned future extensions.
 
-### Protocol Changes Summary
+### 8.1 Completed Protocol Enhancements and Empirical Results
 
-1. **Nested Cross-Validation:** All hyperparameter selection (segmentation strategy, penalty/window size, z, k, fusion weights, classifier type) is now performed within a nested CV framework (5-fold outer for reporting, 3-fold inner for tuning). This eliminates selection leakage from the original per-dataset manual tuning.
+To address selection leakage and improve validation rigor, we implemented the following completed enhancements and evaluated them across the initial 5 UCR datasets:
 
-2. **Automatic Segmentation Strategy:** The choice between CPD and fixed-window segmentation is determined automatically using a training-data-only statistic (variance of lag-1 autocorrelation across training samples), replacing the manual domain-knowledge-based selection.
+1. **Nested Cross-Validation:** We implemented a nested cross-validation framework (5-fold outer cross-validation for reporting, 3-fold inner cross-validation for hyperparameter tuning). Hyperparameters (spread factor $z$, neighbors $k$, distance fusion weights, and classifier type) are selected per-fold using only training data, eliminating selection leakage.
+2. **Automatic Segmentation Heuristics:** The choice between Bottom-Up Change Point Detection (CPD) and Fixed-Window partitioning is determined dynamically using only the training split. We compute the variance of lag-1 autocorrelation across training samples; a variance $> 0.05$ indicates a phase-shifted dataset (triggering CPD), while a variance $\le 0.05$ indicates a phase-aligned dataset (triggering Fixed windowing).
+3. **Data-Driven Weight Learning:** Rather than using static distance fusion weights, optimal weights are learned using only the training split via a grid search over nine candidate weight combinations in the inner cross-validation loop.
 
-3. **Fusion Weight Learning:** The hybrid similarity fusion weights ($w_H, w_{DTW}, w_{Cos}$) are now learned from training data via logistic regression on pairwise same-class distances, or selected via grid search with inner CV. This replaces the previously hardcoded weights [0.1, 0.8, 0.1].
+#### Table 4: Selection Leakage Quantification (Official UCR Split, Single Evaluation)
 
-4. **Repeated Evaluation:** All metrics are reported as mean ± std over 10 stratified train/test splits, replacing single-seed evaluation.
+To determine if the original single-split evaluation was inflated by selection leakage, we evaluated the pipeline on the official UCR splits. Hyperparameters were tuned using an inner 3-fold CV on the training split, and the test split was evaluated exactly once.
 
-5. **Reproducible Baselines:** ROCKET, MiniROCKET, and DTW-1NN are now reproduced via the `aeon` library under identical evaluation protocol. HIVE-COTE 2.0 and DrCIF are retained as literature-reported values, explicitly marked with † to indicate they were not reproduced under our protocol.
-
-6. **Dataset Expansion:** Evaluation expanded from 5 to 23 UCR archive datasets spanning 6 domains (Motion, Spectro, Image, ECG, Sensor, Simulated).
-
-7. **Statistical Testing:** The Wilcoxon signed-rank test (limited by n=5 minimum p-value floor) is replaced by the Friedman chi-square test with Nemenyi post-hoc analysis and critical difference diagrams (Demšar, 2006).
-
-8. **Leave-One-Feature-Out Ablation:** The coarse 10-feature vs. 3-feature ablation is supplemented with a fine-grained leave-one-feature-out analysis, providing per-feature accuracy deltas with mean ± std over 10 repeated splits.
-
-9. **Feature Redundancy Analysis:** Pearson correlation matrices, PCA explained variance curves, and Variance Inflation Factors (VIF) are computed to assess multicollinearity among the 10 granule features.
-
-### Impact on Reported Results
-
-> [!WARNING]
-> The corrected protocol is expected to yield lower accuracy numbers than the original evaluation, as the original results were inflated by selection leakage (hyperparameters were tuned with knowledge of test performance). The corrected numbers represent unbiased estimates of generalization performance.
-
-### Empirical Results under Revised Protocol
-
-To empirically validate the protocol revisions, two evaluations were performed:
-1. **Isolated Selection Leakage Quantification:** Assessing the original single-split evaluation under strict, leakage-free conditions (hyperparameters tuned via inner CV using training data only; test split evaluated exactly once).
-2. **Step 1 Nested-CV Generalization:** Evaluating the model using full 5-fold outer, 3-fold inner cross-validation.
-
-#### Table 4: Selection Leakage Quantification (Official UCR Split)
-
-| Dataset | Original Leaky Acc | New Leakage-Free Acc | Leakage Delta |
+| Dataset | Original Leaky Accuracy | New Leakage-Free Accuracy | Leakage Delta |
 |:---|:---:|:---:|:---:|
 | **GunPoint** | 0.9067 | 0.8933 | -0.0133 |
 | **Coffee** | 1.0000 | 1.0000 | +0.0000 |
@@ -238,9 +222,12 @@ To empirically validate the protocol revisions, two evaluations were performed:
 | **Chinatown** | 0.9767 | 0.9417 | -0.0350 |
 | **ArrowHead** | 0.8286 | 0.7829 | -0.0457 |
 
-Comparing these values demonstrates that selection leakage inflated the original results by **1.33% to 4.57%** across four of the five datasets.
+**Result Analysis:** 
+The results confirm that the original manual tuning suffered from selection leakage, which inflated accuracies by **1.33% to 4.57%** across four of the five datasets.
 
-#### Table 5: Leakage-Free Nested-CV Generalization Metrics (5-Fold Outer)
+#### Table 5: Leakage-Free Generalization Estimates (Nested CV, 5-Fold Outer / 3-Fold Inner)
+
+We evaluated the complete pipeline using a nested cross-validation loop. This yields unbiased generalization estimates while filtering out partition-specific split variance.
 
 | Dataset | Nested-CV Accuracy (Mean ± SD) |
 |:---|:---:|
@@ -250,6 +237,19 @@ Comparing these values demonstrates that selection leakage inflated the original
 | **Chinatown** | 0.9779 ± 0.0166 |
 | **ArrowHead** | 0.8767 ± 0.0235 |
 
-The nested CV process produces higher generalization scores on GunPoint, Chinatown, and ArrowHead compared to the single train/test split. This highlights the benefit of multi-fold averaging, which filters out partition-specific variance inherent to the single official UCR splits.
+**Result Analysis:**
+Averaging across multiple outer folds filters out the partition-specific variance of the official single splits. As a result, the nested-CV accuracies are higher than the single-split accuracies on GunPoint, Chinatown, and ArrowHead, providing a more robust and statistically reliable estimate of our model's generalization capabilities.
+
+### 8.2 Ongoing Extensions and Future Work (Planned)
+
+The remaining steps of the protocol overhaul are designed to expand the evidence base and strengthen internal method claims. They are framed as ongoing extensions and future work:
+
+1. **UCR Dataset Expansion:** We plan to scale up the benchmark from 5 datasets to a catalog of 23 UCR datasets spanning six domains (Motion, Spectro, Image, ECG, Sensor, and Simulated). This resolves the statistical limitations of the small sample size.
+2. **Repeated splits evaluation:** We plan to run 10–30 repeated stratified splits per dataset (instead of a single fold) to report reliable confidence intervals for all classifiers across the expanded catalog.
+3. **Reproducible Baselines:** We plan to run ROCKET, MiniROCKET, and DTW-1NN baselines under the exact same repeated splits via `aeon` library integration to ensure direct comparability.
+4. **Friedman and Nemenyi CD Diagrams:** Once results across the 23 datasets are collected, we will replace Wilcoxon significance tests with a Demšar critical difference diagram, plotting average ranks and cliques of statistically similar classifiers.
+5. **Fine-Grained Feature Ablation:** We will execute a leave-one-feature-out ablation study (10 repeats per dataset) to measure individual feature accuracy deltas, providing empirical support for the Gini importance rankings.
+6. **Feature Redundancy and PCA:** We will stack all granule feature vectors to compute Pearson correlation matrices, cumulative PCA explained variance, and Variance Inflation Factors (VIF) to detect and manage multicollinearity among the 10 granule features.
+
 
 

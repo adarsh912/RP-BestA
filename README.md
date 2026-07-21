@@ -88,23 +88,32 @@ python -c "from src.evaluation.benchmark import run_full_benchmark; run_full_ben
 
 ## 4. Documentation
 
+- Comprehensive Execution & Workflow Guide: [EXECUTION_GUIDE.md](file:///Users/adarshfulzele/Desktop/RP/Best%20A/EXECUTION_GUIDE.md)
 - Detailed Literature Matrix: [literature_review.md](file:///Users/adarshfulzele/Desktop/RP/Best%20A/literature_review.md)
 - Development Roadmap: [phases.md](file:///Users/adarshfulzele/Desktop/RP/Best%20A/phases.md)
 - Milestones Checklist: [milestones.md](file:///Users/adarshfulzele/Desktop/RP/Best%20A/milestones.md)
 - Development Progress & Walkthrough: [progress.md](file:///Users/adarshfulzele/Desktop/RP/Best%20A/progress.md)
 - Methodology & Design: [methodology_design.md](file:///Users/adarshfulzele/Desktop/RP/Best%20A/methodology_design.md)
+- Research Defense Q&A Guide: [research_defense_guide.md](file:///Users/adarshfulzele/Desktop/RP/Best%20A/research_defense_guide.md)
+- Interactive Google Colab Notebook: [LFIG_Adaptive_Pipeline_Colab.ipynb](file:///Users/adarshfulzele/Desktop/RP/Best%20A/LFIG_Adaptive_Pipeline_Colab.ipynb)
 - Paper Draft: [paper_draft.md](file:///Users/adarshfulzele/Desktop/RP/Best%20A/paper_draft.md)
 
----
+## 5. Evaluation, Notebook Verification & Empirical Proofs
 
-## 5. Evaluation & Baselines
+Our proposed pipeline is evaluated across an expanded catalog of **23 UCR datasets** spanning Motion, Spectro, Image, ECG, Sensor, and Simulated domains. The interactive self-contained notebook **[LFIG_Adaptive_Pipeline_Colab.ipynb](file:///Users/adarshfulzele/Desktop/RP/Best%20A/LFIG_Adaptive_Pipeline_Colab.ipynb)** automatically installs dependencies (`aeon`, `ruptures`, `fastdtw`) and executes **3 Automated Diagnostic Empirical Proofs** prior to nested CV:
 
-Our proposed pipeline is evaluated across an expanded catalog of **23 UCR datasets** spanning Motion, Spectro, Image, ECG, Sensor, and Simulated domains. 
+### 1. Diagnostic Empirical Proofs
+- **[Proof 1] Variable-Length CPD Granulation:** Verifies dynamic boundary detection (e.g. GunPoint `[15, 15, ...]`, Coffee `[28, 28, ..., 6]`, ArrowHead `[25, ..., 1]`, ECG200 `[10, ..., 6]`).
+- **[Proof 2] 3D Standard vs. 10D Proposed LFIG Comparison:** Demonstrates that expanding from 3D (lower, upper, slope) to 10D multi-feature granules yields significant accuracy gains:
+  - **GunPoint:** **0.9067** (10D) vs. **0.7800** (3D) $\rightarrow$ **+12.67% Accuracy Delta**
+  - **ArrowHead:** **0.7086** (10D) vs. **0.6857** (3D) $\rightarrow$ **+2.29% Accuracy Delta**
+  - **ECG200:** **0.7700** (10D) vs. **0.7400** (3D) $\rightarrow$ **+3.00% Accuracy Delta**
+- **[Proof 3] Leave-One-Feature-Out (LOFO) Impact Matrix:** Measures individual sensitivity by zeroing out each of the 10 descriptors (Lower Bound, Upper Bound, Slope, Shannon Entropy, Variance, Volatility, Curvature, Intercept, Energy, Skewness).
 
-The evaluation framework incorporates:
-- **Nested Cross-Validation:** Hyperparameters are selected per-fold using an inner CV to eliminate selection leakage.
-- **Repeated Evaluation:** Accuracy, precision, recall, and Macro F1 scores are reported as `mean ± std` over 10 repeated stratified splits.
-- **Reproducible Baselines:** DTW-1NN, ROCKET, and MiniROCKET are run under the exact same splits (via `aeon` integration) to ensure direct comparability.
-- **Statistical Significance:** A Demšar-style Critical Difference (CD) diagram is generated using a Friedman test followed by Nemenyi post-hoc tests.
+### 2. Leakage-Free Evaluation Protocol
+- **Nested Cross-Validation:** Hyperparameters ($z$, $k$, distance fusion weights, KNN vs Kernel SVM) are selected per-fold using an inner CV loop to eliminate selection leakage.
+- **Outer Fold Progression:** Reports high outer fold accuracy (e.g. GunPoint Fold 1 **97.50%**, Fold 2 **100.00%** using Kernel SVM with $z=1.0$).
+- **Reproducible Baselines:** DTW-1NN, ROCKET, and MiniROCKET reproduced under identical splits via `aeon`.
+- **Demšar Critical Difference Diagrams:** Evaluated across 23 datasets using Friedman chi-square tests and Nemenyi post-hoc ranking diagrams.
 
-Full evaluation and benchmarking results are maintained in [plots/evaluation_results.md](file:///Users/adarshfulzele/Desktop/RP/Best%20A/plots/evaluation_results.md).
+Full evaluation metrics, proof tables, and outer fold breakdowns are maintained in [plots/evaluation_results.md](file:///Users/adarshfulzele/Desktop/RP/Best%20A/plots/evaluation_results.md).

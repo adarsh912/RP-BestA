@@ -8,8 +8,10 @@ from sklearn.metrics import accuracy_score
 
 
 def _ensure_3d(X):
-    """Reshape to (n_samples, 1, n_timepoints) if needed for aeon's univariate format."""
-    if X.ndim == 2:
+    """Reshape to (n_samples, 1, n_timepoints) or format as list of 2D arrays if variable length."""
+    if isinstance(X, list) or (isinstance(X, np.ndarray) and X.dtype == object):
+        return [x.reshape(1, -1) if x.ndim == 1 else x for x in X]
+    if hasattr(X, 'ndim') and X.ndim == 2:
         return X.reshape(X.shape[0], 1, X.shape[1])
     return X
 

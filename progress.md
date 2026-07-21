@@ -122,4 +122,16 @@ The new protocols were successfully run in a Google Colab GPU-accelerated enviro
    - **Chinatown:** 0.9779 ± 0.0166
    - **ArrowHead:** 0.8767 ± 0.0235
 
+### 3.5 Phase 13: Notebook Pipeline Verification & Diagnostic Proof Execution
+
+- **Self-Contained Notebook Deployment:** Generated and verified [LFIG_Adaptive_Pipeline_Colab.ipynb](file:///Users/adarshfulzele/Desktop/RP/Best%20A/LFIG_Adaptive_Pipeline_Colab.ipynb) containing self-installing dependencies, dynamic inner KFold split safeguards, and explicit `float64` array formatting.
+- **Empirical Diagnostic Proof Results:**
+  1. **[Proof 1] Variable-Length CPD Segmentation:** Confirms boundaries and granule lengths calculated across adaptive signals (e.g. GunPoint `[15, 15, ...]`, Coffee `[28, 28, ..., 6]`, ArrowHead `[25, ..., 1]`, ECG200 `[10, ..., 6]`).
+  2. **[Proof 2] 3D Standard vs. 10D Proposed LFIG Comparison:**
+     - **GunPoint:** 10D Multi-Feature (**0.9067**) vs 3D Standard LFIG (**0.7800**) $\rightarrow$ **+0.1267** accuracy gain (+12.67%).
+     - **ArrowHead:** 10D Multi-Feature (**0.7086**) vs 3D Standard LFIG (**0.6857**) $\rightarrow$ **+0.0229** accuracy gain.
+     - **ECG200:** 10D Multi-Feature (**0.7700**) vs 3D Standard LFIG (**0.7400**) $\rightarrow$ **+0.0300** accuracy gain.
+  3. **[Proof 3] Leave-One-Feature-Out (LOFO) Ablation Matrix:** Derived individual feature contribution deltas for all 10 descriptors (Lower Bound, Upper Bound, Trend Slope, Shannon Entropy, Variance, Volatility, Curvature, Intercept, Energy, Skewness).
+- **Leakage-Free 5-Fold Nested CV Execution:** Nested cross-validation (5 outer folds, 3 inner folds) verified across UCR benchmark catalog datasets with per-fold hyperparameter and classifier selection (e.g., GunPoint Fold 1: **97.50%**, Fold 2: **100.00%** using Kernel SVM with $z=1.0$).
+
 

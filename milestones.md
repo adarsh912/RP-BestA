@@ -63,6 +63,7 @@ This document tracks the progress of the **7 Development Milestones** for the pr
 | **Milestone 9** | Dataset expansion to 23 UCR datasets | ✅ Completed | 2026-07-09 | 2026-07-09 |
 | **Milestone 10** | Hybrid similarity weight learning implemented | ✅ Completed | 2026-07-09 | 2026-07-09 |
 | **Milestone 11** | Fine-grained ablation and redundancy analysis | ✅ Completed | 2026-07-09 | 2026-07-09 |
+| **Milestone 12** | Self-contained Colab notebook & viva defense guide | ✅ Completed | 2026-07-21 | 2026-07-21 |
 
 ### Milestone 8: Experimental Protocol Corrected
 - **Status:** 100%
@@ -83,4 +84,9 @@ This document tracks the progress of the **7 Development Milestones** for the pr
 - **Status:** 100%
 - **Details:** Implemented leave-one-feature-out ablation (zeroing each of 10 features individually) with 10 repeated splits per dataset. Added feature redundancy analysis via Pearson correlation, PCA, and VIF.
 - **Reference:** [benchmark.py](file:///Users/adarshfulzele/Desktop/RP/Best%20A/src/evaluation/benchmark.py) & [redundancy.py](file:///Users/adarshfulzele/Desktop/RP/Best%20A/src/features/redundancy.py)
+
+### Milestone 12: Standalone Notebook & Defense Q&A Guide
+- **Status:** 100%
+- **Details:** Compiled self-contained Jupyter notebook [LFIG_Adaptive_Pipeline_Colab.ipynb](file:///Users/adarshfulzele/Desktop/RP/Best%20A/LFIG_Adaptive_Pipeline_Colab.ipynb) with 3 diagnostic proofs (granule length breakdown, 10D vs 3D feature comparison, LOFO ablation table) and 5-fold nested CV. Authoritative 22-question research defense guide created covering architecture, granulation math, similarity fusion, and statistical validity.
+- **Reference:** [research_defense_guide.md](file:///Users/adarshfulzele/Desktop/RP/Best%20A/research_defense_guide.md) & [LFIG_Adaptive_Pipeline_Colab.ipynb](file:///Users/adarshfulzele/Desktop/RP/Best%20A/LFIG_Adaptive_Pipeline_Colab.ipynb)
 

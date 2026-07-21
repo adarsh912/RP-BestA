@@ -15,6 +15,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.metrics import accuracy_score, precision_recall_fscore_support
 from sklearn.model_selection import StratifiedShuffleSplit
+from tqdm import tqdm
 
 from src.datasets.loader import load_ucr_dataset
 from src.segmentation.adaptive import segment_time_series
@@ -264,7 +265,7 @@ def run_full_benchmark(dataset_names=None, n_repeats=10, data_dir='data'):
     6. Standard 3-feature vs 10-feature ablation
     """
     from src.datasets.ucr_catalog import get_dataset_names as catalog_names
-    from src.evaluation.tuning import run_nested_cv
+    from src.evaluation.tuning import run_nested_cv, select_segmentation_strategy
     from src.evaluation.critical_difference import run_cd_analysis
 
     if dataset_names is None:
@@ -274,7 +275,9 @@ def run_full_benchmark(dataset_names=None, n_repeats=10, data_dir='data'):
     all_results = []
     accuracy_for_cd = {}  # {dataset: {classifier: accuracy}}
 
-    for dataset in dataset_names:
+    pbar = tqdm(dataset_names, desc="Evaluating UCR Catalog", unit="dataset")
+    for dataset in pbar:
+        pbar.set_description(f"Processing: {dataset}")
         print(f"\n{'='*60}")
         print(f"Evaluating: {dataset}")
         print(f"{'='*60}")
@@ -299,8 +302,38 @@ def run_full_benchmark(dataset_names=None, n_repeats=10, data_dir='data'):
                 "F1": f"{ncv_result['f1_mean']:.4f}±{ncv_result['f1_std']:.4f}",
             })
             accuracy_for_cd[dataset]["Proposed"] = ncv_result['accuracy_mean']
+
+            # --- [Proof 1] Variable-Length CPD Segmentation Demonstration ---
+            method, default_param = select_segmentation_strategy(X_train)
+            boundaries = segment_time_series(X_train[0], method, default_param)
+            lengths = [boundaries[i+1] - boundaries[i] for i in range(len(boundaries)-1)]
+            print(f"\n--- [Proof 1] Variable-Length CPD Segmentation: {dataset} ---")
+            print(f"  Boundary Indices: {boundaries}")
+            print(f"  Granule Lengths (variable size proof): {lengths}")
+
+            # --- [Proof 2] Feature Comparison (3D Standard vs 10D Proposed) ---
+            # We use a 3-repeat split to compare 3D vs 10D quickly
+            from sklearn.model_selection import StratifiedShuffleSplit
+            sss = StratifiedShuffleSplit(n_splits=3, test_size=0.3, random_state=42)
+            acc_10d_list = []
+            acc_3d_list = []
+            for tr_idx, val_idx in sss.split(X_train, y_train):
+                a_10d = evaluate_pipeline(X_train[tr_idx], y_train[tr_idx], X_train[val_idx], y_train[val_idx], use_ablation=False)
+                acc_10d_list.append(a_10d)
+                a_3d = evaluate_pipeline(X_train[tr_idx], y_train[tr_idx], X_train[val_idx], y_train[val_idx], use_ablation=True)
+                acc_3d_list.append(a_3d)
+            mean_10d = np.mean(acc_10d_list)
+            mean_3d = np.mean(acc_3d_list)
+            print(f"\n--- [Proof 2] Feature Comparison (3D Standard vs 10D Proposed): {dataset} ---")
+            print(f"  Standard 3D LFIG Accuracy:                 {mean_3d:.4f}")
+            print(f"  Proposed Multi-Feature 10D LFIG Accuracy:  {mean_10d:.4f}")
+            print(f"  Improvement Delta:                        {mean_10d - mean_3d:+.4f}")
+
+            # --- [Proof 3] Leave-One-Feature-Out (LOFO) Ablation ---
+            run_leave_one_feature_out_ablation(dataset, n_repeats=3, data_dir=data_dir)
+
         except Exception as e:
-            print(f"  Nested CV failed: {e}")
+            print(f"  Proposed pipeline proofs failed: {e}")
 
         # --- 2. Reproducible baselines (aeon) ---
         try:
@@ -385,7 +418,8 @@ def run_full_benchmark(dataset_names=None, n_repeats=10, data_dir='data'):
 
 
 if __name__ == "__main__":
-    # Run on the original 5 datasets for a quick sanity check
+    from src.datasets.ucr_catalog import get_dataset_names
+    # Run on all 23 datasets in the catalog
     run_full_benchmark(
-        dataset_names=["GunPoint", "Coffee", "ArrowHead", "ECG200", "Chinatown"]
+        dataset_names=get_dataset_names()
     )

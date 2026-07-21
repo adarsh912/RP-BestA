@@ -71,6 +71,18 @@ This document compiles the **Phase 1 Literature Review** deliverables for the pr
 20. **Lu, W., Pedrycz, W., & Yang, J. (2021)** — *Granular time series modeling: A comprehensive review and new perspectives*
     - **Focus:** Detailed review of interval and fuzzy time series models, forecasting, and clustering.
     - **Key Finding:** Emphasizes that future work should combine feature engineering with fuzzy granules to expand their usage to classification.
+21. **ScienceDirect (2018)** — *Time-series clustering based on linear fuzzy information granules*
+    - **Focus:** Derives Hausdorff-based distance between LFIG bounds and generalizes it into an LFIG-DTW metric for equal and unequal-length granular sequences.
+    - **Key Finding:** Establishes the combination of Hausdorff boundary distance and DTW sequence alignment ($D_H + D_{DTW}$), though without 10D internal features or learned fusion weights.
+22. **ScienceDirect (2023)** — *TFGRP-SVM: Linear fuzzy information granulation integrated with time series recurrence analysis for classification*
+    - **Focus:** Integrates LFIG into time series recurrence plots (TFGRP) combined with SVM classifiers to address noise and trend-confusion problems.
+    - **Key Finding:** Direct competitor framing for LFIG in classification, using recurrence plot transformations rather than explicit 10D statistical descriptor vectors.
+23. **ScienceDirect (2023)** — *Distance measure for equal and unequal-size LFIGs via constrained DTW variants*
+    - **Focus:** Formalizes interval Hausdorff distance between equal-size granules, extends it to unequal-size LFIGs via constrained DTW, and builds sequence-level distances for full time series.
+    - **Key Finding:** Resolves unequal granule length alignment using boundary constraints, establishing a formal precedent for non-uniform LFIG distances.
+24. **Adjacent LFIG Approaches (Gaussian LFIG, FCM+LFIG, Fuzzy Inference & Decision Trees)** — *Various authors (2017-2024)*
+    - **Focus:** Explores Gaussian membership envelopes, trend-oriented Fuzzy C-Means (FCM) clustering, fuzzy inference systems, and fuzzy decision trees for forecasting.
+    - **Key Finding:** Demonstrates that the LFIG literature space is active but overwhelmingly centered on forecasting and clustering rather than high-dimensional feature-based classification.
 
 ---
 
@@ -137,8 +149,9 @@ This document compiles the **Phase 1 Literature Review** deliverables for the pr
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | **ROCKET / MiniROCKET** (Dempster et al., 2021) | Convolutions (Random Kernels) | Linear Classifiers (Ridge) | State-of-the-art speed; extremely low parameter tuning. | Lacks interpretability; features are random projections. | Primary accuracy and speed benchmark baseline. |
 | **DrCIF** (Middlehurst et al., 2020) | Random Intervals (Mean, Std, Slope) | Decision Trees / Forest | Captures local interval behaviors; robust to noise. | Sensitive to interval count hyperparameters; slow. | Baseline for interval-based methods; guides feature choices. |
-| **LFIG** (Pedrycz & Yu, 2014) | Linear Trends + Fuzzy Bounds | Euclidean / L2 on parameters | Captures trends and local uncertainty; highly interpretable. | Standard LFIG only uses 3 features (Lower, Upper, Trend). | Direct foundation for our granulation step. |
-| **Adaptive Segmentation** (Keogh et al., 2001) | Piecewise Linear Approximation | Reconstruction Error | Matches physical regime changes; variable window size. | Can be slow; sensitive to threshold selection. | Core methodology for Phase 4 (Adaptive Segmentation). |
+| **LFIG-DTW Clustering** (ScienceDirect, 2018) | LFIG Bounds + Slopes | Hausdorff + Slope DTW ($D_H + D_{DTW}$) | Generalizes equal/unequal granule lengths via DTW. | No internal 10D feature vector ($D_{Cos}$ missing); unweighted fusion; clustering focus. | Primary metric baseline for $D_H + D_{DTW}$ combination. |
+| **TFGRP-SVM Classification** (ScienceDirect, 2023) | LFIG + Recurrence Plots | SVM on Recurrence Matrices | Combines LFIG noise filtering with recurrence plots for classification. | Indirect feature space via images; high computational cost; no direct metric learning. | Direct competitor for LFIG in Time Series Classification. |
+| **Constrained LFIG-DTW** (ScienceDirect, 2023) | Unequal-Length LFIG Envelopes | Constrained LFIG-DTW Variant | Formalizes boundary constraints for non-uniform granule alignment. | Lacks statistical feature descriptors (entropy, curvature, skewness); fixed weights. | Reference for unequal granule DTW alignment constraints. |
 | **catch22** (Lubba et al., 2019) | Canonical Features (22 values) | Standard Classifiers | Non-redundant; highly efficient; captures dynamics. | Does not retain temporal/sequential alignment. | Inspires our 10 granular features (variance, entropy, etc.). |
 
 ---
@@ -146,13 +159,15 @@ This document compiles the **Phase 1 Literature Review** deliverables for the pr
 ## 3. Research Gap Analysis
 
 1. **Information Loss in Granule Representation:**
-   Current Linear Fuzzy Information Granulation (LFIG) models (such as Pedrycz & Yu, 2014) compress time series segments into only three core components: the local trend ($y = ax + b$), and the lower/upper uncertainty bounds (usually defined as triangular or trapezoidal fuzzy spreads). While this preserves the basic boundaries and linear direction, it discards essential statistical and dynamic behaviors within the segment, such as local volatility, entropy (information density), curvature, skewness, and energy. Consequently, standard LFIG representations are too coarse for complex classification tasks.
+   Current Linear Fuzzy Information Granulation (LFIG) models (such as Pedrycz & Yu, 2014; ScienceDirect, 2018; ScienceDirect, 2023) compress time series segments into only two or three core components: local trend slope ($y = ax + b$) and lower/upper uncertainty bounds ($[L, U]$). While this preserves basic bounds and slope, it discards essential statistical and dynamic behaviors within the segment, such as local volatility, entropy (information density), curvature, skewness, and energy. Consequently, standard LFIG representations are too coarse for complex classification tasks.
 
-2. **Rigidity of Fixed-Window Granulation:**
-   The majority of LFIG implementations partition time series using fixed-size sliding windows. However, real-world time series exhibit dynamic behaviors with varying phases (e.g., rapid volatility shifts followed by long periods of stationarity). Fixed window sizes either over-granularize stationary segments (causing computational waste) or under-granularize high-frequency volatile segments (causing severe information loss).
+2. **Rigidity & Manual Selection of Granulation:**
+   The majority of LFIG implementations partition time series using fixed-size sliding windows or fixed penalty parameters. However, real-world time series exhibit dynamic behaviors with varying phases (e.g., rapid volatility shifts followed by long periods of stationarity). Fixed window sizes either over-granularize stationary segments or under-granularize high-frequency volatile segments. Furthermore, prior work lacks automated criteria to route phase-aligned signals vs. phase-shifted signals to fixed vs. adaptive change-point segmentation automatically.
 
-3. **Single-Metric Similarity Bias:**
-   In classification frameworks that operate on granules, distance is typically measured using a single metric—either Hausdorff distance (which measures boundary/set containment) or Dynamic Time Warping (DTW) on the trend coefficients. A single metric is insufficient: Hausdorff captures interval boundary spreads but ignores sequential phase shifts, while DTW aligns temporal paths but ignores local amplitude boundaries, and Cosine similarity captures directional trends but misses absolute scale. There is currently no framework that fuses these orthogonal similarity spaces for fuzzy granules.
+3. **Unweighted & Incomplete Metric Fusion:**
+   While 2018/2023 LFIG-DTW formulations derive Hausdorff distance ($D_H$) and slope DTW ($D_{DTW}$) for unequal granule sequences, they suffer from two major limitations:
+   - **Missing Directional Alignment ($D_{Cos}$):** They omit high-dimensional feature cosine alignment, missing directional orientation across complex multi-feature space.
+   - **Static, Unlearned Weights:** They combine $D_H$ and $D_{DTW}$ using equal, unlearned, or hardcoded weights. There is currently no framework that fuses set-theoretic boundary overlap ($D_H$), phase alignment ($D_{DTW}$), and 10D directional feature alignment ($D_{Cos}$) using data-driven weight learning (via pairwise logistic regression or inner CV grid search).
 
 ---
 
@@ -188,3 +203,44 @@ Our proposed framework addresses the identified research gaps through **five cor
 
 5. **Extensive Benchmark Evaluation:**
    We perform a comprehensive evaluation of our framework against 7 leading state-of-the-art models (ROCKET, MiniROCKET, MultiROCKET, DrCIF, Shapelets, HIVE-COTE, DTW) across 15+ UEA/UCR datasets, tracking accuracy, runtime, memory, and significance testing.
+
+---
+
+## 5. Direct Prior Work & Novelty Differentiation Matrix
+
+To rigorously establish novelty, the table below directly contrasts our proposed framework against the four most closely competing LFIG studies in literature across five structural dimensions:
+
+| Study / Model | Segmentation Strategy | Granule Representation (# Features) | Similarity Metric Space | Weight Learning Mechanism | Primary Target Task |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| **Yang, Yu & Pedrycz (2017)** (*Int. J. Approx. Reason.*) | Fixed-Window Sliding | Standard 3D LFIG ($[L, U, a]$) | Euclidean / Error Distance | None (Unweighted) | Long-Term Forecasting |
+| **Duan, Yu, Pedrycz & Wang (2018)** (*Appl. Soft Comput.*) | Fixed-Window / Constrained | Standard 3D LFIG ($[L, U, a]$) | Hausdorff + Slope DTW ($D_H + D_{DTW}$) | None (Unweighted / Static Sum) | Time Series Clustering |
+| **Gao & Yu (2019)** (*IEEE Access*) | Fixed / Heuristic Unequal | Standard 3D LFIG ($[L, U, a]$) | Generalized LFIG-DTW | Static Equal Weights | Classification (Unequal Length) |
+| **He & Yu (2023)** (*Chaos Solitons & Fractals*) | Recurrence Matrix Splitting | 2D Recurrence Plot Images (TFGRP) | SVM Precomputed Kernel | None (Implicit SVM Margin) | Noise-Robust Classification |
+| **Applied Soft Computing (2023)** (*Follow-up*) | Constrained LFIG Variants | Standard 3D LFIG ($[L, U, a]$) | Constrained LFIG-DTW | Fixed Weights | Time Series Clustering |
+| **Our Proposed Framework** | **Adaptive CPD vs. Fixed (Autocorrelation $\sigma^2_r$)** | **Enhanced 10D Multi-Feature Descriptor** | **3-Way Hybrid ($D_H + D_{DTW} + D_{Cos}$)** | **Learned Weights (Pairwise Logistic / Inner CV)** | **Time Series Classification (TSC)** |
+
+---
+
+## 6. Literature Citation Taxonomy (Tier 1 to Tier 4)
+
+### Tier 1: Direct Competitors (Must-Cite Competitors)
+1. **Gao & Yu (2019)** — *Linear Fuzzy Information Granulation Based Classification Method for Unequal Length Time Series* (IEEE Access). Direct precedent for LFIG classification.
+2. **He & Yu (2023)** — *Trend recurrence analysis and time series classification via trend fuzzy granular recurrence plot method (TFGRP-SVM)* (Chaos, Solitons & Fractals). Direct competitor transforming LFIG into 2D recurrence plot images for SVM.
+3. **Duan, Yu, Pedrycz & Wang (2018)** — *Time-series clustering based on linear fuzzy information granules* (Applied Soft Computing). Primary derivation of interval Hausdorff distance ($D_H$) + slope DTW ($D_{DTW}$) for unequal-length granules.
+4. **Applied Soft Computing (2023)** — *Clustering time series under trend-oriented fuzzy information granulation*. Reformulates LFIG-DTW for non-uniform granules.
+
+### Tier 2: Foundational Lineage
+5. **Yang, Yu & Pedrycz (2017)** — *Long-term forecasting of time series based on linear fuzzy information granules and fuzzy inference system* (Int. J. Approx. Reasoning). Seminal origin for LFIG envelopes and linear trend fitting.
+6. **Pedrycz & Vukovich (2001)** — *Abstraction and specialization of information granules* (IEEE Trans. SMC). Granular computing theoretical origin.
+
+### Tier 3: Adjacent Variants & Non-Linear Alternatives
+7. **Gaussian & Asymmetric LFIG Variants (2017-2024)** — 2-layer FCM, Laplace LFIG for financial time series.
+8. **Trend-Granulation Fuzzy C-Means (IEEE Trans. Fuzzy Syst.)** — Granular clustering machinery for interval-valued data.
+9. **Polynomial & Non-linear FIG (Yang et al., Mathematics 2022)** — Alternative non-linear granule shapes; contextualizes our deliberate choice of piecewise linear descriptors.
+
+### Tier 4: Methodological & Statistical Backbone
+10. **Demšar, J. (2006)** — *Statistical Comparisons of Classifiers over Multiple Data Sets* (JMLR). Source for Friedman chi-square and Nemenyi critical difference diagrams.
+11. **Dempster et al. (2019/2021)** — *ROCKET & MiniROCKET* (Data Mining & Knowl. Discov.). Primary benchmark baselines.
+12. **Middlehurst et al. (2021)** — *HIVE-COTE 2.0* (Machine Learning). Meta-ensemble accuracy target baseline.
+13. **Berndt & Clifford (1994)** — *Using Dynamic Time Warping to Find Patterns in Time Series* (KDD Workshop). Canonical DTW baseline reference.
+14. **Truong, Oudre & Vayatis (2020)** — *Selective review of offline change point detection methods* (Signal Processing). Benchmark reference for Bottom-Up change point detection.

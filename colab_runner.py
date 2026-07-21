@@ -789,18 +789,22 @@ from src.features.extractor import extract_granular_sequence
 from src.similarity.hybrid import compute_pairwise_distances, fuse_distances
 from src.classifiers.models import CustomDistanceKNN
 
-def select_segmentation_strategy(X_train, y_train):
+def select_segmentation_strategy(X_train, y_train=None):
     autocorrs = []
     for x in X_train:
-        if len(x) < 3:
+        x_arr = np.asarray(x, dtype=np.float64)
+        if len(x_arr) < 3:
             continue
-        r = np.corrcoef(x[:-1], x[1:])[0, 1]
+        r = np.corrcoef(x_arr[:-1], x_arr[1:])[0, 1]
         if not np.isnan(r):
-            autocorrs.append(r)
+            autocorrs.append(float(r))
     if len(autocorrs) < 2:
         return 'cpd', 1.5
-    var_autocorr = np.var(autocorrs)
-    series_length = X_train.shape[1]
+    var_autocorr = float(np.var(autocorrs))
+    if hasattr(X_train, 'ndim') and X_train.ndim == 2:
+        series_length = X_train.shape[1]
+    else:
+        series_length = int(np.mean([len(x) for x in X_train]))
     if var_autocorr > 0.05:
         return 'cpd', 1.5
     else:
@@ -835,7 +839,13 @@ def _evaluate_pipeline(X_train, y_train, X_test, y_test, method, param, z, k, we
     return accuracy_score(y_test, preds)
 
 def run_inner_cv(X_train_fold, y_train_fold, method, param_grid, n_inner_folds=3):
-    skf = StratifiedKFold(n_splits=n_inner_folds, shuffle=True, random_state=42)
+    min_class_size = np.min(np.unique(y_train_fold, return_counts=True)[1]) if len(y_train_fold) > 0 else 0
+    actual_inner = min(n_inner_folds, min_class_size)
+    if actual_inner < 2:
+        from sklearn.model_selection import KFold
+        skf = KFold(n_splits=2, shuffle=True, random_state=42)
+    else:
+        skf = StratifiedKFold(n_splits=actual_inner, shuffle=True, random_state=42)
     keys, values = list(param_grid.keys()), list(param_grid.values())
     combos = list(product(*values))
     best_acc, best_params = -1.0, None
@@ -854,12 +864,21 @@ def run_inner_cv(X_train_fold, y_train_fold, method, param_grid, n_inner_folds=3
         if mean_acc > best_acc:
             best_acc = mean_acc
             best_params = params
+    if best_params is None:
+        best_params = {'param': 1.5, 'z': 1.96, 'k': 1, 'weights': [0.3, 0.4, 0.3], 'clf_type': 'KNN'}
     return best_params
 
 def run_nested_cv(dataset_name, n_outer_folds=5, n_inner_folds=3, data_dir='data'):
     X_train, y_train, X_test, y_test = load_ucr_dataset(dataset_name, data_dir=data_dir)
-    X_full = np.concatenate([X_train, X_test], axis=0)
-    y_full = np.concatenate([y_train, y_test], axis=0)
+    combined_list = list(X_train) + list(X_test)
+    lengths = [len(x) for x in combined_list]
+    if len(set(lengths)) == 1:
+        X_full = np.array([np.asarray(x, dtype=np.float64) for x in combined_list], dtype=np.float64)
+    else:
+        X_full = np.empty(len(combined_list), dtype=object)
+        for i, x in enumerate(combined_list):
+            X_full[i] = np.asarray(x, dtype=np.float64)
+    y_full = np.concatenate([np.asarray(y_train), np.asarray(y_test)], axis=0)
     outer_skf = StratifiedKFold(n_splits=n_outer_folds, shuffle=True, random_state=42)
     param_grid = {
         'param': [1.0, 1.5, 2.0],
@@ -886,7 +905,9 @@ files_to_create["src/evaluation/baselines.py"] = '''import numpy as np
 from sklearn.metrics import accuracy_score
 
 def _ensure_3d(X):
-    if X.ndim == 2:
+    if isinstance(X, list) or (isinstance(X, np.ndarray) and X.dtype == object):
+        return [x.reshape(1, -1) if x.ndim == 1 else x for x in X]
+    if hasattr(X, 'ndim') and X.ndim == 2:
         return X.reshape(X.shape[0], 1, X.shape[1])
     return X
 

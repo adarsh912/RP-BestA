@@ -41,7 +41,10 @@ def select_segmentation_strategy(X_train):
         return 'cpd', 1.5
 
     var_autocorr = np.var(autocorrs)
-    series_length = X_train.shape[1]
+    if hasattr(X_train, 'shape') and len(X_train.shape) == 2:
+        series_length = X_train.shape[1]
+    else:
+        series_length = int(np.mean([len(x) for x in X_train]))
 
     if var_autocorr > 0.05:
         return 'cpd', 1.5
@@ -99,7 +102,16 @@ def run_inner_cv(X_tr_fold, y_tr_fold, method, default_param, n_inner=3):
     Selects optimal hyperparameters using ONLY the training fold.
     Caches distances for each z level to optimize computation.
     """
-    skf = StratifiedKFold(n_splits=n_inner, shuffle=True, random_state=42)
+    # Dynamically adjust inner CV splits based on the minimum class size
+    from sklearn.model_selection import KFold
+    min_class_size = np.min(np.unique(y_tr_fold, return_counts=True)[1]) if len(y_tr_fold) > 0 else 0
+    actual_inner = min(n_inner, min_class_size)
+    
+    if actual_inner < 2:
+        skf = KFold(n_splits=2, shuffle=True, random_state=42)
+    else:
+        skf = StratifiedKFold(n_splits=actual_inner, shuffle=True, random_state=42)
+        
     splits = list(skf.split(X_tr_fold, y_tr_fold))
     
     z_values = PARAM_GRID['z']
@@ -134,6 +146,13 @@ def run_inner_cv(X_tr_fold, y_tr_fold, method, default_param, n_inner=3):
                 best_acc = mean_acc
                 best_params = {'z': z, 'k': k, 'weights': weights, 'clf_type': clf_type}
                 
+    if best_params is None:
+        best_params = {
+            'z': 1.96,
+            'k': 1,
+            'weights': [0.3, 0.4, 0.3],
+            'clf_type': 'KNN'
+        }
     return best_params
 
 
@@ -147,9 +166,20 @@ def run_nested_cv(dataset_name, n_outer=5, n_inner=3, data_dir='data'):
 
     # Load dataset
     X_train, y_train, X_test, y_test = load_ucr_dataset(dataset_name, data_dir=data_dir)
-    X = np.concatenate([X_train, X_test], axis=0)
-    y = np.concatenate([y_train, y_test], axis=0)
-    print(f"Dataset shape: {X.shape[0]} samples, {X.shape[1]} timepoints")
+    combined_list = list(X_train) + list(X_test)
+    lengths = [len(x) for x in combined_list]
+    if len(set(lengths)) == 1:
+        X = np.array([np.asarray(x, dtype=np.float64) for x in combined_list], dtype=np.float64)
+        n_samples, series_len = X.shape
+    else:
+        X = np.empty(len(combined_list), dtype=object)
+        for i, x in enumerate(combined_list):
+            X[i] = np.asarray(x, dtype=np.float64)
+        n_samples = len(X)
+        series_len = int(np.mean([len(x) for x in X]))
+    
+    y = np.concatenate([np.asarray(y_train), np.asarray(y_test)], axis=0)
+    print(f"Dataset shape: {n_samples} samples, {series_len} timepoints (mean)")
 
     outer = StratifiedKFold(n_splits=n_outer, shuffle=True, random_state=42)
     metrics = {'accuracy': [], 'precision': [], 'recall': [], 'f1': []}

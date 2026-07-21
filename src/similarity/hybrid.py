@@ -199,7 +199,13 @@ def learn_fusion_weights_grid(D_H_train, D_DTW_train, D_Cos_train, y_train, k=3,
     ]
 
     y = np.asarray(y_train)
-    skf = StratifiedKFold(n_splits=cv, shuffle=True, random_state=42)
+    min_class_size = np.min(np.unique(y, return_counts=True)[1]) if len(y) > 0 else 0
+    actual_cv = min(cv, min_class_size)
+    if actual_cv < 2:
+        from sklearn.model_selection import KFold
+        skf = KFold(n_splits=2, shuffle=True, random_state=42)
+    else:
+        skf = StratifiedKFold(n_splits=actual_cv, shuffle=True, random_state=42)
 
     best_weights, best_acc = [0.3, 0.4, 0.3], -1.0
     for w in weight_grid:

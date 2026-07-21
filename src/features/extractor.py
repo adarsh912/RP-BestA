@@ -78,6 +78,8 @@ def extract_granular_sequence(X_series, boundaries, z=1.96):
             continue
         feat = extract_granule_features(segment, z=z)
         seq.append(feat)
+    if len(seq) == 0:
+        return np.empty((0, 10))
     return np.array(seq)
 
 def extract_granular_dataset(X, method="cpd", param=2.5, z=1.96):

@@ -4,6 +4,38 @@ This document contains the corrected, leakage-free experimental results for the 
 
 ---
 
+## UCR Benchmark Dataset Sizes and Data Dimensions
+
+The 23 UCR datasets evaluated across domains (Motion, Spectro, Image, ECG, Sensor, Simulated) have the following splits and sequence lengths:
+
+| # | Dataset | Domain | Train Samples | Test Samples | Series Length | Classes | Total Samples |
+|---|---|---|---|---|---|---|---|
+| 1 | GunPoint | Motion | 50 | 150 | 150 | 2 | 200 |
+| 2 | Coffee | Spectro | 28 | 28 | 286 | 2 | 56 |
+| 3 | ArrowHead | Image | 36 | 175 | 251 | 3 | 211 |
+| 4 | ECG200 | ECG | 100 | 100 | 96 | 2 | 200 |
+| 5 | Chinatown | Sensor | 20 | 345 | 24 | 2 | 365 |
+| 6 | ItalyPowerDemand | Sensor | 67 | 1029 | 24 | 2 | 1096 |
+| 7 | SonyAIBORobotSurface1 | Sensor | 20 | 601 | 70 | 2 | 621 |
+| 8 | TwoLeadECG | ECG | 23 | 1139 | 82 | 2 | 1162 |
+| 9 | ECGFiveDays | ECG | 23 | 861 | 136 | 2 | 884 |
+| 10 | MoteStrain | Sensor | 20 | 1252 | 84 | 2 | 1272 |
+| 11 | Beef | Spectro | 30 | 30 | 470 | 5 | 60 |
+| 12 | OliveOil | Spectro | 30 | 30 | 570 | 4 | 60 |
+| 13 | Meat | Spectro | 60 | 60 | 448 | 3 | 120 |
+| 14 | BeetleFly | Image | 20 | 20 | 512 | 2 | 40 |
+| 15 | BirdChicken | Image | 20 | 20 | 512 | 2 | 40 |
+| 16 | FaceFour | Image | 24 | 88 | 350 | 4 | 112 |
+| 17 | SyntheticControl | Simulated | 300 | 300 | 60 | 6 | 600 |
+| 18 | CBF | Simulated | 30 | 900 | 128 | 3 | 930 |
+| 19 | TwoPatterns | Simulated | 1000 | 4000 | 128 | 4 | 5000 |
+| 20 | Wafer | Sensor | 1000 | 6164 | 152 | 2 | 7164 |
+| 21 | FordA | Sensor | 3601 | 1320 | 500 | 2 | 4921 |
+| 22 | Yoga | Image | 300 | 3000 | 426 | 2 | 3300 |
+| 23 | SwedishLeaf | Image | 500 | 625 | 128 | 15 | 1125 |
+
+---
+
 ## 1. Isolated Selection Leakage Analysis
 
 To answer the critical question — **"Was the original single-split table inflated by selection leakage?"** — we evaluated our model on the official UCR train/test splits. 

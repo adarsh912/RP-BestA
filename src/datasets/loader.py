@@ -5,28 +5,18 @@ import numpy as np
 import pandas as pd
 
 def load_local_ucr_txt(file_path):
-    """
-    Loads a UCR archive dataset from a space/tab-separated txt file.
-    The first column is the label, and the remaining columns are the time series values.
-    """
     try:
         data = np.loadtxt(file_path)
         y = data[:, 0]
         X = data[:, 1:]
         return X, y
     except Exception as e:
-        # Fallback to pandas for handling irregular spacing or headers
         df = pd.read_csv(file_path, header=None, sep=None, engine='python')
         y = df.iloc[:, 0].values
         X = df.iloc[:, 1:].values
         return X, y
 
 def load_ts_file(file_path):
-    """
-    Parses a standard .ts file (used by sktime/aeon) where data is formatted as:
-    value1,value2,...,valueN:label
-    and contains metadata headers starting with @.
-    """
     X = []
     y = []
     in_data = False
@@ -56,13 +46,6 @@ def load_ts_file(file_path):
     return np.array(X), np.array(y)
 
 def load_ucr_dataset(dataset_name, data_dir="data"):
-    """
-    Loads a UCR dataset. Checks local directory, falls back to pyts built-in,
-    or fetches from OpenML / public repositories.
-    
-    Returns:
-        X_train, y_train, X_test, y_test
-    """
     dataset_dir = os.path.join(data_dir, dataset_name)
     os.makedirs(dataset_dir, exist_ok=True)
     
@@ -73,7 +56,6 @@ def load_ucr_dataset(dataset_name, data_dir="data"):
     train_path_ts = os.path.join(dataset_dir, f"{dataset_name}_TRAIN.ts")
     test_path_ts = os.path.join(dataset_dir, f"{dataset_name}_TEST.ts")
     
-    # 1. Check if files exist locally in txt, tsv, or ts format
     if os.path.exists(train_path_txt) and os.path.exists(test_path_txt):
         X_train, y_train = load_local_ucr_txt(train_path_txt)
         X_test, y_test = load_local_ucr_txt(test_path_txt)
@@ -89,7 +71,6 @@ def load_ucr_dataset(dataset_name, data_dir="data"):
         X_test, y_test = load_ts_file(test_path_ts)
         return X_train, y_train, X_test, y_test
 
-    # 2. Check if the dataset is built into pyts.datasets to avoid network requests
     try:
         if dataset_name.lower() == "gunpoint":
             from pyts.datasets import load_gunpoint
@@ -100,8 +81,8 @@ def load_ucr_dataset(dataset_name, data_dir="data"):
             X_train, X_test, y_train, y_test = load_coffee(return_X_y=True)
             return X_train, y_train, X_test, y_test
     except ImportError:
-        pass  # pyts is not installed yet or loading failed, try next
-    # 3. Try to fetch from the official UCR aeon-formatted zip archive
+        pass
+
     try:
         print(f"Attempting to download '{dataset_name}' from the official UCR archive...")
         zip_url = f"https://timeseriesclassification.com/aeon-formatted/{dataset_name}.zip"
@@ -119,12 +100,10 @@ def load_ucr_dataset(dataset_name, data_dir="data"):
             return X_train, y_train, X_test, y_test
     except Exception as e:
         print(f"Official UCR archive download failed: {e}")
-        # Clean up zip on failure
         zip_path_temp = os.path.join(dataset_dir, f"{dataset_name}.zip")
         if os.path.exists(zip_path_temp):
             os.remove(zip_path_temp)
 
-    # 4. Try to fetch from OpenML (highly reliable repository mirror)
     try:
         from sklearn.datasets import fetch_openml
         print(f"Attempting to fetch dataset '{dataset_name}' from OpenML...")
@@ -142,14 +121,9 @@ def load_ucr_dataset(dataset_name, data_dir="data"):
     except Exception as e:
         print(f"OpenML fetch failed: {e}")
         
-    # 4. Try loading from other public GitHub mirrors
-    # Many common UCR datasets are mirrored in these raw repositories:
     mirrors = [
-        # sktime mirror contains .ts files
         (f"https://raw.githubusercontent.com/sktime/sktime/main/sktime/datasets/data/{dataset_name}/{dataset_name}_TRAIN.ts", train_path_ts, ".ts"),
-        # cd-diagram mirror contains .tsv files
         (f"https://raw.githubusercontent.com/hfawaz/cd-diagram/master/{dataset_name}/{dataset_name}_TRAIN.tsv", train_path_tsv, ".tsv"),
-        # anomaly mirror contains txt files
         (f"https://raw.githubusercontent.com/ajbagwell/UCR-Time-Series-Archive-2015/master/UCR%20Time%20Series%20Anomaly%20Archive/{dataset_name}/{dataset_name}_TRAIN", train_path_txt, ".txt"),
     ]
     
@@ -172,7 +146,6 @@ def load_ucr_dataset(dataset_name, data_dir="data"):
                 X_test, y_test = load_local_ucr_txt(local_test_path)
             return X_train, y_train, X_test, y_test
         except Exception as e:
-            # Clean up on failure
             if os.path.exists(local_path):
                 os.remove(local_path)
             test_path_temp = local_path.replace("TRAIN", "TEST")
@@ -181,13 +154,3 @@ def load_ucr_dataset(dataset_name, data_dir="data"):
             continue
             
     raise FileNotFoundError(f"Could not load or download UCR dataset: {dataset_name}")
-
-if __name__ == "__main__":
-    # Test script
-    try:
-        X_tr, y_tr, X_te, y_te = load_ucr_dataset("GunPoint")
-        print(f"Successfully loaded GunPoint dataset:")
-        print(f"X_train shape: {X_tr.shape}, y_train shape: {y_tr.shape}")
-        print(f"X_test shape: {X_te.shape}, y_test shape: {y_te.shape}")
-    except Exception as e:
-        print(f"Loader test failed: {e}")

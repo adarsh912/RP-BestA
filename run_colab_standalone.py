@@ -422,7 +422,7 @@ def run_inner_cv(X_tr_fold, y_tr_fold, method, default_param, n_inner=3):
             )
             caches.append((cache, y_tr_fold[inner_tr_idx], y_tr_fold[inner_val_idx]))
             
-        for k, weights, clf_type in other_combos:
+        for k, weights, clf_type in tqdm(other_combos, desc=f"    Inner CV Grid (z={z})", leave=False):
             accs = []
             for cache, y_tr_split, y_val_split in caches:
                 try:
@@ -463,7 +463,7 @@ def run_nested_cv_standalone(X, y, n_outer=5, n_inner=3):
     outer = StratifiedKFold(n_splits=n_outer, shuffle=True, random_state=42)
     metrics = {'accuracy': [], 'precision': [], 'recall': [], 'f1': []}
     
-    for fold_i, (tr_idx, te_idx) in enumerate(outer.split(X, y)):
+    for fold_i, (tr_idx, te_idx) in enumerate(tqdm(list(outer.split(X, y)), desc="  Outer CV Folds", leave=False)):
         X_tr, X_te = X[tr_idx], X[te_idx]
         y_tr, y_te = y[tr_idx], y[te_idx]
         
@@ -614,6 +614,19 @@ def run_baseline_comparison_demo(X_train, y_train, X_test, y_test, our_acc, data
         print(f"{'HIVE-COTE 2.0 (Literature†)':34s} | {hc2_acc:.4f}          | {hc2_acc - our_acc:+.4f}")
 
 
+def _df_to_markdown_safe(df):
+    try:
+        return df.to_markdown(index=False)
+    except Exception:
+        cols = list(df.columns)
+        header = "| " + " | ".join(str(c) for c in cols) + " |"
+        sep = "| " + " | ".join("---" for _ in cols) + " |"
+        rows = []
+        for idx, row in df.iterrows():
+            rows.append("| " + " | ".join(str(val) for val in row.values) + " |")
+        return "\n".join([header, sep] + rows)
+
+
 # ---------------------------------------------------------------------------
 # 4. Main Execution
 # ---------------------------------------------------------------------------
@@ -674,7 +687,20 @@ if __name__ == "__main__":
                 '10D_Acc': acc,
                 'NestedCV': f"{ncv_results['mean']:.4f}±{ncv_results['std']:.4f}"
             })
-            print(f"Finished {name} in {time.time() - t0:.2f} seconds.")
+            
+            # Save results incrementally after each completed dataset
+            os.makedirs("plots", exist_ok=True)
+            df_summary = pd.DataFrame(master_summary)
+            df_summary.to_csv("master_benchmark_results.csv", index=False)
+            df_summary.to_csv("plots/evaluation_results.csv", index=False)
+            with open("master_benchmark_results.md", "w") as f:
+                f.write("# Master Summary Benchmark Results\n\n")
+                f.write(_df_to_markdown_safe(df_summary))
+            with open("plots/evaluation_results.md", "w") as f:
+                f.write("# Master Summary Benchmark Results\n\n")
+                f.write(_df_to_markdown_safe(df_summary))
+
+            print(f"Finished {name} in {time.time() - t0:.2f} seconds. (Saved to master_benchmark_results.csv)")
         except Exception as e:
             print(f"Error processing {name}: {e}")
 
@@ -687,3 +713,4 @@ if __name__ == "__main__":
         for row in master_summary:
             print(f"{row['Dataset']:22s} | {row['3D_Acc']:.4f}       | {row['10D_Acc']:.4f}               | {row['NestedCV']}")
         print(f"{'='*80}\n")
+        print("Saved benchmark outputs to 'master_benchmark_results.csv' and 'plots/evaluation_results.md'.")

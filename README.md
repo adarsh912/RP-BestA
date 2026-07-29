@@ -96,11 +96,40 @@ python -c "from src.evaluation.benchmark import run_full_benchmark; run_full_ben
 - Methodology & Design: [methodology_design.md](file:///Users/adarshfulzele/Desktop/RP/Best%20A/methodology_design.md)
 - Research Defense Q&A Guide: [research_defense_guide.md](file:///Users/adarshfulzele/Desktop/RP/Best%20A/research_defense_guide.md)
 - Interactive Google Colab Notebook: [LFIG_Adaptive_Pipeline_Colab.ipynb](file:///Users/adarshfulzele/Desktop/RP/Best%20A/LFIG_Adaptive_Pipeline_Colab.ipynb)
-- Paper Draft: [paper_draft.md](file:///Users/adarshfulzele/Desktop/RP/Best%20A/paper_draft.md)
+- Paper Draft: [paper_draft.md](file:///Users/adarshfulzele/Desktop/RP/Best%20A/Conference%20Paper/paper_draft.md)
 
 ## 5. Evaluation, Notebook Verification & Empirical Proofs
 
-Our proposed pipeline is evaluated across an expanded catalog of **23 UCR datasets** spanning Motion, Spectro, Image, ECG, Sensor, and Simulated domains. The interactive self-contained notebook **[LFIG_Adaptive_Pipeline_Colab.ipynb](file:///Users/adarshfulzele/Desktop/RP/Best%20A/LFIG_Adaptive_Pipeline_Colab.ipynb)** automatically installs dependencies (`aeon`, `ruptures`, `fastdtw`) and executes **3 Automated Diagnostic Empirical Proofs** prior to nested CV:
+Our proposed pipeline is evaluated across an expanded catalog of **23 UCR datasets** spanning Motion, Spectro, Image, ECG, Sensor, and Simulated domains. The interactive self-contained notebook **[LFIG_Adaptive_Pipeline_Colab.ipynb](file:///Users/adarshfulzele/Desktop/RP/Best%20A/LFIG_Adaptive_Pipeline_Colab.ipynb)** automatically installs dependencies (`aeon`, `ruptures`, `fastdtw`) and executes **4 Automated Diagnostic Empirical Proofs** prior to nested CV.
+
+### UCR Dataset Catalog and Sizes
+The table below specifies the characteristics and data dimensions for each of the 23 datasets evaluated in this study:
+
+| # | Dataset | Domain | Train Samples | Test Samples | Series Length | Classes | Total Samples |
+|---|---|---|---|---|---|---|---|
+| 1 | GunPoint | Motion | 50 | 150 | 150 | 2 | 200 |
+| 2 | Coffee | Spectro | 28 | 28 | 286 | 2 | 56 |
+| 3 | ArrowHead | Image | 36 | 175 | 251 | 3 | 211 |
+| 4 | ECG200 | ECG | 100 | 100 | 96 | 2 | 200 |
+| 5 | Chinatown | Sensor | 20 | 345 | 24 | 2 | 365 |
+| 6 | ItalyPowerDemand | Sensor | 67 | 1029 | 24 | 2 | 1096 |
+| 7 | SonyAIBORobotSurface1 | Sensor | 20 | 601 | 70 | 2 | 621 |
+| 8 | TwoLeadECG | ECG | 23 | 1139 | 82 | 2 | 1162 |
+| 9 | ECGFiveDays | ECG | 23 | 861 | 136 | 2 | 884 |
+| 10 | MoteStrain | Sensor | 20 | 1252 | 84 | 2 | 1272 |
+| 11 | Beef | Spectro | 30 | 30 | 470 | 5 | 60 |
+| 12 | OliveOil | Spectro | 30 | 30 | 570 | 4 | 60 |
+| 13 | Meat | Spectro | 60 | 60 | 448 | 3 | 120 |
+| 14 | BeetleFly | Image | 20 | 20 | 512 | 2 | 40 |
+| 15 | BirdChicken | Image | 20 | 20 | 512 | 2 | 40 |
+| 16 | FaceFour | Image | 24 | 88 | 350 | 4 | 112 |
+| 17 | SyntheticControl | Simulated | 300 | 300 | 60 | 6 | 600 |
+| 18 | CBF | Simulated | 30 | 900 | 128 | 3 | 930 |
+| 19 | TwoPatterns | Simulated | 1000 | 4000 | 128 | 4 | 5000 |
+| 20 | Wafer | Sensor | 1000 | 6164 | 152 | 2 | 7164 |
+| 21 | FordA | Sensor | 3601 | 1320 | 500 | 2 | 4921 |
+| 22 | Yoga | Image | 300 | 3000 | 426 | 2 | 3300 |
+| 23 | SwedishLeaf | Image | 500 | 625 | 128 | 15 | 1125 |
 
 ### 1. Diagnostic Empirical Proofs
 - **[Proof 1] Variable-Length CPD Granulation:** Verifies dynamic boundary detection (e.g. GunPoint `[15, 15, ...]`, Coffee `[28, 28, ..., 6]`, ArrowHead `[25, ..., 1]`, ECG200 `[10, ..., 6]`).
@@ -108,12 +137,13 @@ Our proposed pipeline is evaluated across an expanded catalog of **23 UCR datase
   - **GunPoint:** **0.9067** (10D) vs. **0.7800** (3D) $\rightarrow$ **+12.67% Accuracy Delta**
   - **ArrowHead:** **0.7086** (10D) vs. **0.6857** (3D) $\rightarrow$ **+2.29% Accuracy Delta**
   - **ECG200:** **0.7700** (10D) vs. **0.7400** (3D) $\rightarrow$ **+3.00% Accuracy Delta**
-- **[Proof 3] Leave-One-Feature-Out (LOFO) Impact Matrix:** Measures individual sensitivity by zeroing out each of the 10 descriptors (Lower Bound, Upper Bound, Slope, Shannon Entropy, Variance, Volatility, Curvature, Intercept, Energy, Skewness).
+- **[Proof 3] Leave-One-Feature-Out (LOFO) Feature Impact Matrix:** Measures individual sensitivity by zeroing out each of the 10 descriptors (Lower Bound, Upper Bound, Slope, Shannon Entropy, Variance, Volatility, Curvature, Intercept, Energy, Skewness).
+- **[Proof 4] Comparative Baselines Benchmark:** Compares our 10D Adaptive LFIG model against SOTA baselines (DTW-1NN, ROCKET, MiniROCKET, HIVE-COTE 2.0).
 
 ### 2. Leakage-Free Evaluation Protocol
-- **Nested Cross-Validation:** Hyperparameters ($z$, $k$, distance fusion weights, KNN vs Kernel SVM) are selected per-fold using an inner CV loop to eliminate selection leakage.
+- **Nested Cross-Validation:** Hyperparameters ($z$, $k$, distance fusion weights, KNN vs Kernel SVM) are selected per-fold using an inner CV loop with progress bars to eliminate selection leakage.
 - **Outer Fold Progression:** Reports high outer fold accuracy (e.g. GunPoint Fold 1 **97.50%**, Fold 2 **100.00%** using Kernel SVM with $z=1.0$).
 - **Reproducible Baselines:** DTW-1NN, ROCKET, and MiniROCKET reproduced under identical splits via `aeon`.
 - **Demšar Critical Difference Diagrams:** Evaluated across 23 datasets using Friedman chi-square tests and Nemenyi post-hoc ranking diagrams.
 
-Full evaluation metrics, proof tables, and outer fold breakdowns are maintained in [plots/evaluation_results.md](file:///Users/adarshfulzele/Desktop/RP/Best%20A/plots/evaluation_results.md).
+Full evaluation metrics, proof tables, and outer fold breakdowns are saved to `master_benchmark_results.csv` and maintained in [plots/evaluation_results.md](file:///Users/adarshfulzele/Desktop/RP/Best%20A/plots/evaluation_results.md).

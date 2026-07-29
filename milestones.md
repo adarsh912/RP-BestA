@@ -87,6 +87,6 @@ This document tracks the progress of the **7 Development Milestones** for the pr
 
 ### Milestone 12: Standalone Notebook & Defense Q&A Guide
 - **Status:** 100%
-- **Details:** Compiled self-contained Jupyter notebook [LFIG_Adaptive_Pipeline_Colab.ipynb](file:///Users/adarshfulzele/Desktop/RP/Best%20A/LFIG_Adaptive_Pipeline_Colab.ipynb) with 3 diagnostic proofs (granule length breakdown, 10D vs 3D feature comparison, LOFO ablation table) and 5-fold nested CV. Authoritative 22-question research defense guide created covering architecture, granulation math, similarity fusion, and statistical validity.
+- **Details:** Compiled self-contained Jupyter notebook [LFIG_Adaptive_Pipeline_Colab.ipynb](file:///Users/adarshfulzele/Desktop/RP/Best%20A/LFIG_Adaptive_Pipeline_Colab.ipynb) with 4 diagnostic proofs (granule length breakdown, 10D vs 3D feature comparison, LOFO ablation table, and comparative baseline benchmarks) and 5-fold nested CV. Authoritative 22-question research defense guide created covering architecture, granulation math, similarity fusion, and statistical validity.
 - **Reference:** [research_defense_guide.md](file:///Users/adarshfulzele/Desktop/RP/Best%20A/research_defense_guide.md) & [LFIG_Adaptive_Pipeline_Colab.ipynb](file:///Users/adarshfulzele/Desktop/RP/Best%20A/LFIG_Adaptive_Pipeline_Colab.ipynb)
 

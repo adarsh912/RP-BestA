@@ -27,23 +27,56 @@ This notebook is **100% self-contained** and designed to run in Google Colab (CP
 1. **Open the Notebook:**
    - Upload `LFIG_Adaptive_Pipeline_Colab.ipynb` to [Google Colab](https://colab.research.google.com/) or open it in VS Code / Jupyter Lab.
 
-2. **Execute Cell 1 (Dependency Setup):**
-   - Automatically executes `!pip install -q aeon ruptures fastdtw scikit-learn matplotlib seaborn scipy tqdm`.
-   - **What Happens:** Installs the required time series dataset loader (`aeon`), Change Point Detection (`ruptures`), and fast DTW warping (`fastdtw`).
+2. **Run Step 1: Install Dependencies & Check Environment:**
+   - Automatically checks and installs the required packages (`aeon`, `ruptures`, `fastdtw`, `scikit-learn`, `joblib`, `tqdm`).
+   - **What Happens:** Satisfies all requirements needed to load datasets and run granular calculations.
 
-3. **Execute Cell 2 (Pipeline Core Implementation):**
+3. **Run Steps 2 to 5: Import Packages, Core Pipeline Modules, Hybrid Similarity, and Strategy Selector:**
    - Contains all modular functions: segmentation algorithms (`fixed_segmentation`, `cpd_segmentation`), 10D granule feature extractor, pairwise distance functions, fusion weight learning, KNN & Precomputed Kernel SVM classifiers, and nested CV helpers.
-   - **What Happens:** Loads the pipeline logic into memory cleanly without needing external imports.
+   - **What Happens:** Loads the core pipeline logic, dynamic over-subscription guard, and caching engines into the runtime memory.
 
-4. **Execute Cell 3 (Empirical Proofs & Benchmark Execution):**
-   - Downloads datasets dynamically via `aeon.datasets.load_classification`.
-   - **What Happens:** Loops over UCR datasets (e.g. `GunPoint`, `Coffee`, `ArrowHead`, `ECG200`) and executes:
+4. **Run Step 6: Full Benchmark & Diagnostic Proofs Demonstration:**
+   - Automatically downloads datasets dynamically via `aeon.datasets.load_classification` and loops over all **23 UCR datasets** (starting with `GunPoint`, `Coffee`, `ArrowHead`, etc.).
+   - **What Happens:** For each dataset, it executes:
      - **[Proof 1]** Granule Boundary Breakdown table (demonstrating CPD vs Fixed segmentation).
      - **[Proof 2]** 3D Standard vs. 10D Proposed LFIG performance comparison table.
      - **[Proof 3]** Leave-One-Feature-Out (LOFO) ablation impact table.
      - **[Proof 4]** Comparative Baselines Benchmark table (comparing Our 10D LFIG vs DTW-1NN, ROCKET, MiniROCKET, and HIVE-COTE 2.0).
-     - **5-Fold Nested Cross-Validation:** Runs outer 5 folds (3 inner folds for tuning) and prints fold-by-fold accuracy and hyperparameter selections.
-     - **Master Comparative Benchmark Table:** Prints a master summary table across all processed datasets at the end of execution.
+     - **5-Fold Nested Cross-Validation:** Runs outer 5 folds (with an inner 3-fold CV grid search parameter selector) with real-time progress bars, logging fold accuracy.
+     - **Incremental Saving & Auto-Downloads**: Saves results after each dataset to `master_benchmark_results.csv` and triggers automatic browser download prompts at the end of the run.
+     - **Master Comparative Benchmark Table:** Prints a final master summary table comparing 3D standard LFIG, 10D proposed LFIG, and Nested CV accuracy across all datasets.
+
+---
+
+## 2.1 Benchmark Dataset Sizes and Data Dimensions
+
+The full UCR Time Series Archive subset evaluated in this project consists of **23 datasets** across six domains. Their detailed sizes (training/test split) and sequence lengths are tabulated below:
+
+| # | Dataset | Domain | Train Samples | Test Samples | Series Length | Classes | Total Samples |
+|---|---|---|---|---|---|---|---|
+| 1 | GunPoint | Motion | 50 | 150 | 150 | 2 | 200 |
+| 2 | Coffee | Spectro | 28 | 28 | 286 | 2 | 56 |
+| 3 | ArrowHead | Image | 36 | 175 | 251 | 3 | 211 |
+| 4 | ECG200 | ECG | 100 | 100 | 96 | 2 | 200 |
+| 5 | Chinatown | Sensor | 20 | 345 | 24 | 2 | 365 |
+| 6 | ItalyPowerDemand | Sensor | 67 | 1029 | 24 | 2 | 1096 |
+| 7 | SonyAIBORobotSurface1 | Sensor | 20 | 601 | 70 | 2 | 621 |
+| 8 | TwoLeadECG | ECG | 23 | 1139 | 82 | 2 | 1162 |
+| 9 | ECGFiveDays | ECG | 23 | 861 | 136 | 2 | 884 |
+| 10 | MoteStrain | Sensor | 20 | 1252 | 84 | 2 | 1272 |
+| 11 | Beef | Spectro | 30 | 30 | 470 | 5 | 60 |
+| 12 | OliveOil | Spectro | 30 | 30 | 570 | 4 | 60 |
+| 13 | Meat | Spectro | 60 | 60 | 448 | 3 | 120 |
+| 14 | BeetleFly | Image | 20 | 20 | 512 | 2 | 40 |
+| 15 | BirdChicken | Image | 20 | 20 | 512 | 2 | 40 |
+| 16 | FaceFour | Image | 24 | 88 | 350 | 4 | 112 |
+| 17 | SyntheticControl | Simulated | 300 | 300 | 60 | 6 | 600 |
+| 18 | CBF | Simulated | 30 | 900 | 128 | 3 | 930 |
+| 19 | TwoPatterns | Simulated | 1000 | 4000 | 128 | 4 | 5000 |
+| 20 | Wafer | Sensor | 1000 | 6164 | 152 | 2 | 7164 |
+| 21 | FordA | Sensor | 3601 | 1320 | 500 | 2 | 4921 |
+| 22 | Yoga | Image | 300 | 3000 | 426 | 2 | 3300 |
+| 23 | SwedishLeaf | Image | 500 | 625 | 128 | 15 | 1125 |
 
 ---
 

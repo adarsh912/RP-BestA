@@ -133,7 +133,7 @@ def run_inner_cv(X_tr_fold, y_tr_fold, method, default_param, n_inner=3):
             caches.append((cache, y_tr_fold[inner_tr_idx], y_tr_fold[inner_val_idx]))
             
         # Loop through other hyperparameters rapidly using the cache
-        for k, weights, clf_type in other_combos:
+        for k, weights, clf_type in tqdm(other_combos, desc=f"    Inner CV Grid (z={z})", leave=False):
             accs = []
             for cache, y_tr_split, y_val_split in caches:
                 try:
@@ -184,7 +184,7 @@ def run_nested_cv(dataset_name, n_outer=5, n_inner=3, data_dir='data'):
     outer = StratifiedKFold(n_splits=n_outer, shuffle=True, random_state=42)
     metrics = {'accuracy': [], 'precision': [], 'recall': [], 'f1': []}
 
-    for fold_i, (tr_idx, te_idx) in enumerate(outer.split(X, y)):
+    for fold_i, (tr_idx, te_idx) in enumerate(tqdm(list(outer.split(X, y)), desc="  Outer CV Folds", leave=False)):
         print(f"\n--- Outer Fold {fold_i + 1}/{n_outer} ---")
         X_tr, X_te = X[tr_idx], X[te_idx]
         y_tr, y_te = y[tr_idx], y[te_idx]

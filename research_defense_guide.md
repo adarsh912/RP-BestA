@@ -13,7 +13,7 @@ Rather than calculating distances directly on raw points (which is highly sensit
 
 **Gap:** The high-level workflow is described across multiple sections in the draft, but the reader can easily get lost in the mathematical details of individual features without a unifying view of how a single series transforms step-by-step.
 
-**Fix:** Add a high-level flowchart or a text diagram showing the sequence of representation changes: Raw Series ($N$ values) $\rightarrow$ Segments ($S$ intervals) $\rightarrow$ Granules ($S \times 10$ matrix) $\rightarrow$ Pairwise Distances ($M \times M$ matrix) $\rightarrow$ Classifier. (This has been added to [LFIG_Adaptive_Pipeline_Colab.ipynb](file:///Users/adarshfulzele/Desktop/RP/Best%20A/LFIG_Adaptive_Pipeline_Colab.ipynb)).
+**Fix:** Add a high-level flowchart or a text diagram showing the sequence of representation changes: Raw Series ($N$ values) $\rightarrow$ Segments ($S$ intervals) $\rightarrow$ Granules ($S \times 10$ matrix) $\rightarrow$ Pairwise Distances ($M \times M$ matrix) $\rightarrow$ Classifier. (This has been added to [LFIG_Adaptive_Pipeline_Colab.ipynb](file:///Users/adarshfulzele/Desktop/RP/Best%20A/LFIG_Adaptive_Pipeline_Colab.ipynb) and [LFIG_Adaptive_Pipeline_Colab_GPU.ipynb](file:///Users/adarshfulzele/Desktop/RP/Best%20A/LFIG_Adaptive_Pipeline_Colab_GPU.ipynb)).
 
 ---
 
@@ -139,7 +139,7 @@ This compresses the raw segment values into a fuzzy trend interval $[g_{\text{lo
 
 **Gap:** The paper mentions the 10 features but does not present the accuracy comparison numbers that justify why the standard 3D representation was abandoned.
 
-**Fix:** Add the comparative accuracy results (which we have now generated in [LFIG_Adaptive_Pipeline_Colab.ipynb](file:///Users/adarshfulzele/Desktop/RP/Best%20A/LFIG_Adaptive_Pipeline_Colab.ipynb) under "Proof 2") directly into the feature selection section.
+**Fix:** Add the comparative accuracy results (which we have now generated in the notebooks [LFIG_Adaptive_Pipeline_Colab.ipynb](file:///Users/adarshfulzele/Desktop/RP/Best%20A/LFIG_Adaptive_Pipeline_Colab.ipynb) and [LFIG_Adaptive_Pipeline_Colab_GPU.ipynb](file:///Users/adarshfulzele/Desktop/RP/Best%20A/LFIG_Adaptive_Pipeline_Colab_GPU.ipynb) under "Proof 2") directly into the feature selection section.
 
 ---
 

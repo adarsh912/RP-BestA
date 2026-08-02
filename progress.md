@@ -7,13 +7,13 @@ This document details the code development progress, module verification results
 ## 1. Module Development Progress
 
 ### 1.1 Datasets Module
-* **Code:** [loader.py](file:///Users/adarshfulzele/Desktop/RP/Best%20A/src/datasets/loader.py) & [stats.py](file:///Users/adarshfulzele/Desktop/RP/Best%20A/src/datasets/stats.py)
+& Notebook Code Cells
 * **Accomplishment:** Implemented local dataset loading, `pyts` cache loading, and OpenML dataset retrieval.
 * **Verification Result:** Successfully loaded the **GunPoint** dataset (50 training, 150 testing samples, series length 150, 2 classes).
 * **Plot Generated:** [GunPoint_samples.png](file:///Users/adarshfulzele/Desktop/RP/Best%20A/plots/GunPoint_samples.png) (contains class-wise sample graphs and mean signals).
 
 ### 1.2 Segmentation Module
-* **Code:** [adaptive.py](file:///Users/adarshfulzele/Desktop/RP/Best%20A/src/segmentation/adaptive.py) & [visualize_segmentation.py](file:///Users/adarshfulzele/Desktop/RP/Best%20A/src/segmentation/visualize_segmentation.py)
+& Notebook Code Cells
 * **Accomplishment:** Developed 4 window partitioning algorithms: Fixed Windowing, Variance-based split, Shannon Entropy-based split, and Change Point Detection (CPD) via the `ruptures` BottomUp algorithm.
 * **Verification Result:** Ran and compared all four segmentations on a sample series from GunPoint.
 * **Plot Generated:** [GunPoint_segmentation_comparison.png](file:///Users/adarshfulzele/Desktop/RP/Best%20A/plots/GunPoint_segmentation_comparison.png) (compares boundaries and shades regions).
@@ -24,13 +24,13 @@ This document details the code development progress, module verification results
   - *Change Point Detection (CPD - Bottom-Up):* **Chosen as the best method.** It minimizes the global least-squares error of linear fits subject to a penalty on segment count. It accurately aligns segment bounds with regime transitions (placing wide segments on flat regions and tight segments on volatile regions), yielding the most mathematically rigorous and robust granulation.
 
 ### 1.3 Granulation Module (LFIG)
-* **Code:** [lfig.py](file:///Users/adarshfulzele/Desktop/RP/Best%20A/src/granulation/lfig.py) & [visualize_lfig.py](file:///Users/adarshfulzele/Desktop/RP/Best%20A/src/granulation/visualize_lfig.py)
+& Notebook Code Cells
 * **Accomplishment:** Implemented least-squares linear trend regression within segments, computing standard deviation of residuals, and drawing upper/lower fuzzy bounds.
 * **Verification Result:** Granularized sequences and verified the boundary invariant $L_j \le T_j \le U_j$.
 * **Plot Generated:** [GunPoint_lfig_granulation.png](file:///Users/adarshfulzele/Desktop/RP/Best%20A/plots/GunPoint_lfig_granulation.png) (shows raw signal, fitted trend lines, and shaded fuzzy spreads).
 
 ### 1.4 Feature Extraction Module
-* **Code:** [extractor.py](file:///Users/adarshfulzele/Desktop/RP/Best%20A/src/features/extractor.py) & [importance.py](file:///Users/adarshfulzele/Desktop/RP/Best%20A/src/features/importance.py)
+& Notebook Code Cells
 * **Accomplishment:** Created 10D granule feature vectors (Lower bound, Upper bound, Slope, Shannon entropy, Variance, Volatility, Curvature, Intercept, Energy, Skewness).
 * **Verification Result:** Trained a Random Forest classifier on aggregated train granules to compute Gini importances.
 * **Key Findings:**
@@ -41,19 +41,17 @@ This document details the code development progress, module verification results
 * **Plot Generated:** [GunPoint_feature_importance.png](file:///Users/adarshfulzele/Desktop/RP/Best%20A/plots/GunPoint_feature_importance.png).
 
 ### 1.5 Similarity & Fusion Module
-* **Code:** [hybrid.py](file:///Users/adarshfulzele/Desktop/RP/Best%20A/src/similarity/hybrid.py)
 * **Accomplishment:** Implemented set-boundary Hausdorff distance, slope warping DTW, and 10D feature Cosine warping DTW. Built normalized weighted distance fusion and Borda ranking count modules.
 * **Verification Result:** Verified pairwise distance matrices and diagonal identity property $d(P, P) = 0$.
 
 ### 1.6 Classification Module
-* **Code:** [models.py](file:///Users/adarshfulzele/Desktop/RP/Best%20A/src/classifiers/models.py)
 * **Accomplishment:** Developed precomputed distance-space KNN and Kernel SVM classifiers alongside tabular boosting models (XGBoost, LightGBM, CatBoost, Random Forest).
 * **Verification Result:** Validated classification pipeline end-to-end on synthetic data.
 
 ---
 
 ### 1.7 Evaluation & Benchmark Module
-* **Code:** [benchmark.py](file:///Users/adarshfulzele/Desktop/RP/Best%20A/src/evaluation/benchmark.py) & [evaluation_results.md](file:///Users/adarshfulzele/Desktop/RP/Best%20A/plots/evaluation_results.md)
+& [evaluation_results.md](file:///Users/adarshfulzele/Desktop/RP/Best%20A/plots/evaluation_results.md)
 * **Accomplishment:** Scaled the evaluation suite to a 5-dataset benchmark (GunPoint, Coffee, ArrowHead, ECG200, Chinatown) and integrated grid search tuned hyperparameters.
 * **Key Findings:**
   - **Perfect Accuracy on Coffee:** Achieved **100% accuracy** (matching state-of-the-art ensembles and outperforming literature DTW at 99.3%).
@@ -74,64 +72,46 @@ All core algorithmic and evaluation modules (Phases 1-9, Milestones 1-7) have be
 
 ### 3.1 Phase 10: Experimental Protocol Fixes
 * **Step 1 — Selection Leakage Eliminated:** Removed hardcoded per-dataset hyperparameters from `benchmark.py`. All tuning now uses nested cross-validation (5-fold outer for reporting, 3-fold inner for tuning). Implemented automatic segmentation strategy selection using lag-1 autocorrelation variance computed solely on training data.
-  * **Code:** [tuning.py](file:///Users/adarshfulzele/Desktop/RP/Best%20A/src/evaluation/tuning.py)
-
-* **Step 2 — Repeated Evaluation:** Added `run_repeated_evaluation()` with 10 stratified train/test splits per dataset. All metrics now reported as mean ± std.
-  * **Code:** [benchmark.py](file:///Users/adarshfulzele/Desktop/RP/Best%20A/src/evaluation/benchmark.py)
-
-* **Step 3 — Baselines Fixed:** ROCKET, MiniROCKET, and DTW-1NN now reproduced via `aeon` library under identical evaluation protocol. HIVE-COTE 2.0 and DrCIF marked as "literature-reported†" with explicit caveats.
-  * **Code:** [baselines.py](file:///Users/adarshfulzele/Desktop/RP/Best%20A/src/evaluation/baselines.py)
-
-### 3.2 Phase 11: Evidence Scaling
+  * **Step 2 — Repeated Evaluation:** Added `run_repeated_evaluation()` with 10 stratified train/test splits per dataset. All metrics now reported as mean ± std.
+  * **Step 3 — Baselines Fixed:** ROCKET, MiniROCKET, and DTW-1NN now reproduced via `aeon` library under identical evaluation protocol. HIVE-COTE 2.0 and DrCIF marked as "literature-reported†" with explicit caveats.
+  ### 3.2 Phase 11: Evidence Scaling
 * **Step 4 — Dataset Expansion:** Expanded from 5 to 23 UCR datasets spanning 6 domains (Motion, Spectro, Image, ECG, Sensor, Simulated).
-  * **Code:** [ucr_catalog.py](file:///Users/adarshfulzele/Desktop/RP/Best%20A/src/datasets/ucr_catalog.py)
-
-* **Step 5 — Auto-Segmentation Validated:** `validate_strategy_selection()` function compares automatic strategy selection against human expectations across all 23 datasets.
-  * **Code:** [tuning.py](file:///Users/adarshfulzele/Desktop/RP/Best%20A/src/evaluation/tuning.py)
-
-* **Demšar CD Diagrams:** Implemented Friedman test + Nemenyi post-hoc critical difference diagrams replacing the previous Wilcoxon test.
-  * **Code:** [critical_difference.py](file:///Users/adarshfulzele/Desktop/RP/Best%20A/src/evaluation/critical_difference.py)
-
-### 3.3 Phase 12: Method Strengthening
+  * **Step 5 — Auto-Segmentation Validated:** `validate_strategy_selection()` function compares automatic strategy selection against human expectations across all 23 datasets.
+  * **Demšar CD Diagrams:** Implemented Friedman test + Nemenyi post-hoc critical difference diagrams replacing the previous Wilcoxon test.
+  ### 3.3 Phase 12: Method Strengthening
 * **Step 6 — Hybrid Similarity Learning Defined:** Added `learn_fusion_weights()` (logistic regression on pairwise same-class labels) and `learn_fusion_weights_grid()` (grid search with inner CV). Weights are now learned from training data, not hardcoded.
-  * **Code:** [hybrid.py](file:///Users/adarshfulzele/Desktop/RP/Best%20A/src/similarity/hybrid.py)
+  * **Step 7 — Fine-Grained Ablation:** Implemented leave-one-feature-out ablation with 10 repeats per dataset. Each of the 10 features is zeroed out individually to measure accuracy delta.
+  * **Step 8 — Feature Redundancy Checked:** Implemented Pearson correlation matrix, PCA explained variance analysis, and Variance Inflation Factor (VIF) analysis for the 10 granule features.
+  ### 3.4 Verification & Empirical Results (Google Colab GPU Run)
 
-* **Step 7 — Fine-Grained Ablation:** Implemented leave-one-feature-out ablation with 10 repeats per dataset. Each of the 10 features is zeroed out individually to measure accuracy delta.
-  * **Code:** [benchmark.py](file:///Users/adarshfulzele/Desktop/RP/Best%20A/src/evaluation/benchmark.py)
+The new protocols were successfully run in a Google Colab GPU-accelerated environment across all 23 UCR datasets with the following outcomes:
 
-* **Step 8 — Feature Redundancy Checked:** Implemented Pearson correlation matrix, PCA explained variance analysis, and Variance Inflation Factor (VIF) analysis for the 10 granule features.
-  * **Code:** [redundancy.py](file:///Users/adarshfulzele/Desktop/RP/Best%20A/src/features/redundancy.py)
+1. **Complete 23-Dataset Benchmark Results:**
+   We completed single-split evaluations and nested CV for all 23 UCR datasets, resolving the scaling bottleneck for the largest datasets (`FordA`, `Yoga`, and `SwedishLeaf`).
 
-### 3.4 Verification & Empirical Results (Google Colab Run)
+2. **Performance Gaps & Alignment on Official Splits:**
+   - **Official Splits Comparison:** On the official single train/test splits, state-of-the-art models (ROCKET, MiniROCKET, and HIVE-COTE 2.0) outperform our single-split test accuracy ($10\text{D Acc}$) across all 23 datasets, as shown in the final output of `LFIG_Adaptive_Pipeline_Colab_GPU.ipynb`.
+   - **Cross-Validation Generalization:** Under the 5-fold outer cross-validation protocol, our model achieves high generalization performance (e.g. **1.0000** on Coffee, **0.9855** on SonyAIBORobotSurface1, and **0.9245** on Yoga) due to larger training folds.
+   - **Competitive Edge:** Our model consistently outperforms the standard DTW-1NN baseline on average ranks, and runs up to **15x faster** than raw Fast-DTW.
 
-The new protocols were successfully run in a Google Colab GPU-accelerated environment with the following outcomes:
+3. **Demšar Critical Difference Analysis:**
+   - Friedman test statistic = 36.8832 ($p = 0.000000$, highly significant).
+   - Average ranks: ROCKET (**1.7174**), MiniROCKET (**1.8261**), Proposed LFIG (**2.8043**), DTW-1NN (**3.6522**).
+   - Critical Difference (CD) Threshold: **0.9780**.
+   - Diagram plotted and saved: `plots/cd_diagram.png`.
 
-1. **Isolated Selection Leakage Verified:**
-   Comparing the original leaky single-split accuracies against the newly isolated, leakage-free single-split evaluation (hyperparameters tuned via inner CV on training data only) showed an accuracy drop across 4/5 datasets (indicating the original table was indeed inflated by selection leakage):
-   - **GunPoint:** 0.9067 → 0.8933 (-0.0133)
-   - **Coffee:** 1.0000 → 1.0000 (0.0000)
-   - **ECG200:** 0.9100 → 0.8800 (-0.0300)
-   - **Chinatown:** 0.9767 → 0.9417 (-0.0350)
-   - **ArrowHead:** 0.8286 → 0.7829 (-0.0457)
-
-2. **Unbiased Nested CV Benchmarks:**
-   Running the full 5-fold outer, 3-fold inner nested CV loop yielded the following leakage-free generalization metrics:
-   - **GunPoint:** 0.9550 ± 0.0292
-   - **Coffee:** 1.0000 ± 0.0000
-   - **ECG200:** 0.8750 ± 0.0418
-   - **Chinatown:** 0.9779 ± 0.0166
-   - **ArrowHead:** 0.8767 ± 0.0235
+4. **Compute Metrics:**
+   - **Total Compute Time:** 11.69 hours (42080.6 seconds).
+   - **Average Runtime per Dataset:** 1829.59 seconds.
 
 ### 3.5 Phase 13: Notebook Pipeline Verification & Diagnostic Proof Execution
 
-- **Self-Contained Notebook Deployment:** Generated and verified [LFIG_Adaptive_Pipeline_Colab.ipynb](file:///Users/adarshfulzele/Desktop/RP/Best%20A/LFIG_Adaptive_Pipeline_Colab.ipynb) containing self-installing dependencies, dynamic inner KFold split safeguards, and explicit `float64` array formatting.
+- **Self-Contained Notebook Deployment:** Generated and verified [LFIG_Adaptive_Pipeline_Colab.ipynb](file:///Users/adarshfulzele/Desktop/RP/Best%20A/LFIG_Adaptive_Pipeline_Colab.ipynb) (CPU-focused) and [LFIG_Adaptive_Pipeline_Colab_GPU.ipynb](file:///Users/adarshfulzele/Desktop/RP/Best%20A/LFIG_Adaptive_Pipeline_Colab_GPU.ipynb) (GPU-accelerated) containing self-installing dependencies, dynamic inner KFold split safeguards, and explicit `float64` array formatting.
 - **Empirical Diagnostic Proof Results:**
   1. **[Proof 1] Variable-Length CPD Segmentation:** Confirms boundaries and granule lengths calculated across adaptive signals (e.g. GunPoint `[15, 15, ...]`, Coffee `[28, 28, ..., 6]`, ArrowHead `[25, ..., 1]`, ECG200 `[10, ..., 6]`).
   2. **[Proof 2] 3D Standard vs. 10D Proposed LFIG Comparison:**
-     - **GunPoint:** 10D Multi-Feature (**0.9067**) vs 3D Standard LFIG (**0.7800**) $\rightarrow$ **+0.1267** accuracy gain (+12.67%).
-     - **ArrowHead:** 10D Multi-Feature (**0.7086**) vs 3D Standard LFIG (**0.6857**) $\rightarrow$ **+0.0229** accuracy gain.
-     - **ECG200:** 10D Multi-Feature (**0.7700**) vs 3D Standard LFIG (**0.7400**) $\rightarrow$ **+0.0300** accuracy gain.
-  3. **[Proof 3] Leave-One-Feature-Out (LOFO) Ablation Matrix:** Derived individual feature contribution deltas for all 10 descriptors (Lower Bound, Upper Bound, Trend Slope, Shannon Entropy, Variance, Volatility, Curvature, Intercept, Energy, Skewness).
+     - **GunPoint:** 10D Multi-Feature (**0.9067**) vs 3D Standard LFIG (**0.8000**) $\rightarrow$ **+0.1067** accuracy gain.
+     - **ArrowHead:** 10D Multi-Feature (**0.7029**) vs 3D Standard LFIG (**0.7143**) $\rightarrow$ **-0.0114** accuracy delta.
+     - **ECG200:** 10D Multi-Feature (**0.8800**) vs 3D Standard LFIG (**0.8600**) $\rightarrow$ **+0.0200** accuracy gain.
+3. **[Proof 3] Leave-One-Feature-Out (LOFO) Ablation Matrix:** Derived individual feature contribution deltas for all 10 descriptors (Lower Bound, Upper Bound, Trend Slope, Shannon Entropy, Variance, Volatility, Curvature, Intercept, Energy, Skewness).
 - **Leakage-Free 5-Fold Nested CV Execution:** Nested cross-validation (5 outer folds, 3 inner folds) verified across UCR benchmark catalog datasets with per-fold hyperparameter and classifier selection (e.g., GunPoint Fold 1: **97.50%**, Fold 2: **100.00%** using Kernel SVM with $z=1.0$).
-
-

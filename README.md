@@ -22,41 +22,22 @@ This framework addresses these gaps through:
 
 ```directory
 .
-├── literature_review.md      # Seminal papers & comparison tables
-├── phases.md                 # Project development roadmap (Phases 1-12)
-├── milestones.md             # Project milestones status checklist
-├── progress.md               # Code walkthrough and development progress
-├── requirements.txt          # Python package requirements
-├── plots/                    # Output plots and visualizations
-│   ├── cd_diagram.png        # Critical difference diagram (Friedman + Nemenyi)
-│   ├── feature_correlation_matrix.png
-│   ├── feature_pca_variance.png
-│   ├── evaluation_results.md # Performance results from nested CV
-│   └── ...
-└── src/                      # Source Code
-    ├── datasets/
-    │   ├── loader.py         # UCR/UEA datasets loader
-    │   ├── stats.py          # Data analysis & statistics
-    │   └── ucr_catalog.py    # Catalog of 23 UCR datasets across 6 domains
-    ├── segmentation/
-    │   ├── adaptive.py       # Segmentation algorithms (Fixed, Var, Ent, CPD)
-    │   └── visualize_segmentation.py
-    ├── granulation/
-    │   ├── lfig.py           # Linear Fuzzy Information Granulation
-    │   └── visualize_lfig.py
-    ├── features/
-    │   ├── extractor.py      # 10D feature sequence extractor
-    │   ├── importance.py     # Random Forest feature Gini importance
-    │   └── redundancy.py     # Feature correlation, PCA, and VIF analysis
-    ├── similarity/
-    │   └── hybrid.py         # Hausdorff, DTW, Cosine, and fusion weights learning
-    ├── classifiers/
-    │   └── models.py         # Precomputed distance kNN/SVM & boosting models
-    └── evaluation/
-        ├── tuning.py         # Nested CV & auto-segmentation selector
-        ├── baselines.py      # Reproducible aeon baselines
-        ├── critical_difference.py # Demšar CD diagrams
-        └── benchmark.py      # Benchmark runner and ablation harness
+├── LFIG_Adaptive_Pipeline_Colab.ipynb      # CPU-focused self-contained notebook
+├── LFIG_Adaptive_Pipeline_Colab_GPU.ipynb  # GPU-accelerated self-contained notebook (complete 23 datasets)
+├── README.md                               # This overview document
+├── literature_review.md                     # Seminal papers & comparison tables
+├── methodology_design.md                   # Technical design details
+├── progress.md                              # Walkthrough and development progress
+├── requirements.txt                         # Python package requirements
+├── research_defense_guide.md                # Research defence Q&A guide
+├── master_benchmark_results_gpu.csv         # Core GPU benchmark results CSV
+├── master_benchmark_results_gpu_detailed.csv# Detailed GPU benchmark results CSV
+├── master_benchmark_results_gpu.md          # Markdown GPU benchmark table
+├── master_benchmark_results.csv             # Core CPU benchmark results CSV
+└── plots/                                   # Visualizations & reports
+    ├── cd_diagram.png                       # Demšar Critical Difference diagram
+    ├── evaluation_results.md                # Detailed markdown results report
+    └── ...
 ```
 
 ---
@@ -88,19 +69,17 @@ python -c "from src.evaluation.benchmark import run_full_benchmark; run_full_ben
 
 ## 4. Documentation
 
-- Comprehensive Execution & Workflow Guide: [EXECUTION_GUIDE.md](file:///Users/adarshfulzele/Desktop/RP/Best%20A/EXECUTION_GUIDE.md)
 - Detailed Literature Matrix: [literature_review.md](file:///Users/adarshfulzele/Desktop/RP/Best%20A/literature_review.md)
-- Development Roadmap: [phases.md](file:///Users/adarshfulzele/Desktop/RP/Best%20A/phases.md)
-- Milestones Checklist: [milestones.md](file:///Users/adarshfulzele/Desktop/RP/Best%20A/milestones.md)
 - Development Progress & Walkthrough: [progress.md](file:///Users/adarshfulzele/Desktop/RP/Best%20A/progress.md)
 - Methodology & Design: [methodology_design.md](file:///Users/adarshfulzele/Desktop/RP/Best%20A/methodology_design.md)
 - Research Defense Q&A Guide: [research_defense_guide.md](file:///Users/adarshfulzele/Desktop/RP/Best%20A/research_defense_guide.md)
-- Interactive Google Colab Notebook: [LFIG_Adaptive_Pipeline_Colab.ipynb](file:///Users/adarshfulzele/Desktop/RP/Best%20A/LFIG_Adaptive_Pipeline_Colab.ipynb)
+- Interactive CPU Colab Notebook: [LFIG_Adaptive_Pipeline_Colab.ipynb](file:///Users/adarshfulzele/Desktop/RP/Best%20A/LFIG_Adaptive_Pipeline_Colab.ipynb)
+- Interactive GPU Colab Notebook: [LFIG_Adaptive_Pipeline_Colab_GPU.ipynb](file:///Users/adarshfulzele/Desktop/RP/Best%20A/LFIG_Adaptive_Pipeline_Colab_GPU.ipynb)
 - Paper Draft: [paper_draft.md](file:///Users/adarshfulzele/Desktop/RP/Best%20A/Conference%20Paper/paper_draft.md)
 
 ## 5. Evaluation, Notebook Verification & Empirical Proofs
 
-Our proposed pipeline is evaluated across an expanded catalog of **23 UCR datasets** spanning Motion, Spectro, Image, ECG, Sensor, and Simulated domains. The interactive self-contained notebook **[LFIG_Adaptive_Pipeline_Colab.ipynb](file:///Users/adarshfulzele/Desktop/RP/Best%20A/LFIG_Adaptive_Pipeline_Colab.ipynb)** automatically installs dependencies (`aeon`, `ruptures`, `fastdtw`) and executes **4 Automated Diagnostic Empirical Proofs** prior to nested CV.
+Our proposed pipeline is evaluated across an expanded catalog of **23 UCR datasets** spanning Motion, Spectro, Image, ECG, Sensor, and Simulated domains. The interactive self-contained notebooks **[LFIG_Adaptive_Pipeline_Colab.ipynb](file:///Users/adarshfulzele/Desktop/RP/Best%20A/LFIG_Adaptive_Pipeline_Colab.ipynb)** (CPU-focused) and **[LFIG_Adaptive_Pipeline_Colab_GPU.ipynb](file:///Users/adarshfulzele/Desktop/RP/Best%20A/LFIG_Adaptive_Pipeline_Colab_GPU.ipynb)** (GPU-accelerated) automatically install dependencies (`aeon`, `ruptures`, `fastdtw`) and execute **4 Automated Diagnostic Empirical Proofs** prior to nested CV.
 
 ### UCR Dataset Catalog and Sizes
 The table below specifies the characteristics and data dimensions for each of the 23 datasets evaluated in this study:
@@ -134,9 +113,9 @@ The table below specifies the characteristics and data dimensions for each of th
 ### 1. Diagnostic Empirical Proofs
 - **[Proof 1] Variable-Length CPD Granulation:** Verifies dynamic boundary detection (e.g. GunPoint `[15, 15, ...]`, Coffee `[28, 28, ..., 6]`, ArrowHead `[25, ..., 1]`, ECG200 `[10, ..., 6]`).
 - **[Proof 2] 3D Standard vs. 10D Proposed LFIG Comparison:** Demonstrates that expanding from 3D (lower, upper, slope) to 10D multi-feature granules yields significant accuracy gains:
-  - **GunPoint:** **0.9067** (10D) vs. **0.7800** (3D) $\rightarrow$ **+12.67% Accuracy Delta**
-  - **ArrowHead:** **0.7086** (10D) vs. **0.6857** (3D) $\rightarrow$ **+2.29% Accuracy Delta**
-  - **ECG200:** **0.7700** (10D) vs. **0.7400** (3D) $\rightarrow$ **+3.00% Accuracy Delta**
+  - **GunPoint:** **0.9067** (10D) vs. **0.8000** (3D) $\rightarrow$ **+10.67% Accuracy Delta**
+  - **ArrowHead:** **0.7029** (10D) vs. **0.7143** (3D) $\rightarrow$ **-1.14% Accuracy Delta**
+  - **ECG200:** **0.8800** (10D) vs. **0.8600** (3D) $\rightarrow$ **+2.00% Accuracy Delta**
 - **[Proof 3] Leave-One-Feature-Out (LOFO) Feature Impact Matrix:** Measures individual sensitivity by zeroing out each of the 10 descriptors (Lower Bound, Upper Bound, Slope, Shannon Entropy, Variance, Volatility, Curvature, Intercept, Energy, Skewness).
 - **[Proof 4] Comparative Baselines Benchmark:** Compares our 10D Adaptive LFIG model against SOTA baselines (DTW-1NN, ROCKET, MiniROCKET, HIVE-COTE 2.0).
 

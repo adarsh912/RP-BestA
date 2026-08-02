@@ -285,7 +285,7 @@ TABLE VI. DETAILED 5-FOLD NESTED CROSS-VALIDATION PROGRESSION
 ### A. Dynamic CPD vs. Fixed-Window Partitioning
 One of the most important takeaways is the dichotomy between phase-shifted and phase-aligned series:
 * *Phase-Shifted (GunPoint, Coffee)*: Hand movement triggers occur at varying index offsets. Here, adaptive CPD segmentation is superior because it dynamically aligns boundaries with active transitions, minimizing linear fit cost. 
-* *Phase-Aligned (ECG200, ArrowHead, Chinatown)*: These datasets are length-normalized, and their components are strictly aligned (e.g., heartbeat complexes in ECG occur at fixed locations). Adaptive CPD introduces misalignment noise because it shifts boundaries based on minor local amplitude changes. Fixed partitioning forces strict phase alignment of granules across samples, yielding a massive performance boost (e.g., ECG200 accuracy jumped from 83.00 percent to 91.00 percent).
+* *Phase-Aligned (ECG200, ArrowHead, Chinatown)*: These datasets are length-normalized, and their components are strictly aligned (e.g., heartbeat complexes in ECG occur at fixed locations). Adaptive CPD introduces misalignment noise because it shifts boundaries based on minor local amplitude changes. Fixed partitioning forces strict phase alignment of granules across samples, yielding a massive performance boost (e.g., ECG200 accuracy jumped from 83.00 percent to 88.00 percent).
 
 ### B. Feature Importance and Ablation
 Under adaptive segmentation (CPD), our 10-feature granulation prevents information loss, yielding a significant increase in classification performance (+3.57% on Coffee and +2.67% on GunPoint). On phase-aligned datasets under fixed windowing, the core 3 features are highly sufficient, and the additional 7 structural features provide highly stable, competitive bounds.
@@ -343,11 +343,11 @@ Table VIII reports the unbiased generalization estimates using nested cross-vali
 TABLE VIII. LEAKAGE-FREE GENERALIZATION ESTIMATES (NESTED CV, 5-FOLD OUTER / 3-FOLD INNER)
 | Dataset | Nested-CV Accuracy (Mean ± SD) |
 |:---|:---:|
-| **GunPoint** | 0.9550 ± 0.0292 |
+| **GunPoint** | 0.9750 ± 0.0224 |
 | **Coffee** | 1.0000 ± 0.0000 |
-| **ECG200** | 0.8750 ± 0.0418 |
-| **Chinatown** | 0.9779 ± 0.0166 |
-| **ArrowHead** | 0.8767 ± 0.0235 |
+| **ECG200** | 0.8600 ± 0.0624 |
+| **Chinatown** | 0.9807 ± 0.0140 |
+| **ArrowHead** | 0.8863 ± 0.0232 |
 
 Averaging across multiple outer folds filters out the partition-specific variance of the official single splits. As a result, the nested-CV accuracies are higher than the single-split accuracies on GunPoint, Chinatown, and ArrowHead, providing a more robust and statistically reliable estimate of our model's generalization capabilities.
 

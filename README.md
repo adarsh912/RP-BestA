@@ -109,10 +109,11 @@ The table below specifies the characteristics and data dimensions for each of th
 
 ### 1. Diagnostic Empirical Proofs
 - **[Proof 1] Variable-Length CPD Granulation:** Verifies dynamic boundary detection (e.g. GunPoint `[15, 15, ...]`, Coffee `[28, 28, ..., 6]`, ArrowHead `[25, ..., 1]`, ECG200 `[10, ..., 6]`).
-- **[Proof 2] 3D Standard vs. 10D Proposed LFIG Comparison:** Demonstrates that expanding from 3D (lower, upper, slope) to 10D multi-feature granules yields significant accuracy gains:
-  - **GunPoint:** **0.9067** (10D) vs. **0.8000** (3D) $\rightarrow$ **+10.67% Accuracy Delta**
-  - **ArrowHead:** **0.7029** (10D) vs. **0.7143** (3D) $\rightarrow$ **-1.14% Accuracy Delta**
-  - **ECG200:** **0.8800** (10D) vs. **0.8600** (3D) $\rightarrow$ **+2.00% Accuracy Delta**
+- **[Proof 2] 3D Standard vs. 10D Proposed LFIG Comparison:** Demonstrates the performance impact of expanding from 3D (lower, upper, slope) to 10D multi-feature granules under the leakage-free evaluation protocol:
+  - **GunPoint:** **0.8533** (10D) vs. **0.8267** (3D) $\rightarrow$ **+2.67% Accuracy Delta**
+  - **ArrowHead:** **0.7086** (10D) vs. **0.6857** (3D) $\rightarrow$ **+2.29% Accuracy Delta**
+  - **ECG200:** **0.7200** (10D) vs. **0.8000** (3D) $\rightarrow$ **-8.00% Accuracy Delta**
+  - **Coffee:** **0.9286** (10D) vs. **0.9286** (3D) $\rightarrow$ **+0.00% Accuracy Delta**
 - **[Proof 3] Leave-One-Feature-Out (LOFO) Feature Impact Matrix:** Measures individual sensitivity by zeroing out each of the 10 descriptors (Lower Bound, Upper Bound, Slope, Shannon Entropy, Variance, Volatility, Curvature, Intercept, Energy, Skewness).
 - **[Proof 4] Comparative Baselines Benchmark:** Compares our 10D Adaptive LFIG model against SOTA baselines (DTW-1NN, ROCKET, MiniROCKET, HIVE-COTE 2.0).
 

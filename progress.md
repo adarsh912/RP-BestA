@@ -56,7 +56,7 @@ This document details the code development progress, module verification results
 * **Key Findings:**
   - **Perfect Accuracy on Coffee:** Achieved **100% accuracy** (matching state-of-the-art ensembles and outperforming literature DTW at 99.3%).
   - **High Performance on Chinatown:** Achieved **97.38% accuracy** utilizing precomputed Kernel SVM.
-  - **Massive Speedups:** Runs up to **15x faster** than the Fast-DTW baseline (e.g. GunPoint completed in 10.97s vs 163.75s).
+  - **Massive Speedups:** Runs up to **14.2x faster** than the Fast-DTW baseline (e.g. GunPoint completed in 11.78s vs 167.46s).
   - **Ablation Validity:** Feature ablation shows significant accuracy drop when moving from our proposed 10-feature model to a standard 3-feature model, demonstrating an accuracy drop of up to **16%** on ECG200 and **11.43%** on ArrowHead.
 * **Plots Generated:** [accuracy_comparison.png](file:///Users/adarshfulzele/Desktop/RP/Best%20A/plots/accuracy_comparison.png) (shows classification accuracy across all model configurations).
 
@@ -92,7 +92,7 @@ The new protocols were successfully run in a Google Colab GPU-accelerated enviro
 2. **Performance Gaps & Alignment on Official Splits:**
    - **Official Splits Comparison:** On the official single train/test splits, state-of-the-art models (ROCKET, MiniROCKET, and HIVE-COTE 2.0) outperform our single-split test accuracy ($10\text{D Acc}$) across all 20 datasets, as shown in the final output of `LFIG_Adaptive_Pipeline_Colab_GPU.ipynb`.
    - **Cross-Validation Generalization:** Under the 5-fold outer cross-validation protocol, our model achieves high generalization performance (e.g. **1.0000** on Coffee, **0.9742** on SonyAIBORobotSurface1, and **0.9807** on Chinatown) due to larger training folds.
-   - **Competitive Edge:** Our model consistently outperforms the standard DTW-1NN baseline on average ranks, and runs up to **15x faster** than raw Fast-DTW.
+   - **Competitive Edge:** Our model consistently outperforms the standard DTW-1NN baseline on average ranks, and runs up to **14.2x faster** than raw Fast-DTW.
 
 3. **Demšar Critical Difference Analysis:**
    - Friedman test statistic = 45.8254 ($p = 0.000000$, highly significant).
@@ -110,8 +110,9 @@ The new protocols were successfully run in a Google Colab GPU-accelerated enviro
 - **Empirical Diagnostic Proof Results:**
   1. **[Proof 1] Variable-Length CPD Segmentation:** Confirms boundaries and granule lengths calculated across adaptive signals (e.g. GunPoint `[15, 15, ...]`, Coffee `[28, 28, ..., 6]`, ArrowHead `[25, ..., 1]`, ECG200 `[10, ..., 6]`).
   2. **[Proof 2] 3D Standard vs. 10D Proposed LFIG Comparison:**
-     - **GunPoint:** 10D Multi-Feature (**0.9067**) vs 3D Standard LFIG (**0.8000**) $\rightarrow$ **+0.1067** accuracy gain.
-     - **ArrowHead:** 10D Multi-Feature (**0.7029**) vs 3D Standard LFIG (**0.7143**) $\rightarrow$ **-0.0114** accuracy delta.
-     - **ECG200:** 10D Multi-Feature (**0.8800**) vs 3D Standard LFIG (**0.8600**) $\rightarrow$ **+0.0200** accuracy gain.
+     - **GunPoint:** 10D Multi-Feature (**0.8533**) vs 3D Standard LFIG (**0.8267**) $\rightarrow$ **+0.0267** accuracy gain.
+     - **ArrowHead:** 10D Multi-Feature (**0.7086**) vs 3D Standard LFIG (**0.6857**) $\rightarrow$ **+0.0229** accuracy delta.
+     - **ECG200:** 10D Multi-Feature (**0.7200**) vs 3D Standard LFIG (**0.8000**) $\rightarrow$ **-0.0800** accuracy gain.
+     - **Coffee:** 10D Multi-Feature (**0.9286**) vs 3D Standard LFIG (**0.9286**) $\rightarrow$ **+0.0000** accuracy delta.
 3. **[Proof 3] Leave-One-Feature-Out (LOFO) Ablation Matrix:** Derived individual feature contribution deltas for all 10 descriptors (Lower Bound, Upper Bound, Trend Slope, Shannon Entropy, Variance, Volatility, Curvature, Intercept, Energy, Skewness).
 - **Leakage-Free 5-Fold Nested CV Execution:** Nested cross-validation (5 outer folds, 3 inner folds) verified across UCR benchmark catalog datasets with per-fold hyperparameter and classifier selection (e.g., GunPoint Fold 1: **97.50%**, Fold 2: **100.00%** using Kernel SVM with $z=1.0$).

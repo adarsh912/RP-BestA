@@ -157,3 +157,6 @@ catboost_info/
 *.njsproj
 *.sln
 *.sw?
+
+# Data folder containing downloaded UCR datasets
+data/

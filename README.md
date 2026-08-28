@@ -23,7 +23,7 @@ This framework addresses these gaps through:
 ```directory
 .
 ├── LFIG_Adaptive_Pipeline_Colab.ipynb      # CPU-focused self-contained notebook
-├── LFIG_Adaptive_Pipeline_Colab_GPU.ipynb  # GPU-accelerated self-contained notebook (complete 23 datasets)
+├── LFIG_Adaptive_Pipeline_Colab_GPU.ipynb  # GPU-accelerated self-contained notebook (complete 20 datasets)
 ├── README.md                               # This overview document
 ├── literature_review.md                     # Seminal papers & comparison tables
 ├── methodology_design.md                   # Technical design details
@@ -79,10 +79,10 @@ python -c "from src.evaluation.benchmark import run_full_benchmark; run_full_ben
 
 ## 5. Evaluation, Notebook Verification & Empirical Proofs
 
-Our proposed pipeline is evaluated across an expanded catalog of **23 UCR datasets** spanning Motion, Spectro, Image, ECG, Sensor, and Simulated domains. The interactive self-contained notebooks **[LFIG_Adaptive_Pipeline_Colab.ipynb](file:///Users/adarshfulzele/Desktop/RP/Best%20A/LFIG_Adaptive_Pipeline_Colab.ipynb)** (CPU-focused) and **[LFIG_Adaptive_Pipeline_Colab_GPU.ipynb](file:///Users/adarshfulzele/Desktop/RP/Best%20A/LFIG_Adaptive_Pipeline_Colab_GPU.ipynb)** (GPU-accelerated) automatically install dependencies (`aeon`, `ruptures`, `fastdtw`) and execute **4 Automated Diagnostic Empirical Proofs** prior to nested CV.
+Our proposed pipeline is evaluated across an expanded catalog of **20 UCR datasets** spanning Motion, Spectro, Image, ECG, Sensor, and Simulated domains. The interactive self-contained notebooks **[LFIG_Adaptive_Pipeline_Colab.ipynb](file:///Users/adarshfulzele/Desktop/RP/Best%20A/LFIG_Adaptive_Pipeline_Colab.ipynb)** (CPU-focused) and **[LFIG_Adaptive_Pipeline_Colab_GPU.ipynb](file:///Users/adarshfulzele/Desktop/RP/Best%20A/LFIG_Adaptive_Pipeline_Colab_GPU.ipynb)** (GPU-accelerated) automatically install dependencies (`aeon`, `ruptures`, `fastdtw`) and execute **4 Automated Diagnostic Empirical Proofs** prior to nested CV.
 
 ### UCR Dataset Catalog and Sizes
-The table below specifies the characteristics and data dimensions for each of the 23 datasets evaluated in this study:
+The table below specifies the characteristics and data dimensions for each of the 20 datasets evaluated in this study:
 
 | # | Dataset | Domain | Train Samples | Test Samples | Series Length | Classes | Total Samples |
 |---|---|---|---|---|---|---|---|
@@ -106,9 +106,6 @@ The table below specifies the characteristics and data dimensions for each of th
 | 18 | CBF | Simulated | 30 | 900 | 128 | 3 | 930 |
 | 19 | TwoPatterns | Simulated | 1000 | 4000 | 128 | 4 | 5000 |
 | 20 | Wafer | Sensor | 1000 | 6164 | 152 | 2 | 7164 |
-| 21 | FordA | Sensor | 3601 | 1320 | 500 | 2 | 4921 |
-| 22 | Yoga | Image | 300 | 3000 | 426 | 2 | 3300 |
-| 23 | SwedishLeaf | Image | 500 | 625 | 128 | 15 | 1125 |
 
 ### 1. Diagnostic Empirical Proofs
 - **[Proof 1] Variable-Length CPD Granulation:** Verifies dynamic boundary detection (e.g. GunPoint `[15, 15, ...]`, Coffee `[28, 28, ..., 6]`, ArrowHead `[25, ..., 1]`, ECG200 `[10, ..., 6]`).
@@ -123,6 +120,6 @@ The table below specifies the characteristics and data dimensions for each of th
 - **Nested Cross-Validation:** Hyperparameters ($z$, $k$, distance fusion weights, KNN vs Kernel SVM) are selected per-fold using an inner CV loop with progress bars to eliminate selection leakage.
 - **Outer Fold Progression:** Reports high outer fold accuracy (e.g. GunPoint Fold 1 **97.50%**, Fold 2 **100.00%** using Kernel SVM with $z=1.0$).
 - **Reproducible Baselines:** DTW-1NN, ROCKET, and MiniROCKET reproduced under identical splits via `aeon`.
-- **Demšar Critical Difference Diagrams:** Evaluated across 23 datasets using Friedman chi-square tests and Nemenyi post-hoc ranking diagrams.
+- **Demšar Critical Difference Diagrams:** Evaluated across 20 datasets using Friedman chi-square tests and Nemenyi post-hoc ranking diagrams.
 
 Full evaluation metrics, proof tables, and outer fold breakdowns are saved to `master_benchmark_results.csv` and maintained in [plots/evaluation_results.md](file:///Users/adarshfulzele/Desktop/RP/Best%20A/plots/evaluation_results.md).

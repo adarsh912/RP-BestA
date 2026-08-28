@@ -28,7 +28,7 @@ graph TD
     end
     
     Fuse --> Dist[Fused Distance Matrix]
-    Dist --> Classifier[Classifier Ensemble]
+    Dist --> Classifier[Separately-Evaluated Classifiers]
     Classifier --> Output[Class Label Prediction]
     
     %% Styling

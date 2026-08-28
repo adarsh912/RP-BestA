@@ -217,7 +217,7 @@ To rigorously establish novelty, the table below directly contrasts our proposed
 | **Gao & Yu (2019)** (*IEEE Access*) | Fixed / Heuristic Unequal | Standard 3D LFIG ($[L, U, a]$) | Generalized LFIG-DTW | Static Equal Weights | Classification (Unequal Length) |
 | **He & Yu (2023)** (*Chaos Solitons & Fractals*) | Recurrence Matrix Splitting | 2D Recurrence Plot Images (TFGRP) | SVM Precomputed Kernel | None (Implicit SVM Margin) | Noise-Robust Classification |
 | **Applied Soft Computing (2023)** (*Follow-up*) | Constrained LFIG Variants | Standard 3D LFIG ($[L, U, a]$) | Constrained LFIG-DTW | Fixed Weights | Time Series Clustering |
-| **Our Proposed Framework** | **Adaptive CPD vs. Fixed (Autocorrelation $\sigma^2_r$)** | **Enhanced 10D Multi-Feature Descriptor** | **3-Way Hybrid ($D_H + D_{DTW} + D_{Cos}$)** | **Learned Weights (Pairwise Logistic / Inner CV)** | **Time Series Classification (TSC)** |
+| **Our Proposed Framework** | **Adaptive CPD vs. Fixed (Autocorrelation $\sigma^2_r$)** | **Enhanced 10D Multi-Feature Descriptor** | **3-Way Hybrid ($D_H + D_{DTW} + D_{Cos}$)** | **Grid Search / Inner CV** | **Time Series Classification (TSC)** |
 
 ---
 

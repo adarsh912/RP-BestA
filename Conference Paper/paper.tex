@@ -12,9 +12,7 @@
 \makeatletter
 \long\def\@makecaption#1#2{%
   \ifx\@captype\@IEEEtablestring
-    \begin{center}
-      {\normalfont\footnotesize #1: #2}%
-    \end{center}
+    \noindent{\normalfont\footnotesize #1: #2}\par
   \else
     \@IEEEmakefigurecaption{#1}{#2}%
   \fi}

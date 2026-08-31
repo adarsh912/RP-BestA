@@ -9,6 +9,17 @@
 
 \newcolumntype{Y}{>{\centering\arraybackslash}X}
 
+\makeatletter
+\long\def\@makecaption#1#2{%
+  \ifx\@captype\@IEEEtablestring
+    \begin{center}
+      {\normalfont\footnotesize #1: #2}%
+    \end{center}
+  \else
+    \@IEEEmakefigurecaption{#1}{#2}%
+  \fi}
+\makeatother
+
 \begin{document}
 
 \title{Adaptive Multi-Feature Linear Fuzzy Information Granulation with Hybrid Similarity Learning for Time Series Classification}
@@ -77,10 +88,10 @@ Our structural differentiation against prior LFIG competitors is summarized in T
 \begin{tabularx}{\textwidth}{|Y|Y|Y|Y|Y|Y|}
 \hline
 Study / Model & Segmentation Strategy & Granule Features & Similarity Metric Space & Weight Learning Mechanism & Primary Target Task \\ \hline
-Yang et al. \cite{yang2017} & Fixed Sliding Window & Standard 3D ($[L, U, a]$) & Euclidean / Error Distance & None (Unweighted) & Long-Term Forecasting \\ \hline
-Duan et al. \cite{duan2018} & Fixed / Constrained & Standard 3D ($[L, U, a]$) & Hausdorff + Slope DTW ($D_H + D_{DTW}$) & None (Static Sum) & Time Series Clustering \\ \hline
-Gao and Yu \cite{gao2019} & Fixed / Heuristic Unequal & Standard 3D ($[L, U, a]$) & Generalized LFIG-DTW & Static Equal Weights & Classification (Unequal Length) \\ \hline
-He and Yu \cite{he2023} & Recurrence Matrix Splitting & 2D Recurrence Images & SVM Precomputed Kernel & None (Implicit Margin) & Noise-Robust Classification \\ \hline
+Yang et al. \cite{yang2017} & Fixed Sliding Window & Standard 3D ($[L, U, a]$) & Euclidean / Error Distance & None (Unweighted) & Long-Term Forecasting \\
+Duan et al. \cite{duan2018} & Fixed / Constrained & Standard 3D ($[L, U, a]$) & Hausdorff + Slope DTW ($D_H + D_{DTW}$) & None (Static Sum) & Time Series Clustering \\
+Gao and Yu \cite{gao2019} & Fixed / Heuristic Unequal & Standard 3D ($[L, U, a]$) & Generalized LFIG-DTW & Static Equal Weights & Classification (Unequal Length) \\
+He and Yu \cite{he2023} & Recurrence Matrix Splitting & 2D Recurrence Images & SVM Precomputed Kernel & None (Implicit Margin) & Noise-Robust Classification \\
 Proposed Framework & Adaptive CPD vs. Fixed ($\sigma^2_r$) & Enhanced 10D Multi-Feature & 3-Way Hybrid ($D_H + D_{DTW} + D_{Cos}$) & Grid Search / Inner CV & Time Series Classification (TSC) \\ \hline
 \end{tabularx}
 \end{table*}
@@ -302,9 +313,9 @@ The choice between fixed windowing and CPD is evaluated by inspecting the granul
 \begin{tabularx}{\textwidth}{|l|c|c|>{\raggedright\arraybackslash}X|c|>{\raggedright\arraybackslash}X|}
 \hline
 Dataset & Strategy Selected & Param & Detected Boundaries & Granules & Granule Length Breakdown \\ \hline
-\textbf{GunPoint} & CPD & 1.5 & $[0, 25, 55, 60, 95, 100, 150]$ & 6 & $[25, 30, 5, 35, 5, 50]$ \\ \hline
-\textbf{Coffee} & FIXED & 28 & \shortstack[l]{$[0,28,56,84,112,140,$\\$168,196,224,252,280,286]$} & 11 & \shortstack[l]{$[28,28,28,28,28,28,$\\$28,28,28,28,6]$} \\ \hline
-\textbf{ArrowHead} & FIXED & 25 & \shortstack[l]{$[0,25,50,75,100,125,$\\$150,175,200,225,250,251]$} & 11 & \shortstack[l]{$[25,25,25,25,25,25,$\\$25,25,25,25,1]$} \\ \hline
+\textbf{GunPoint} & CPD & 1.5 & $[0, 25, 55, 60, 95, 100, 150]$ & 6 & $[25, 30, 5, 35, 5, 50]$ \\
+\textbf{Coffee} & FIXED & 28 & \shortstack[l]{$[0,28,56,84,112,140,$\\$168,196,224,252,280,286]$} & 11 & \shortstack[l]{$[28,28,28,28,28,28,$\\$28,28,28,28,6]$} \\
+\textbf{ArrowHead} & FIXED & 25 & \shortstack[l]{$[0,25,50,75,100,125,$\\$150,175,200,225,250,251]$} & 11 & \shortstack[l]{$[25,25,25,25,25,25,$\\$25,25,25,25,1]$} \\
 \textbf{ECG200} & CPD & 1.5 & $[0, 20, 45, 60, 75, 96]$ & 5 & $[20, 25, 15, 15, 21]$ \\ \hline
 \end{tabularx}
 \end{table*}
@@ -320,9 +331,9 @@ To verify the impact of the 10-dimensional granule feature representation, we co
 \begin{tabularx}{\columnwidth}{|X|Y|Y|Y|}
 \hline
 Dataset & Standard 3D LFIG Acc & Proposed 10D Multi-Feature LFIG Acc & Improvement Delta \\ \hline
-\textbf{GunPoint} & 0.8267 & \textbf{0.8533} & \textbf{+0.0267 (+2.67\%)} \\ \hline
-\textbf{ArrowHead} & 0.6857 & \textbf{0.7086} & \textbf{+0.0229 (+2.29\%)} \\ \hline
-\textbf{ECG200} & 0.8000 & \textbf{0.7200} & \textbf{-0.0800 (-8.00\%)} \\ \hline
+\textbf{GunPoint} & 0.8267 & \textbf{0.8533} & \textbf{+0.0267 (+2.67\%)} \\
+\textbf{ArrowHead} & 0.6857 & \textbf{0.7086} & \textbf{+0.0229 (+2.29\%)} \\
+\textbf{ECG200} & 0.8000 & \textbf{0.7200} & \textbf{-0.0800 (-8.00\%)} \\
 \textbf{Coffee} & 0.9286 & \textbf{0.9286} & +0.0000 \\ \hline
 \end{tabularx}
 \end{table}
@@ -340,15 +351,15 @@ To inspect the individual contributions of the 10 structural features, we perfor
 \begin{tabularx}{\columnwidth}{|X|Y|Y|X|}
 \hline
 Feature Descriptor & Mean Delta ($\Delta = \text{Full} - \text{Ablated}$) & 95\% Confidence Interval & Representation Role \\ \hline
-\textbf{Energy} ($E_{n}$) & -0.0279 & [-0.0533, -0.0024] & Global representation stabilizer \\ \hline
-\textbf{Upper Bound} ($U$) & -0.0091 & [-0.0455, +0.0273] & Upper bounds shift \\ \hline
-\textbf{Variance} ($\sigma^2$) & -0.0027 & [-0.0066, +0.0012] & Fluctuation spread descriptor \\ \hline
-\textbf{Curvature} ($c$) & -0.0001 & [-0.0003, +0.0001] & Polynomial shape acceleration \\ \hline
-\textbf{Volatility} ($V_{ol}$) & +0.0001 & [-0.0012, +0.0013] & Volatility spread descriptor \\ \hline
-\textbf{Intercept} ($b$) & +0.0028 & [-0.0040, +0.0097] & Base amplitude height \\ \hline
-\textbf{Skewness} ($Sk$) & +0.0039 & [-0.0027, +0.0105] & Asymmetry descriptor \\ \hline
-\textbf{Shannon Entropy} ($H$) & +0.0054 & [-0.0141, +0.0248] & Granule complexity descriptor \\ \hline
-\textbf{Lower Bound} ($L$) & +0.0110 & [-0.0163, +0.0382] & Lower bounds level \\ \hline
+\textbf{Energy} ($E_{n}$) & -0.0279 & [-0.0533, -0.0024] & Global representation stabilizer \\
+\textbf{Upper Bound} ($U$) & -0.0091 & [-0.0455, +0.0273] & Upper bounds shift \\
+\textbf{Variance} ($\sigma^2$) & -0.0027 & [-0.0066, +0.0012] & Fluctuation spread descriptor \\
+\textbf{Curvature} ($c$) & -0.0001 & [-0.0003, +0.0001] & Polynomial shape acceleration \\
+\textbf{Volatility} ($V_{ol}$) & +0.0001 & [-0.0012, +0.0013] & Volatility spread descriptor \\
+\textbf{Intercept} ($b$) & +0.0028 & [-0.0040, +0.0097] & Base amplitude height \\
+\textbf{Skewness} ($Sk$) & +0.0039 & [-0.0027, +0.0105] & Asymmetry descriptor \\
+\textbf{Shannon Entropy} ($H$) & +0.0054 & [-0.0141, +0.0248] & Granule complexity descriptor \\
+\textbf{Lower Bound} ($L$) & +0.0110 & [-0.0163, +0.0382] & Lower bounds level \\
 \textbf{Trend Slope} ($a$) & +0.0243 & [-0.0052, +0.0537] & Primary direction descriptor \\ \hline
 \end{tabularx}
 \end{table}
@@ -366,25 +377,25 @@ To establish robust statistical validation, we scale our evaluation to a catalog
 \begin{tabularx}{\textwidth}{|>{\raggedright\arraybackslash}p{3.0cm}|c|c|c|c|c|>{\centering\arraybackslash}X|c|}
 \hline
 Dataset & 10D Acc. & Nested CV & DTW-1NN & ROCKET & MiniROCKET & Best Baseline & Gap \\ \hline
-GunPoint & 0.8533 & 0.9300 $\pm$ 0.0100 & 0.9067 & 1.0000 & 0.9933 & ROCKET (1.0000) & +0.0700 \\ \hline
-Coffee & 0.9286 & 1.0000 $\pm$ 0.0000 & 1.0000 & 1.0000 & 1.0000 & DTW-1NN (1.0000) & +0.0000 \\ \hline
-ArrowHead & 0.7086 & 0.8910 $\pm$ 0.0241 & 0.7029 & 0.8057 & 0.8514 & HIVE-COTE 2.0 (0.8710) & -0.0200 \\ \hline
-ECG200 & 0.7200 & 0.8000 $\pm$ 0.0671 & 0.7700 & 0.9200 & 0.9100 & ROCKET (0.9200) & +0.1200 \\ \hline
-Chinatown & 0.9184 & 0.9807 $\pm$ 0.0140 & 0.9738 & 0.9825 & 0.9825 & HIVE-COTE 2.0 (0.9830) & +0.0023 \\ \hline
-ItalyPowerDemand & 0.8863 & 0.9644 $\pm$ 0.0159 & 0.9504 & 0.9699 & 0.9640 & HIVE-COTE 2.0 (0.9700) & +0.0056 \\ \hline
-SonyAIBORobotSurface1 & 0.7837 & 0.9742 $\pm$ 0.0156 & 0.7255 & 0.9168 & 0.8935 & ROCKET (0.9168) & -0.0574 \\ \hline
-TwoLeadECG & 0.6778 & 0.9845 $\pm$ 0.0034 & 0.9043 & 0.9991 & 0.9982 & HIVE-COTE 2.0 (1.0000) & +0.0155 \\ \hline
-ECGFiveDays & 0.7793 & 0.9819 $\pm$ 0.0109 & 0.7677 & 1.0000 & 1.0000 & ROCKET (1.0000) & +0.0181 \\ \hline
-MoteStrain & 0.8602 & 0.9465 $\pm$ 0.0138 & 0.8347 & 0.9153 & 0.9257 & MiniROCKET (0.9257) & -0.0208 \\ \hline
-Beef & 0.4000 & 0.3667 $\pm$ 0.0850 & 0.6333 & 0.8000 & 0.8333 & MiniROCKET (0.8333) & +0.4666 \\ \hline
-OliveOil & 0.8333 & 0.7500 $\pm$ 0.0745 & 0.8333 & 0.9333 & 0.9333 & ROCKET (0.9333) & +0.1833 \\ \hline
-Meat & 0.6833 & 0.8917 $\pm$ 0.0333 & 0.9333 & 0.9500 & 0.9667 & MiniROCKET (0.9667) & +0.0750 \\ \hline
-BeetleFly & 0.6000 & 0.7750 $\pm$ 0.0935 & 0.7000 & 0.9000 & 0.9000 & ROCKET (0.9000) & +0.1250 \\ \hline
-BirdChicken & 0.7000 & 0.8000 $\pm$ 0.0612 & 0.7500 & 0.9000 & 0.9000 & ROCKET (0.9000) & +0.1000 \\ \hline
-FaceFour & 0.7841 & 0.9285 $\pm$ 0.0363 & 0.8295 & 0.9773 & 0.9886 & MiniROCKET (0.9886) & +0.0601 \\ \hline
-SyntheticControl & 0.9733 & 0.9933 $\pm$ 0.0062 & 0.9933 & 1.0000 & 0.9833 & ROCKET (1.0000) & +0.0067 \\ \hline
-CBF & 0.9000 & 0.9817 $\pm$ 0.0111 & 0.9967 & 1.0000 & 0.9989 & ROCKET (1.0000) & +0.0183 \\ \hline
-TwoPatterns & 0.7775 & 0.7110 $\pm$ 0.0112 & 1.0000 & 1.0000 & 0.9962 & DTW-1NN (1.0000) & +0.2890 \\ \hline
+GunPoint & 0.8533 & 0.9300 $\pm$ 0.0100 & 0.9067 & 1.0000 & 0.9933 & ROCKET (1.0000) & +0.0700 \\
+Coffee & 0.9286 & 1.0000 $\pm$ 0.0000 & 1.0000 & 1.0000 & 1.0000 & DTW-1NN (1.0000) & +0.0000 \\
+ArrowHead & 0.7086 & 0.8910 $\pm$ 0.0241 & 0.7029 & 0.8057 & 0.8514 & HIVE-COTE 2.0 (0.8710) & -0.0200 \\
+ECG200 & 0.7200 & 0.8000 $\pm$ 0.0671 & 0.7700 & 0.9200 & 0.9100 & ROCKET (0.9200) & +0.1200 \\
+Chinatown & 0.9184 & 0.9807 $\pm$ 0.0140 & 0.9738 & 0.9825 & 0.9825 & HIVE-COTE 2.0 (0.9830) & +0.0023 \\
+ItalyPowerDemand & 0.8863 & 0.9644 $\pm$ 0.0159 & 0.9504 & 0.9699 & 0.9640 & HIVE-COTE 2.0 (0.9700) & +0.0056 \\
+SonyAIBORobotSurface1 & 0.7837 & 0.9742 $\pm$ 0.0156 & 0.7255 & 0.9168 & 0.8935 & ROCKET (0.9168) & -0.0574 \\
+TwoLeadECG & 0.6778 & 0.9845 $\pm$ 0.0034 & 0.9043 & 0.9991 & 0.9982 & HIVE-COTE 2.0 (1.0000) & +0.0155 \\
+ECGFiveDays & 0.7793 & 0.9819 $\pm$ 0.0109 & 0.7677 & 1.0000 & 1.0000 & ROCKET (1.0000) & +0.0181 \\
+MoteStrain & 0.8602 & 0.9465 $\pm$ 0.0138 & 0.8347 & 0.9153 & 0.9257 & MiniROCKET (0.9257) & -0.0208 \\
+Beef & 0.4000 & 0.3667 $\pm$ 0.0850 & 0.6333 & 0.8000 & 0.8333 & MiniROCKET (0.8333) & +0.4666 \\
+OliveOil & 0.8333 & 0.7500 $\pm$ 0.0745 & 0.8333 & 0.9333 & 0.9333 & ROCKET (0.9333) & +0.1833 \\
+Meat & 0.6833 & 0.8917 $\pm$ 0.0333 & 0.9333 & 0.9500 & 0.9667 & MiniROCKET (0.9667) & +0.0750 \\
+BeetleFly & 0.6000 & 0.7750 $\pm$ 0.0935 & 0.7000 & 0.9000 & 0.9000 & ROCKET (0.9000) & +0.1250 \\
+BirdChicken & 0.7000 & 0.8000 $\pm$ 0.0612 & 0.7500 & 0.9000 & 0.9000 & ROCKET (0.9000) & +0.1000 \\
+FaceFour & 0.7841 & 0.9285 $\pm$ 0.0363 & 0.8295 & 0.9773 & 0.9886 & MiniROCKET (0.9886) & +0.0601 \\
+SyntheticControl & 0.9733 & 0.9933 $\pm$ 0.0062 & 0.9933 & 1.0000 & 0.9833 & ROCKET (1.0000) & +0.0067 \\
+CBF & 0.9000 & 0.9817 $\pm$ 0.0111 & 0.9967 & 1.0000 & 0.9989 & ROCKET (1.0000) & +0.0183 \\
+TwoPatterns & 0.7775 & 0.7110 $\pm$ 0.0112 & 1.0000 & 1.0000 & 0.9962 & DTW-1NN (1.0000) & +0.2890 \\
 Wafer & 0.9455 & 0.9782 $\pm$ 0.0038 & 0.9799 & 0.9985 & 0.9994 & MiniROCKET (0.9994) & +0.0212 \\ \hline
 \end{tabularx}
 \end{table*}
@@ -414,10 +425,10 @@ Table \ref{tab:leakage_and_generalization} quantifies the selection leakage pres
 \begin{tabularx}{\columnwidth}{|X|Y|Y|Y|}
 \hline
 Dataset & Leaky Accuracy & Leakage-Free Accuracy & Nested-CV Accuracy (Mean $\pm$ SD) \\ \hline
-\textbf{GunPoint} & 0.9067 & 0.8533 & 0.9300 $\pm$ 0.0100 \\ \hline
-\textbf{Coffee} & 0.9286 & 0.9286 & 1.0000 $\pm$ 0.0000 \\ \hline
-\textbf{ECG200} & 0.8800 & 0.7200 & 0.8000 $\pm$ 0.0671 \\ \hline
-\textbf{Chinatown} & 0.9155 & 0.9184 & 0.9807 $\pm$ 0.0140 \\ \hline
+\textbf{GunPoint} & 0.9067 & 0.8533 & 0.9300 $\pm$ 0.0100 \\
+\textbf{Coffee} & 0.9286 & 0.9286 & 1.0000 $\pm$ 0.0000 \\
+\textbf{ECG200} & 0.8800 & 0.7200 & 0.8000 $\pm$ 0.0671 \\
+\textbf{Chinatown} & 0.9155 & 0.9184 & 0.9807 $\pm$ 0.0140 \\
 \textbf{ArrowHead} & 0.7029 & 0.7086 & 0.8910 $\pm$ 0.0241 \\ \hline
 \end{tabularx}
 \end{table}

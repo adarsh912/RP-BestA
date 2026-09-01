@@ -22,9 +22,8 @@ This framework addresses these gaps through:
 
 ```directory
 .
-├── LFIG_Adaptive_Pipeline_Colab.ipynb      # CPU-focused self-contained notebook
-├── LFIG_Adaptive_Pipeline_Colab_GPU.ipynb  # GPU-accelerated self-contained notebook (complete 20 datasets)
-├── README.md                               # This overview document
+├── LFIG_Adaptive_Pipeline.ipynb           # Complete canonical self-contained notebook (20 datasets & proofs)
+├── README.md                              # This overview document
 ├── literature_review.md                     # Seminal papers & comparison tables
 ├── methodology_design.md                   # Technical design details
 ├── progress.md                              # Walkthrough and development progress
@@ -81,13 +80,12 @@ python -c "from src.evaluation.benchmark import run_full_benchmark; run_full_ben
 - Development Progress & Walkthrough: [progress.md](file:///Users/adarshfulzele/Desktop/RP/Best%20A/progress.md)
 - Methodology & Design: [methodology_design.md](file:///Users/adarshfulzele/Desktop/RP/Best%20A/methodology_design.md)
 - Research Defense Q&A Guide: [research_defense_guide.md](file:///Users/adarshfulzele/Desktop/RP/Best%20A/research_defense_guide.md)
-- Interactive CPU Colab Notebook: [LFIG_Adaptive_Pipeline_Colab.ipynb](file:///Users/adarshfulzele/Desktop/RP/Best%20A/LFIG_Adaptive_Pipeline_Colab.ipynb)
-- Interactive GPU Colab Notebook: [LFIG_Adaptive_Pipeline_Colab_GPU.ipynb](file:///Users/adarshfulzele/Desktop/RP/Best%20A/LFIG_Adaptive_Pipeline_Colab_GPU.ipynb)
+- Interactive Executable Colab/Jupyter Notebook: [LFIG_Adaptive_Pipeline.ipynb](file:///Users/adarshfulzele/Desktop/RP/Best%20A/LFIG_Adaptive_Pipeline.ipynb)
 - Paper Draft: [paper_draft.md](file:///Users/adarshfulzele/Desktop/RP/Best%20A/Conference%20Paper/paper_draft.md)
 
 ## 5. Evaluation, Notebook Verification & Empirical Proofs
 
-Our proposed pipeline is evaluated across an expanded catalog of **20 UCR datasets** spanning Motion, Spectro, Image, ECG, Sensor, and Simulated domains. The interactive self-contained notebooks **[LFIG_Adaptive_Pipeline_Colab.ipynb](file:///Users/adarshfulzele/Desktop/RP/Best%20A/LFIG_Adaptive_Pipeline_Colab.ipynb)** (CPU-focused) and **[LFIG_Adaptive_Pipeline_Colab_GPU.ipynb](file:///Users/adarshfulzele/Desktop/RP/Best%20A/LFIG_Adaptive_Pipeline_Colab_GPU.ipynb)** (GPU-accelerated) automatically install dependencies (`aeon`, `ruptures`, `fastdtw`) and execute **4 Automated Diagnostic Empirical Proofs** prior to nested CV.
+Our proposed pipeline is evaluated across an expanded catalog of **20 UCR datasets** spanning Motion, Spectro, Image, ECG, Sensor, and Simulated domains. The interactive self-contained notebook **[LFIG_Adaptive_Pipeline.ipynb](file:///Users/adarshfulzele/Desktop/RP/Best%20A/LFIG_Adaptive_Pipeline.ipynb)** automatically installs dependencies (`aeon`, `ruptures`, `fastdtw`) and executes **4 Automated Diagnostic Empirical Proofs** prior to nested CV.
 
 ### UCR Dataset Catalog and Sizes
 The table below specifies the characteristics and data dimensions for each of the 20 datasets evaluated in this study:

@@ -264,7 +264,7 @@ All metrics are reported as mean ± std over 10 stratified train/test splits per
 
 ### 6.6 Standalone Execution Architecture & Caching Optimization
 
-The standalone notebooks (`LFIG_Adaptive_Pipeline_Colab.ipynb` and `LFIG_Adaptive_Pipeline_Colab_GPU.ipynb`) execute the complete pipeline natively in Google Colab / Jupyter environments:
+The standalone executable notebook (`LFIG_Adaptive_Pipeline.ipynb`) executes the complete pipeline natively in Google Colab / Jupyter environments:
 1. **Dynamic KFold Safeguard:** Inner cross-validation dynamically caps inner splits `actual_inner = min(n_inner, min_class_size)` and falls back to standard `KFold` when small training class sizes prevent stratified splitting.
 2. **Distance Cache Optimization:** Distance matrices $D_H, D_{DTW}, D_{Cos}$ are pre-computed per $z$-level on each inner fold and cached in memory. Hyperparameter grid sweeps over $k$, fusion weight vectors $w$, and classifier types evaluate instantly over cached distance matrices, speeding up nested CV grid search by orders of magnitude.
 3. **Data Array Typing:** All univariate sequences are dynamically inspected and converted into explicit C-contiguous `np.float64` NumPy arrays (or 1D object arrays of `np.float64` series for variable-length datasets), ensuring full compatibility with underlying Cython routines in `ruptures` and `fastdtw`.

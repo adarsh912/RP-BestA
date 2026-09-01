@@ -1140,5 +1140,5 @@ if __name__ == '__main__':
     if args.compile_results:
         print("\n=== COMPILING RESULTS AND GENERATING CD DIAGRAMS ===")
         csv_file = 'master_benchmark_results_gpu.csv' if args.gpu else 'master_benchmark_results.csv'
-        nb_file = 'LFIG_Adaptive_Pipeline_Colab_GPU.ipynb' if args.gpu else 'LFIG_Adaptive_Pipeline_Colab.ipynb'
+        nb_file = 'LFIG_Adaptive_Pipeline.ipynb'
         compile_results_and_plot(nb_file=nb_file, csv_file=csv_file, is_gpu=args.gpu)

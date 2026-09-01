@@ -90,7 +90,7 @@ The new protocols were successfully run in a Google Colab GPU-accelerated enviro
    We completed single-split evaluations and nested CV for all 20 UCR datasets, excluding large-scale datasets (`FordA`, `Yoga`, and `SwedishLeaf`) due to timing/timeout constraints.
 
 2. **Performance Gaps & Alignment on Official Splits:**
-   - **Official Splits Comparison:** On the official single train/test splits, state-of-the-art models (ROCKET, MiniROCKET, and HIVE-COTE 2.0) outperform our single-split test accuracy ($10\text{D Acc}$) across all 20 datasets, as shown in the final output of `LFIG_Adaptive_Pipeline_Colab_GPU.ipynb`.
+   - **Official Splits Comparison:** On the official single train/test splits, state-of-the-art models (ROCKET, MiniROCKET, and HIVE-COTE 2.0) outperform our single-split test accuracy ($10\text{D Acc}$) across all 20 datasets, as shown in the final output of `LFIG_Adaptive_Pipeline.ipynb`.
    - **Cross-Validation Generalization:** Under the 5-fold outer cross-validation protocol, our model achieves high generalization performance (e.g. **1.0000** on Coffee, **0.9742** on SonyAIBORobotSurface1, and **0.9807** on Chinatown) due to larger training folds.
    - **Competitive Edge:** Our **Proposed Adaptive LFIG framework** consistently outperforms the standard DTW-1NN baseline on average ranks, and runs up to **14.2x faster** than raw Fast-DTW.
 
@@ -106,7 +106,7 @@ The new protocols were successfully run in a Google Colab GPU-accelerated enviro
 
 ### 3.5 Phase 13: Notebook Pipeline Verification & Diagnostic Proof Execution
 
-- **Self-Contained Notebook Deployment:** Generated and verified [LFIG_Adaptive_Pipeline_Colab.ipynb](file:///Users/adarshfulzele/Desktop/RP/Best%20A/LFIG_Adaptive_Pipeline_Colab.ipynb) (CPU-focused) and [LFIG_Adaptive_Pipeline_Colab_GPU.ipynb](file:///Users/adarshfulzele/Desktop/RP/Best%20A/LFIG_Adaptive_Pipeline_Colab_GPU.ipynb) (GPU-accelerated) containing self-installing dependencies, dynamic inner KFold split safeguards, and explicit `float64` array formatting.
+- **Self-Contained Notebook Deployment:** Generated and verified [LFIG_Adaptive_Pipeline.ipynb](file:///Users/adarshfulzele/Desktop/RP/Best%20A/LFIG_Adaptive_Pipeline.ipynb) containing self-installing dependencies, dynamic inner KFold split safeguards, and explicit `float64` array formatting.
 - **Empirical Diagnostic Proof Results:**
   1. **[Proof 1] Variable-Length CPD Segmentation:** Confirms boundaries and granule lengths calculated across adaptive signals (e.g. GunPoint `[15, 15, ...]`, Coffee `[28, 28, ..., 6]`, ArrowHead `[25, ..., 1]`, ECG200 `[10, ..., 6]`).
   2. **[Proof 2] 3D Standard vs. 10D Proposed LFIG Comparison:**

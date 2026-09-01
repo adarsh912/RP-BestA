@@ -52,6 +52,14 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
+### Hardware & System Specifications
+Experiments and benchmark evaluations were profiled on the following workstation:
+- **Workstation:** Dell Precision 3650 Tower
+- **Processor:** 11th Gen Intel® Core™ i9-11900K @ 3.50 GHz (16 logical CPUs)
+- **RAM:** 32 GB (32768 MB)
+- **GPU Accelerator:** NVIDIA GeForce RTX 3070 (8 GB Dedicated VRAM)
+- **Operating System:** Windows 11 Pro 64-bit (DirectX 12 Ultimate)
+
 ### Running the New Modules
 To verify the new modules and run experimental tasks:
 ```bash

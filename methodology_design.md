@@ -269,3 +269,12 @@ The standalone notebooks (`LFIG_Adaptive_Pipeline_Colab.ipynb` and `LFIG_Adaptiv
 2. **Distance Cache Optimization:** Distance matrices $D_H, D_{DTW}, D_{Cos}$ are pre-computed per $z$-level on each inner fold and cached in memory. Hyperparameter grid sweeps over $k$, fusion weight vectors $w$, and classifier types evaluate instantly over cached distance matrices, speeding up nested CV grid search by orders of magnitude.
 3. **Data Array Typing:** All univariate sequences are dynamically inspected and converted into explicit C-contiguous `np.float64` NumPy arrays (or 1D object arrays of `np.float64` series for variable-length datasets), ensuring full compatibility with underlying Cython routines in `ruptures` and `fastdtw`.
 
+### 6.7 Hardware & System Specifications
+
+All experimental benchmarks, diagnostic proofs, and nested cross-validation runs were evaluated on the following dedicated workstation architecture:
+- **Workstation Model:** Dell Precision 3650 Tower
+- **Processor (CPU):** 11th Gen Intel® Core™ i9-11900K @ 3.50 GHz (16 logical CPUs / 8 cores)
+- **System Memory (RAM):** 32 GB (32768 MB)
+- **Graphics Processing Unit (GPU):** NVIDIA GeForce RTX 3070 (8 GB Dedicated GDDR6 VRAM, 16 GB Shared Memory)
+- **Operating System:** Microsoft Windows 11 Pro 64-bit (DirectX 12 Ultimate enabled)
+

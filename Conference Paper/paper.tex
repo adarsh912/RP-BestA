@@ -272,7 +272,7 @@ No. & Dataset & Domain & Train/Test & Length & Classes \\ \hline
 
 \begin{itemize}
     \item \textbf{Baselines}: Reproduced implementations of DTW-1NN, ROCKET, and MiniROCKET \cite{dempster2021}, alongside literature results for HIVE-COTE 2.0 \cite{middlehurst2021}.
-    \item \textbf{Environment \& Reproducibility}: Local execution on a macOS Apple M-series workstation (16GB Unified Memory). We enforce a random seed of `42` to ensure deterministic train/test splits, cross-validations, and classifier initializations.
+    \item \textbf{Hardware \& Experimental Environment}: Experiments were executed on a dedicated Dell Precision 3650 Tower workstation equipped with an 11th Gen Intel Core i9-11900K processor @ 3.50 GHz (16 logical CPUs), 32 GB RAM, and an NVIDIA GeForce RTX 3070 GPU (8 GB VRAM) running 64-bit Windows 11 Pro. A global random seed of \texttt{42} was enforced across all splits, cross-validations, and classifier initializations to guarantee strict reproducibility.
     \item \textbf{UCR Loader Source}: Downloaded directly from the official UCR Time Series Classification Archive using the archive password.
 \end{itemize}
 

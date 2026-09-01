@@ -71,18 +71,18 @@ This document compiles the **Phase 1 Literature Review** deliverables for the pr
 20. **Lu, W., Pedrycz, W., & Yang, J. (2021)** — *Granular time series modeling: A comprehensive review and new perspectives*
     - **Focus:** Detailed review of interval and fuzzy time series models, forecasting, and clustering.
     - **Key Finding:** Emphasizes that future work should combine feature engineering with fuzzy granules to expand their usage to classification.
-21. **ScienceDirect (2018)** — *Time-series clustering based on linear fuzzy information granules*
-    - **Focus:** Derives Hausdorff-based distance between LFIG bounds and generalizes it into an LFIG-DTW metric for equal and unequal-length granular sequences.
-    - **Key Finding:** Establishes the combination of Hausdorff boundary distance and DTW sequence alignment ($D_H + D_{DTW}$), though without 10D internal features or learned fusion weights.
-22. **ScienceDirect (2023)** — *TFGRP-SVM: Linear fuzzy information granulation integrated with time series recurrence analysis for classification*
-    - **Focus:** Integrates LFIG into time series recurrence plots (TFGRP) combined with SVM classifiers to address noise and trend-confusion problems.
-    - **Key Finding:** Direct competitor framing for LFIG in classification, using recurrence plot transformations rather than explicit 10D statistical descriptor vectors.
-23. **ScienceDirect (2023)** — *Distance measure for equal and unequal-size LFIGs via constrained DTW variants*
-    - **Focus:** Formalizes interval Hausdorff distance between equal-size granules, extends it to unequal-size LFIGs via constrained DTW, and builds sequence-level distances for full time series.
-    - **Key Finding:** Resolves unequal granule length alignment using boundary constraints, establishing a formal precedent for non-uniform LFIG distances.
-24. **Adjacent LFIG Approaches (Gaussian LFIG, FCM+LFIG, Fuzzy Inference & Decision Trees)** — *Various authors (2017-2024)*
-    - **Focus:** Explores Gaussian membership envelopes, trend-oriented Fuzzy C-Means (FCM) clustering, fuzzy inference systems, and fuzzy decision trees for forecasting.
-    - **Key Finding:** Demonstrates that the LFIG literature space is active but overwhelmingly centered on forecasting and clustering rather than high-dimensional feature-based classification.
+21. **Duan, L., Yu, F., Pedrycz, W., & Wang, Y. (2018)** — *Time-series clustering based on linear fuzzy information granules* (Applied Soft Computing, Vol. 73, pp. 1053–1067)
+    - **Focus:** Derives Hausdorff-based distance between LFIG bounds and generalizes it into an LFIG-DTW metric for equal and unequal-length granular sequences in hierarchical clustering.
+    - **Key Finding:** Establishes the combination of Hausdorff boundary distance and DTW sequence alignment ($D_H + D_{DTW}$), though relying on 3D $[L, U, a]$ representations without 10D statistical features or learned fusion weights.
+22. **He, Q., & Yu, F. (2023)** — *Trend recurrence analysis and time series classification via trend fuzzy granular recurrence plot method (TFGRP-SVM)* (Chaos, Solitons & Fractals, Vol. 169, Article 113309)
+    - **Focus:** Integrates LFIG into time series recurrence plots (TFGRP) combined with SVM classifiers using a precomputed recurrence kernel to address noise and trend-confusion problems.
+    - **Key Finding:** Direct competitor framing for LFIG in classification, utilizing 2D recurrence plot image transformations rather than explicit 10D statistical-structural descriptor vectors.
+23. **Gao, F., & Yu, F. (2019)** — *Linear Fuzzy Information Granulation Based Classification Method for Unequal Length Time Series* (IEEE Access, Vol. 7, pp. 91118–91128)
+    - **Focus:** Extends LFIG distance metric to classify unequal-length time series using Generalized LFIG-DTW distance with static weights.
+    - **Key Finding:** Resolves unequal granule length alignment using heuristic boundary constraints, but lacks multi-feature expansion, dynamic metric weight learning, and adaptive CPD segmentation.
+24. **Yang, X., Yu, F., & Pedrycz, W. (2017)** — *Long-term forecasting of time series based on linear fuzzy information granules and fuzzy inference system* (International Journal of Approximate Reasoning, Vol. 81, pp. 1–27)
+    - **Focus:** Explores fixed sliding-window LFIG granule construction combined with Fuzzy Inference Systems (FIS) for long-term time series forecasting.
+    - **Key Finding:** Demonstrates that standard LFIG is effective for forecasting and noise smoothing, but is constrained to fixed partitions and unweighted Euclidean distance metrics.
 
 ---
 

@@ -92,11 +92,11 @@ The new protocols were successfully run in a Google Colab GPU-accelerated enviro
 2. **Performance Gaps & Alignment on Official Splits:**
    - **Official Splits Comparison:** On the official single train/test splits, state-of-the-art models (ROCKET, MiniROCKET, and HIVE-COTE 2.0) outperform our single-split test accuracy ($10\text{D Acc}$) across all 20 datasets, as shown in the final output of `LFIG_Adaptive_Pipeline_Colab_GPU.ipynb`.
    - **Cross-Validation Generalization:** Under the 5-fold outer cross-validation protocol, our model achieves high generalization performance (e.g. **1.0000** on Coffee, **0.9742** on SonyAIBORobotSurface1, and **0.9807** on Chinatown) due to larger training folds.
-   - **Competitive Edge:** Our model consistently outperforms the standard DTW-1NN baseline on average ranks, and runs up to **14.2x faster** than raw Fast-DTW.
+   - **Competitive Edge:** Our **Proposed Adaptive LFIG framework** consistently outperforms the standard DTW-1NN baseline on average ranks, and runs up to **14.2x faster** than raw Fast-DTW.
 
 3. **Demšar Critical Difference Analysis:**
    - Friedman test statistic = 45.8254 ($p = 0.000000$, highly significant).
-   - Average ranks: ROCKET (**1.5000**), MiniROCKET (**1.6750**), DTW-1NN (**3.0500**), Proposed LFIG (**3.7750**).
+   - Average ranks: ROCKET (**1.5000**), MiniROCKET (**1.6750**), DTW-1NN (**3.0500**), **Proposed Adaptive LFIG** (**3.7750**).
    - Critical Difference (CD) Threshold: **1.0488**.
    - Diagram plotted and saved: `plots/cd_diagram.png`.
 

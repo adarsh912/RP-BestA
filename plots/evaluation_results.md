@@ -19,7 +19,7 @@ Critical difference diagram is saved in [/Users/adarshfulzele/Desktop/RP/Best A/
 
 ## Complete Comparative Benchmark Table
 
-| Dataset | Train | Test | Segmentation | Weights | Accuracy (10D) | Nested CV Accuracy | Runtime (s) | Best Baseline | Gap |
+| Dataset | Train | Test | Segmentation | Weights | Proposed (10D Acc) | Proposed (Nested CV) | Runtime (s) | Best Baseline | Gap |
 |:---|---:|---:|:---|:---|:---:|:---:|---:|:---|---:|
 | GunPoint | 50 | 150 | cpd(1.5) | [0.2, 0.4, 0.4] | 0.8533 | 0.9300±0.0100 | 243.2 | ROCKET (1.0000) | +0.0700 |
 | Coffee | 28 | 28 | fixed(28) | [0.1, 0.8, 0.1] | 0.9286 | 1.0000±0.0000 | 109.2 | DTW-1NN (1.0000) | 0.0000 (Tie) |

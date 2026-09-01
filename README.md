@@ -1,6 +1,6 @@
 # Adaptive Multi-Feature Linear Fuzzy Information Granulation with Hybrid Similarity Learning
 
-This repository implements an advanced, statistically rigorous framework for time series classification (TSC) using **Adaptive Segmentation**, **Enhanced Linear Fuzzy Information Granulation (LFIG)**, **Multi-Feature Granule Representation**, and **Hybrid Similarity Learning with Rank Fusion**.
+This repository implements the **Proposed Adaptive Multi-Feature Linear Fuzzy Information Granulation (Proposed Adaptive LFIG)** framework for time series classification (TSC) using **Adaptive Segmentation**, **Enhanced Linear Fuzzy Information Granulation (LFIG)**, **10-Dimensional Multi-Feature Granule Representation**, and **Hybrid Similarity Learning with Rank Fusion**.
 
 ---
 
@@ -115,7 +115,7 @@ The table below specifies the characteristics and data dimensions for each of th
   - **ECG200:** **0.7200** (10D) vs. **0.8000** (3D) $\rightarrow$ **-8.00% Accuracy Delta**
   - **Coffee:** **0.9286** (10D) vs. **0.9286** (3D) $\rightarrow$ **+0.00% Accuracy Delta**
 - **[Proof 3] Leave-One-Feature-Out (LOFO) Feature Impact Matrix:** Measures individual sensitivity by zeroing out each of the 10 descriptors (Lower Bound, Upper Bound, Slope, Shannon Entropy, Variance, Volatility, Curvature, Intercept, Energy, Skewness).
-- **[Proof 4] Comparative Baselines Benchmark:** Compares our 10D Adaptive LFIG model against SOTA baselines (DTW-1NN, ROCKET, MiniROCKET, HIVE-COTE 2.0).
+- **[Proof 4] Comparative Baselines Benchmark:** Compares our **Proposed 10D Adaptive LFIG model** against SOTA baselines (DTW-1NN, ROCKET, MiniROCKET, HIVE-COTE 2.0).
 
 ### 2. Leakage-Free Evaluation Protocol
 - **Nested Cross-Validation:** Hyperparameters ($z$, $k$, distance fusion weights, KNN vs Kernel SVM) are selected per-fold using an inner CV loop with progress bars to eliminate selection leakage.

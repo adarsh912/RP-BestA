@@ -6,17 +6,20 @@
 \usepackage{xcolor}
 \usepackage{array}
 \usepackage{tabularx}
-
-\newcolumntype{Y}{>{\centering\arraybackslash}X}
+\usepackage{etoolbox}
 
 \makeatletter
-\long\def\@makecaption#1#2{%
-  \ifx\@captype\@IEEEtablestring
-    \noindent{\normalfont\footnotesize #1: #2}\par
-  \else
-    \@IEEEmakefigurecaption{#1}{#2}%
-  \fi}
+\patchcmd{\@makecaption}
+  {\par\centering\@IEEEtabletopskipstrut}
+  {\par\raggedright\@IEEEtabletopskipstrut}
+  {}{}
+\patchcmd{\@makecaption}
+  {{\normalfont\footnotesize #1}\\{\normalfont\footnotesize\scshape #2}}
+  {{\normalfont\footnotesize #1:}\nobreakspace{\normalfont\footnotesize #2}}
+  {}{}
 \makeatother
+
+\newcolumntype{Y}{>{\centering\arraybackslash}X}
 
 \begin{document}
 
@@ -28,7 +31,7 @@
 \IEEEauthorblockA{\textit{Computer Science and Engineering} \\
 \textit{National Institute of Technology}\\
 Rourkela, India \\
-225cs2010@nitrkl.ac.in}
+adarshdewanand912@gmail.com}
 \and
 \IEEEauthorblockN{Souveek Roy}
 \textit{Intelligent Data Analytics}\\
@@ -52,9 +55,9 @@ panigrahis@nitrkl.ac.in}
 \begin{abstract}
 Traditional time series classification (TSC) algorithms are challenged by raw, high-frequency signal noise, temporal phase shifts, and high computational complexity. Linear Fuzzy Information Granulation (LFIG) provides a robust interval-based abstraction by converting raw signals into trend-based envelope granules. However, standard LFIG suffers from boundary rigidity (fixed segmentation), heavy information loss (only storing trend and envelopes), and single-similarity metric bias. 
 
-This paper presents a complete, highly performant Adaptive Multi-Feature LFIG framework that resolves these challenges. We introduce a dual segmentation strategy utilizing Bottom-Up Change Point Detection (CPD) for phase-shifted series, and Fixed-Window partitioning for phase-aligned series. We construct a 10-dimensional structural and statistical granule representation to prevent information loss and introduce a Hybrid Similarity Learning layer that fuses set overlap (interval Hausdorff), phase alignment (slope DTW), and directional movement (Cosine DTW on the 10-dimensional feature space). 
+This paper presents a complete, highly performant Adaptive Multi-Feature LFIG framework (termed \textbf{Proposed Adaptive LFIG}) that resolves these challenges. We introduce a dual segmentation strategy utilizing Bottom-Up Change Point Detection (CPD) for phase-shifted series, and Fixed-Window partitioning for phase-aligned series. We construct a 10-dimensional structural and statistical granule representation to prevent information loss and introduce a Hybrid Similarity Learning layer that fuses set overlap (interval Hausdorff), phase alignment (slope DTW), and directional movement (Cosine DTW on the 10-dimensional feature space). 
 
-Evaluating on 20 benchmark datasets from the UCR Time Series Archive shows that our framework is highly competitive with standard DTW-1NN, achieving an average rank of \textbf{3.7750} compared to DTW-1NN at \textbf{3.0500}. While state-of-the-art ensemble models (HIVE-COTE 2.0) and convolutional models (ROCKET, MiniROCKET) outperform our single-split test accuracy on the official splits due to data sparsity, our model achieves a highly compelling accuracy-efficiency trade-off. It executes up to 14.2$\times$ faster than standard DTW while providing a human-interpretable, compressed fuzzy interval representation.
+Evaluating on 20 benchmark datasets from the UCR Time Series Archive shows that our proposed framework is highly competitive with standard DTW-1NN, achieving an average rank of \textbf{3.7750} compared to DTW-1NN at \textbf{3.0500}. While state-of-the-art ensemble models (HIVE-COTE 2.0) and convolutional models (ROCKET, MiniROCKET) outperform our single-split test accuracy on the official splits due to data sparsity, our proposed model achieves a highly compelling accuracy-efficiency trade-off. It executes up to 14.2$\times$ faster than standard DTW while providing a human-interpretable, compressed fuzzy interval representation.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -71,6 +74,14 @@ To handle these challenges, researchers use Fuzzy Information Granulation (LFIG)
     \item \textit{High Information Loss}: Standard LFIG only extracts three values per segment (Lower bound, Upper bound, and Trend slope). It completely discards internal segment dynamics like volatility, curvature, complexity, and skewness.
     \item \textit{Similarity Bias}: Comparing granules using only Euclidean distance or simple DTW fails to capture shape overlap, phase alignment, and directional movement trends simultaneously.
 \end{enumerate}
+
+To overcome these fundamental limitations, we propose the \textbf{Adaptive Multi-Feature Linear Fuzzy Information Granulation (Proposed Adaptive LFIG)} framework. The principal contributions of our proposed architecture are:
+\begin{itemize}
+    \item \textbf{Dual Adaptive Segmentation}: An automated training-driven heuristic using autocorrelation variance to dynamically select between Bottom-Up Change Point Detection (CPD) for phase-shifted series and Fixed-Window partitioning for phase-aligned series.
+    \item \textbf{10-Dimensional Structural and Statistical Granulation}: Expanding conventional 3D granules into a rich 10D descriptor representation that captures Shannon entropy, volatility, curvature, intercept, energy, skewness, and variance, preventing information loss.
+    \item \textbf{Hybrid 3-Way Metric Learning}: A unified distance space fusing interval Hausdorff distance, slope-DTW phase alignment, and 10D Cosine-DTW directional similarity with data-driven weight optimization.
+    \item \textbf{Leakage-Free Validation}: Comprehensive benchmark validation across 20 UCR datasets under strict nested cross-validation and Dem\v{s}ar statistical significance ranking.
+\end{itemize}
 
 \subsection{Related Work \& Positioning Against Prior LFIG Formulations}
 Prior literature on LFIG focuses predominantly on forecasting and clustering rather than high-dimensional classification: Gao and Yu \cite{gao2019} evaluate unequal-length classification with static weights; He and Yu \cite{he2023} propose recurrence plot SVMs; Duan et al. \cite{duan2018} derive unweighted metrics for clustering; and Yang et al. \cite{yang2017} establish sliding-window forecasting.
@@ -363,10 +374,10 @@ Feature Descriptor & Mean Delta ($\Delta = \text{Full} - \text{Ablated}$) & 95\%
 \end{table}
 
 \subsection{Scaling to 20 UCR Datasets \& Dem\v{s}ar Critical Difference Analysis}
-To establish robust statistical validation, we scale our evaluation to a catalog of 20 UCR datasets spanning six distinct domains, comparing our model (single-split 10D and 5-fold Nested CV) against reproduced DTW-1NN, ROCKET, and MiniROCKET baselines. The complete results are summarized in Table \ref{tab:complete_20_results}.
+To establish robust statistical validation, we scale our evaluation to a catalog of 20 UCR datasets spanning six distinct domains, comparing our Proposed Adaptive LFIG model (single-split 10D and 5-fold Nested CV) against reproduced DTW-1NN, ROCKET, and MiniROCKET baselines. The complete results are summarized in Table \ref{tab:complete_20_results}.
 
 \begin{table*}[!t]
-\caption{Complete 20-Dataset Benchmark Results (Single Split \& Reproduced Baselines)}
+\caption{Complete 20-Dataset Benchmark Results: Proposed Framework vs. Reproduced Baselines}
 \label{tab:complete_20_results}
 \centering
 \footnotesize
@@ -374,7 +385,7 @@ To establish robust statistical validation, we scale our evaluation to a catalog
 \renewcommand{\arraystretch}{0.92}
 \begin{tabularx}{\textwidth}{|>{\raggedright\arraybackslash}p{3.0cm}|c|c|c|c|c|>{\centering\arraybackslash}X|c|}
 \hline
-Dataset & 10D Acc. & Nested CV & DTW-1NN & ROCKET & MiniROCKET & Best Baseline & Gap \\ \hline
+Dataset & \textbf{Proposed (10D)} & \textbf{Proposed (Nested CV)} & DTW-1NN & ROCKET & MiniROCKET & Best Baseline & Gap \\ \hline
 GunPoint & 0.8533 & 0.9300 $\pm$ 0.0100 & 0.9067 & 1.0000 & 0.9933 & ROCKET (1.0000) & +0.0700 \\
 Coffee & 0.9286 & 1.0000 $\pm$ 0.0000 & 1.0000 & 1.0000 & 1.0000 & DTW-1NN (1.0000) & +0.0000 \\
 ArrowHead & 0.7086 & 0.8910 $\pm$ 0.0241 & 0.7029 & 0.8057 & 0.8514 & HIVE-COTE 2.0 (0.8710) & -0.0200 \\
@@ -401,28 +412,28 @@ Wafer & 0.9455 & 0.9782 $\pm$ 0.0038 & 0.9799 & 0.9985 & 0.9994 & MiniROCKET (0.
 We conducted a Friedman chi-square test followed by Nemenyi post-hoc analysis ($\alpha = 0.05$) \cite{demsar2006} using the cross-validated ranks:
 \begin{itemize}
     \item \textbf{Friedman Test Statistic}: 45.8254 ($p = 0.000000$), confirming statistically significant differences.
-    \item \textbf{Average Ranks (Lower is Better)}: ROCKET (1.5000), MiniROCKET (1.6750), DTW-1NN (3.0500), and Proposed LFIG (Single-Split) (3.7750).
+    \item \textbf{Average Ranks (Lower is Better)}: ROCKET (1.5000), MiniROCKET (1.6750), DTW-1NN (3.0500), and Proposed Adaptive LFIG (Single-Split) (3.7750).
     \item \textbf{Critical Difference (CD) Threshold}: 1.0488. The Critical Difference diagram is plotted in Fig. \ref{fig:cd_diagram}.
 \end{itemize}
 
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=\linewidth]{plots/cd_diagram.png}
-\caption{Dem\v{s}ar Critical Difference diagram comparing average ranks of the Proposed model, ROCKET, MiniROCKET, and DTW-1NN baselines across 20 UCR datasets.}
+\caption{Dem\v{s}ar Critical Difference diagram comparing average ranks of the Proposed Adaptive LFIG model, ROCKET, MiniROCKET, and DTW-1NN baselines across 20 UCR datasets.}
 \label{fig:cd_diagram}
 \end{figure}
 
 \subsection{Selection Leakage \& Unbiased Generalization}
-Table \ref{tab:leakage_and_generalization} quantifies the selection leakage present in the official single-split evaluations compared to leakage-free and nested cross-validation bounds on the pilot datasets. The manual tuning of parameters on the test splits inflated single-split accuracies by up to 16.00\% on ECG200. Conversely, averaging across outer nested folds filters out partition-specific split variance, providing a robust estimate of the model's true generalization capacity.
+Table \ref{tab:leakage_and_generalization} quantifies the selection leakage present in the official single-split evaluations compared to leakage-free and nested cross-validation bounds of the Proposed Model on the pilot datasets. The manual tuning of parameters on the test splits inflated single-split accuracies by up to 16.00\% on ECG200. Conversely, averaging across outer nested folds filters out partition-specific split variance, providing a robust estimate of the model's true generalization capacity.
 
 \begin{table}[!t]
-\caption{Selection Leakage and Generalization Estimates on the 5 Pilot Datasets}
+\caption{Selection Leakage and Generalization Estimates of the Proposed Model on 5 Pilot Datasets}
 \label{tab:leakage_and_generalization}
 \centering
 \small
 \begin{tabularx}{\columnwidth}{|X|Y|Y|Y|}
 \hline
-Dataset & Leaky Accuracy & Leakage-Free Accuracy & Nested-CV Accuracy (Mean $\pm$ SD) \\ \hline
+Dataset & Original Leaky Acc & Proposed (Single Split) & Proposed (Nested CV $\pm$ SD) \\ \hline
 \textbf{GunPoint} & 0.9067 & 0.8533 & 0.9300 $\pm$ 0.0100 \\
 \textbf{Coffee} & 0.9286 & 0.9286 & 1.0000 $\pm$ 0.0000 \\
 \textbf{ECG200} & 0.8800 & 0.7200 & 0.8000 $\pm$ 0.0671 \\

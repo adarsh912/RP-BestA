@@ -2,7 +2,7 @@
 
 This table summarizes the benchmark results for all 20 UCR datasets evaluated on GPU.
 
-| Dataset | 3D_Acc | 10D_Acc | NestedCV | Time (s) | Best_Baseline | Outperformed_By |
+| Dataset | Baseline 3D LFIG | Proposed 10D LFIG | Proposed Nested CV | Time (s) | Best Baseline | Outperformed By |
 |:---|:---:|:---:|:---:|:---:|:---|:---|
 | GunPoint | 0.826700 | 0.853300 | 0.9300±0.0100 | 243.2 | ROCKET (1.0000) | ROCKET (1.0000) |
 | Coffee | 0.928600 | 0.928600 | 1.0000±0.0000 | 109.2 | DTW-1NN (1.0000) | N/A |

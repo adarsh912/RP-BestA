@@ -64,20 +64,9 @@ Time series classification, fuzzy information granulation, change point detectio
 
 Time series classification is central to critical domains such as medical diagnostic monitoring (electrocardiograms), financial volatility forecasting, and industrial equipment telemetry. The primary difficulty in classifying time series lies in the high dimensionality and local noise fluctuations of raw signals, alongside variations in temporal offsets (phase shifts).
 
-To handle these challenges, researchers use Fuzzy Information Granulation (LFIG). LFIG splits a time series into segments, fits a linear regression trend line within each segment, and builds a fuzzy interval envelope around it. However, standard LFIG implementations are limited by three major gaps:
-\begin{enumerate}
-    \item \textit{Rigid Windowing}: Relying on equal-length fixed partitions fails when signals are non-stationary, as boundary transitions are ignored.
-    \item \textit{High Information Loss}: Standard LFIG only extracts three values per segment (Lower bound, Upper bound, and Trend slope). It completely discards internal segment dynamics like volatility, curvature, complexity, and skewness.
-    \item \textit{Similarity Bias}: Comparing granules using only Euclidean distance or simple DTW fails to capture shape overlap, phase alignment, and directional movement trends simultaneously.
-\end{enumerate}
+To handle these challenges, researchers use Fuzzy Information Granulation (LFIG). LFIG splits a time series into segments, fits a linear regression trend line within each segment, and builds a fuzzy interval envelope around it. However, standard LFIG implementations are limited by three major shortcomings. First, rigid windowing relying on equal-length fixed partitions fails when signals are non-stationary because structural regime boundaries are ignored. Second, standard formulations suffer from severe information loss by extracting only lower bounds, upper bounds, and linear slopes, discarding essential internal segment dynamics such as volatility, curvature, complexity, and skewness. Third, comparing granules using only Euclidean distance or univariate Dynamic Time Warping introduces similarity bias, failing to simultaneously account for interval set overlap, temporal phase alignment, and multidimensional directional trajectories.
 
-To overcome these fundamental limitations, we propose the \textbf{Adaptive Multi-Feature Linear Fuzzy Information Granulation (Proposed Adaptive LFIG)} framework. The principal contributions of our proposed architecture are:
-\begin{itemize}
-    \item \textbf{Dual Adaptive Segmentation}: An automated training-driven heuristic using autocorrelation variance to dynamically select between Bottom-Up Change Point Detection (CPD) for phase-shifted series and Fixed-Window partitioning for phase-aligned series.
-    \item \textbf{10-Dimensional Structural and Statistical Granulation}: Expanding conventional 3D granules into a rich 10D descriptor representation that captures Shannon entropy, volatility, curvature, intercept, energy, skewness, and variance, preventing information loss.
-    \item \textbf{Hybrid 3-Way Metric Learning}: A unified distance space fusing interval Hausdorff distance, slope-DTW phase alignment, and 10D Cosine-DTW directional similarity with data-driven weight optimization.
-    \item \textbf{Leakage-Free Validation}: Comprehensive benchmark validation across 20 UCR datasets under strict nested cross-validation and Dem\v{s}ar statistical significance ranking.
-\end{itemize}
+To overcome these fundamental limitations, this paper proposes the \textbf{Adaptive Multi-Feature Linear Fuzzy Information Granulation (Proposed Adaptive LFIG)} framework. Our core contributions encompass: (i) a dual adaptive segmentation architecture that dynamically routes signals between Bottom-Up Change Point Detection and Fixed-Window partitioning using a training-split autocorrelation variance heuristic; (ii) a 10-dimensional structural and statistical granulation space incorporating Shannon entropy, volatility, curvature, intercept, energy, skewness, and variance alongside envelope bounds to eliminate representational loss; (iii) a hybrid 3-way metric learning layer fusing interval Hausdorff overlap, slope-DTW phase alignment, and 10D Cosine-DTW directional movement with data-driven weight optimization; and (iv) a rigorous, leakage-free benchmark evaluation across 20 UCR datasets under 5-fold nested cross-validation and Dem\v{s}ar statistical significance ranking.
 
 \subsection{Related Work \& Positioning Against Prior LFIG Formulations}
 Prior literature on LFIG focuses predominantly on forecasting and clustering rather than high-dimensional classification: Gao and Yu \cite{gao2019} evaluate unequal-length classification with static weights; He and Yu \cite{he2023} propose recurrence plot SVMs; Duan et al. \cite{duan2018} derive unweighted metrics for clustering; and Yang et al. \cite{yang2017} establish sliding-window forecasting.
@@ -170,35 +159,19 @@ The parameter $z$ determines the envelope width (e.g., $z=1.0$ covers $68.2\%$ o
 \end{figure}
 
 \subsection{10-Dimensional Granular Feature Extraction}
-To capture internal segment dynamics and extract canonical time-series characteristics similar to standard feature packages like catch22 \cite{lubba2019}, we represent each granule $g_j$ as a 10-dimensional feature vector $\mathbf{f}_j$:
-\begin{enumerate}
-    \item \textit{Lower Bound ($L_j$)}: Mean lower fuzzy boundary.
-    \item \textit{Upper Bound ($U_j$)}: Mean upper fuzzy boundary.
-    \item \textit{Slope ($a_j$)}: Direction and rate of local trend.
-    \item \textit{Shannon Entropy}: Signal complexity within the segment.
-    \item \textit{Variance}: Dispersion of raw signal values.
-    \item \textit{Volatility}: Mean absolute local change.
-    \item \textit{Curvature}: The second-order derivative approximation of segment values.
-    \item \textit{Intercept ($b_j$)}: Absolute level height.
-    \item \textit{Energy}: Root mean square of signal values.
-    \item \textit{Skewness}: Symmetry of values around the trend line.
-\end{enumerate}
+To capture rich internal segment dynamics and extract canonical time-series characteristics inspired by standard feature suites such as catch22 \cite{lubba2019}, each granule $g_j$ is represented as a comprehensive 10-dimensional feature vector $\mathbf{f}_j$. This representation incorporates: (i) lower bound ($L_j$) and upper bound ($U_j$) capturing the fuzzy envelope level; (ii) trend slope ($a_j$) and intercept ($b_j$) parameterizing local trajectory and height; (iii) Shannon entropy ($H_j$) measuring intra-segment complexity; (iv) variance ($\sigma^2_j$) and volatility ($V_{ol, j}$) quantifying local signal dispersion and average first-difference fluctuations; (v) curvature ($c_j$) reflecting polynomial acceleration; and (vi) energy ($E_{n, j}$) and skewness ($Sk_j$) encoding signal magnitude and distribution asymmetry around the trend.
 
 \subsection{Hybrid Similarity Learning \& Distance Fusion}
-Given two granular sequences $P = \{p_1, \dots, p_{S_P}\}$ and $Q = \{q_1, \dots, q_{S_Q}\}$ (where $S_P$ and $S_Q$ can vary), similarity is evaluated across three dimensions:
-\begin{enumerate}
-    \item \textit{Overlap Distance ($D_H$)}: Measures interval Hausdorff distance between bounds:
-    \begin{equation}
-    d_H(p_j, q_k) = \max \left( |L_P - L_Q|, |U_P - U_Q| \right)
-    \label{eq:hausdorff_dist}
-    \end{equation}
-    \item \textit{Phase Distance ($D_{DTW}$)}: Dynamic Time Warping \cite{sakoe1978} computed over granule trend slopes to align local trend rates.
-    \item \textit{Directional Distance ($D_{Cos}$)}: DTW computed over the 10D feature space utilizing a Cosine local metric:
-    \begin{equation}
-    \text{dist}_{\text{Cos}}(\mathbf{f}_P, \mathbf{f}_Q) = 1 - \frac{\mathbf{f}_P \cdot \mathbf{f}_Q}{\|\mathbf{f}_P\| \|\mathbf{f}_Q\|}
-    \label{eq:cosine_dist}
-    \end{equation}
-\end{enumerate}
+Given two granular sequences $P = \{p_1, \dots, p_{S_P}\}$ and $Q = \{q_1, \dots, q_{S_Q}\}$ of potentially varying segment lengths, similarity is evaluated across three complementary physical dimensions. First, the Overlap Distance ($D_H$) measures the interval Hausdorff metric between granule boundaries:
+\begin{equation}
+d_H(p_j, q_k) = \max \left( |L_P - L_Q|, |U_P - U_Q| \right).
+\label{eq:hausdorff_dist}
+\end{equation}
+Second, the Phase Distance ($D_{DTW}$) applies Dynamic Time Warping \cite{sakoe1978} over granule trend slopes ($a_j$) to align localized growth and decay rates. Third, the Directional Distance ($D_{Cos}$) computes multidimensional DTW over the 10D feature granule space utilizing a local Cosine distance metric:
+\begin{equation}
+\text{dist}_{\text{Cos}}(\mathbf{f}_P, \mathbf{f}_Q) = 1 - \frac{\mathbf{f}_P \cdot \mathbf{f}_Q}{\|\mathbf{f}_P\| \|\mathbf{f}_Q\|}.
+\label{eq:cosine_dist}
+\end{equation}
 
 To prevent data leakage during testing, each raw distance matrix $D$ is normalized using the minimum and maximum distance boundaries computed \textit{strictly} from the training set:
 \begin{equation}
@@ -213,21 +186,17 @@ D_{\text{Fused}} = w_H \cdot \overline{D}_H + w_S \cdot \overline{D}_{DTW} + w_C
 
 \section{Classifiers and Distance Space Mapping}
 
-For distance-space custom KNN, classification is computed directly on the fused pairwise distance matrix. For other classifiers (Kernel SVM and tabular models), the distances are mapped into feature spaces:
-\begin{enumerate}
-    \item \textit{Precomputed Kernel SVM}: The precomputed distance is converted to a radial-basis similarity kernel:
-    \begin{equation}
-    K(P, Q) = \exp\left( -\gamma \cdot d_{\text{Fused}}(P, Q)^2 \right)
-    \label{eq:kernel_svm}
-    \end{equation}
-    The parameter $\gamma$ is set dynamically utilizing the median heuristic on the training set:
-    \begin{equation}
-    \gamma = \frac{1}{2 \cdot \text{median}(D_{\text{Fused, Train}})^2}
-    \label{eq:gamma_median}
-    \end{equation}
-    \item \textit{Distance-as-Features (Boosting \& RF)}: The distance matrix column entries represent the features of a sample (representing each sample by its distance coordinates to all training samples).
-    \item \textit{Feature-space Aggregation (Tabular Models)}: The variable-length sequences are aggregated into a fixed-length 20-dimensional vector (10 means and 10 standard deviations across all segments) to train standard tabular models.
-\end{enumerate}
+For distance-space custom KNN models, classification is performed directly on the fused pairwise distance matrix. For kernelized and ensemble classifiers, the distances are mapped into structured feature spaces. In precomputed Kernel SVM architectures, the fused pairwise distance is transformed into a radial-basis similarity kernel:
+\begin{equation}
+K(P, Q) = \exp\left( -\gamma \cdot d_{\text{Fused}}(P, Q)^2 \right),
+\label{eq:kernel_svm}
+\end{equation}
+where the scaling parameter $\gamma$ is determined dynamically via the training set median heuristic:
+\begin{equation}
+\gamma = \frac{1}{2 \cdot \text{median}(D_{\text{Fused, Train}})^2}.
+\label{eq:gamma_median}
+\end{equation}
+For ensemble classifiers (Random Forest, XGBoost, LightGBM, CatBoost), each sample is represented either by its distance coordinate vector relative to all training references (distance-as-features) or by aggregate 20-dimensional summary statistics (computing the mean and standard deviation of each descriptor across all segments).
 
 \section{Experimental Setup}
 
@@ -266,19 +235,10 @@ No. & Dataset & Domain & Train/Test & Length & Classes \\ \hline
 \end{tabularx}
 \end{table}
 
-\begin{itemize}
-    \item \textbf{Baselines}: Reproduced implementations of DTW-1NN, ROCKET, and MiniROCKET \cite{dempster2021}, alongside literature results for HIVE-COTE 2.0 \cite{middlehurst2021}.
-    \item \textbf{Hardware \& Experimental Environment}: Experiments were executed on a dedicated Dell Precision 3650 Tower workstation equipped with an 11th Gen Intel Core i9-11900K processor @ 3.50 GHz (16 logical CPUs), 32 GB RAM, and an NVIDIA GeForce RTX 3070 GPU (8 GB VRAM) running 64-bit Windows 11 Pro. A global random seed of \texttt{42} was enforced across all splits, cross-validations, and classifier initializations to guarantee strict reproducibility.
-    \item \textbf{UCR Loader Source}: Downloaded directly from the official UCR Time Series Classification Archive using the archive password.
-\end{itemize}
+The experimental benchmark incorporates reproduced implementations of DTW-1NN, ROCKET, and MiniROCKET \cite{dempster2021}, alongside established literature results for HIVE-COTE 2.0 \cite{middlehurst2021}. All experiments were executed on a dedicated Dell Precision 3650 Tower workstation equipped with an 11th Gen Intel Core i9-11900K processor @ 3.50 GHz (16 logical CPUs), 32 GB RAM, and an NVIDIA GeForce RTX 3070 GPU (8 GB VRAM) running 64-bit Windows 11 Pro. A global random seed of \texttt{42} was enforced across all splits, cross-validations, and classifier initializations to guarantee strict reproducibility. All raw benchmark datasets were obtained directly from the official UCR Time Series Classification Archive.
 
 \subsection{Leakage-Free Evaluation Protocol}
-To address selection leakage and ensure validation rigor, we execute evaluation under a leakage-free cross-validation protocol:
-\begin{enumerate}
-    \item \textit{Nested Cross-Validation}: We employ a nested cross-validation framework (5-fold outer cross-validation for reporting generalization, and 3-fold inner cross-validation for hyperparameter tuning). Hyperparameters (spread factor $z$, neighbors $k$, distance fusion weights, and classifier type) are selected per-fold using only training data, eliminating selection leakage.
-    \item \textit{Automatic Segmentation Heuristics}: The choice between Bottom-Up Change Point Detection (CPD) and Fixed-Window partitioning is determined dynamically using only the training split. We compute the variance of lag-1 autocorrelation across training samples; a variance $> 0.05$ indicates a phase-shifted dataset (triggering CPD), while a variance $\le 0.05$ indicates a phase-aligned dataset (triggering Fixed windowing).
-    \item \textit{Data-Driven Weight Learning}: Fused distance weights are learned dynamically using only the training split via a grid search over nine candidate weight combinations in the inner cross-validation loop.
-\end{enumerate}
+To address selection leakage and ensure validation rigor, our evaluation follows a strict leakage-free protocol. We employ a nested cross-validation framework consisting of 5 outer folds for assessing generalization performance and 3 inner folds for hyperparameter optimization. All operational parameters—including spread factor $z$, neighbor count $k$, distance fusion weights $w$, and classifier type—are selected per fold strictly using training data, eliminating optimization bias on test splits. Furthermore, the selection between Bottom-Up Change Point Detection (CPD) and Fixed-Window partitioning is determined dynamically on the training split: we compute the variance of lag-1 autocorrelation across training series, where a variance $> 0.05$ flags high shape volatility and routes the dataset to CPD, while a variance $\le 0.05$ selects fixed windowing. Distance fusion weights are optimized simultaneously in the inner cross-validation loop across candidate combinations to tailor alignment preferences to specific domain dynamics.
 
 \section{Empirical Results and Performance}
 
@@ -370,11 +330,7 @@ Feature Descriptor & Mean Delta ($\Delta = \text{Full} - \text{Ablated}$) & 95\%
 \end{table}
 
 \subsection{Scaling to 20 UCR Datasets \& Dem\v{s}ar Critical Difference Analysis}
-To establish complete empirical transparency and rigor, Table \ref{tab:complete_20_results} reports two complementary evaluation protocols side-by-side across all 20 UCR benchmark datasets:
-\begin{enumerate}
-    \item \textbf{Direct 1:1 Baseline Ranking (Official Single Split)}: For a strict apples-to-apples comparison against published literature baselines, the \textbf{Proposed (10D)} column evaluates our model trained strictly on the official UCR training split and tested on the official test split, matching the exact protocol of DTW-1NN, ROCKET, and MiniROCKET.
-    \item \textbf{Stability and Generalization (5-Fold Nested CV)}: The \textbf{Proposed (Nested CV)} column reports the unbiased generalization capacity ($\text{Mean} \pm \text{SD}$) across 5 outer folds with per-fold inner hyperparameter tuning, filtering out partition-specific single-split variance.
-\end{enumerate}
+To establish complete empirical transparency and rigor, Table \ref{tab:complete_20_results} reports two complementary evaluation protocols side-by-side across all 20 UCR benchmark datasets: direct 1:1 baseline ranking on the official single split, and cross-validated stability and generalization under 5-fold nested cross-validation. In the first protocol, the \textbf{Proposed (10D)} column evaluates our model trained strictly on the official UCR training split and tested on the official test split, matching the exact setting of DTW-1NN, ROCKET, and MiniROCKET for a strict apples-to-apples baseline comparison. In the second protocol, the \textbf{Proposed (Nested CV)} column reports the unbiased generalization capacity ($\text{Mean} \pm \text{SD}$) across 5 outer folds with per-fold inner hyperparameter tuning, filtering out partition-specific single-split variance.
 
 \begin{table*}[!t]
 \caption{Complete 20-Dataset Benchmark: 1:1 Single-Split Baseline Comparison and Nested CV Generalization}
@@ -409,12 +365,7 @@ Wafer & 0.9455 & 0.9782 $\pm$ 0.0038 & 0.9799 & 0.9985 & 0.9994 & MiniROCKET (0.
 \end{tabularx}
 \end{table*}
 
-We conducted a Friedman chi-square test followed by Nemenyi post-hoc analysis ($\alpha = 0.05$) \cite{demsar2006} strictly using the 1:1 single-split baseline ranks:
-\begin{itemize}
-    \item \textbf{Friedman Test Statistic}: 45.8254 ($p = 0.000000$), confirming statistically significant differences across models.
-    \item \textbf{Average Ranks (Lower is Better)}: ROCKET (1.5000), MiniROCKET (1.6750), DTW-1NN (3.0500), and Proposed Adaptive LFIG (Single-Split) (3.7750).
-    \item \textbf{Critical Difference (CD) Threshold}: 1.0488. The Critical Difference diagram is plotted in Fig. \ref{fig:cd_diagram}.
-\end{itemize}
+We conducted a Friedman chi-square test followed by Nemenyi post-hoc analysis ($\alpha = 0.05$) \cite{demsar2006} strictly using the 1:1 single-split baseline ranks. The test yielded a Friedman statistic of 45.8254 ($p = 0.000000$), confirming statistically significant differences across models. The resulting average ranks (where lower is better) are: ROCKET (1.5000), MiniROCKET (1.6750), DTW-1NN (3.0500), and Proposed Adaptive LFIG (Single-Split) (3.7750). The critical difference threshold is $\text{CD} = 1.0488$. As visualized in the Critical Difference diagram (Fig. \ref{fig:cd_diagram}), our proposed single-split model and DTW-1NN lie within the same critical difference interval.
 
 \begin{figure}[htbp]
 \centering
@@ -424,20 +375,12 @@ We conducted a Friedman chi-square test followed by Nemenyi post-hoc analysis ($
 \end{figure}
 
 \subsection{Selection Leakage Analysis \& Unbiased Generalization Insights}
-A critical methodological pitfall in time series classification benchmarks is \textit{selection leakage} (or optimization bias), which occurs when hyperparameter tuning or metric configuration choices are influenced by observing performance on the test split. To empirically quantify the severity of this effect, we conducted a controlled pilot ablation comparing test-guided parameter selection against our leakage-free inner cross-validation protocol:
-\begin{itemize}
-    \item \textbf{Quantification of Leakage Inflation}: When hyperparameters (spread factor $z$, neighbor count $k$, and distance fusion weights $w$) were manually adjusted observing the official single test split, test accuracy was artificially inflated by up to 16.00\% on \texttt{ECG200} (0.8800 vs. 0.7200) and by 5.34\% on \texttt{GunPoint} (0.9067 vs. 0.8533). In contrast, well-separated stationary datasets such as \texttt{Coffee} remained unaffected (0.9286). This demonstrates that phase-shifted signals with high local variability are especially prone to overfitting when test data informs configuration choices.
-    \item \textbf{Leakage-Free Nested Cross-Validation}: By enforcing our 5-fold outer / 3-fold inner nested cross-validation framework, all model parameters and segmentation decisions are selected strictly within inner training folds. Evaluating on held-out outer folds removes partition-specific single-split noise, revealing the true generalization capacity of our proposed architecture—achieving 1.0000 $\pm$ 0.0000 on \texttt{Coffee}, 0.9807 $\pm$ 0.0140 on \texttt{Chinatown}, 0.9742 $\pm$ 0.0156 on \texttt{SonyAIBORobotSurface1}, and 0.9300 $\pm$ 0.0100 on \texttt{GunPoint} (as reported in Table \ref{tab:complete_20_results}).
-\end{itemize}
+A critical methodological pitfall in time series classification benchmarks is \textit{selection leakage} (or optimization bias), which occurs when hyperparameter tuning or metric configuration choices are influenced by observing performance on the test split. To empirically quantify the severity of this effect, we conducted a controlled pilot ablation comparing test-guided parameter selection against our leakage-free inner cross-validation protocol. When hyperparameters (spread factor $z$, neighbor count $k$, and distance fusion weights $w$) were manually adjusted observing the official single test split, test accuracy was artificially inflated by up to 16.00\% on \texttt{ECG200} (0.8800 vs. 0.7200) and by 5.34\% on \texttt{GunPoint} (0.9067 vs. 0.8533), while well-separated stationary datasets such as \texttt{Coffee} remained unaffected (0.9286). This demonstrates that phase-shifted signals with high local variability are especially prone to overfitting when test data informs configuration choices. By contrast, enforcing our 5-fold outer / 3-fold inner nested cross-validation framework ensures that all model parameters and segmentation decisions are selected strictly within inner training folds. Evaluating on held-out outer folds removes partition-specific single-split noise, revealing the true generalization capacity of our proposed architecture—achieving 1.0000 $\pm$ 0.0000 on \texttt{Coffee}, 0.9807 $\pm$ 0.0140 on \texttt{Chinatown}, 0.9742 $\pm$ 0.0156 on \texttt{SonyAIBORobotSurface1}, and 0.9300 $\pm$ 0.0100 on \texttt{GunPoint} (as reported in Table \ref{tab:complete_20_results}).
 
 \section{Critical Analysis and Discussion}
 
 \subsection{Dynamic CPD vs. Fixed-Window Partitioning}
-One of the most important takeaways is the dichotomy between phase-shifted and phase-aligned series:
-\begin{itemize}
-    \item \textit{Phase-Shifted (GunPoint, ECG200)}: Volatile signals contain shape transitions at variable index offsets. Here, adaptive CPD segmentation dynamically aligns boundaries with active transitions, minimizing local linear fit cost.
-    \item \textit{Phase-Aligned (ArrowHead, Chinatown, Coffee)}: These datasets are stationary or length-normalized, and their primary components are strictly aligned. Fixed partitioning forces strict phase alignment of granules across samples, avoiding noise from local amplitude-driven CPD shifts.
-\end{itemize}
+One of the most important takeaways from our benchmark is the structural dichotomy between phase-shifted and phase-aligned series. For phase-shifted signals (such as \texttt{GunPoint} and \texttt{ECG200}), volatile shapes contain key regime transitions at variable index offsets. In these cases, adaptive CPD segmentation dynamically aligns window boundaries with active transitions, minimizing local linear fit residuals. Conversely, for phase-aligned signals (such as \texttt{ArrowHead}, \texttt{Chinatown}, and \texttt{Coffee}), datasets are stationary or length-normalized with strictly synchronized components. Here, fixed-window partitioning preserves the exact temporal indexing of granules across samples, avoiding noise introduced by amplitude-driven CPD shifts.
 
 \subsection{Feature Importance and Ablation}
 Our 10-feature granulation yields positive classification gains under both adaptive CPD (+2.67\% on GunPoint) and fixed windowing (+2.29\% on ArrowHead) compared to standard 3D configurations. However, on short phase-shifted signals like ECG200, representing the signal with 10 features over very few granules (e.g., 5 granules) can introduce noise, leading to an accuracy drop of 8.00\%. On other phase-aligned datasets under fixed windowing (e.g., Coffee), the additional features maintain stable, competitive bounds.
@@ -461,12 +404,7 @@ With only $n=5$ datasets, the Wilcoxon signed-rank test is mathematically underp
 We have presented an Adaptive Multi-Feature LFIG framework for time series classification. By dynamically windowing signals, extracting 10D statistical-structural feature spaces, and fusing Hausdorff-DTW-Cosine distances, we achieved classification performance that is competitive with standard benchmarks, achieving strong nested cross-validation generalization while executing up to 14.2$\times$ faster than standard DTW. While state-of-the-art ensemble models (like HIVE-COTE 2.0) and convolutional models (like ROCKET) retain superior raw accuracies on the official single splits due to high parameter capacity, our framework offers a highly compelling alternative for resource-constrained architectures. It provides a massive reduction in computational footprint and memory usage, while offering human-interpretable explanations of local trend dynamics and fuzzy boundary envelopes.
 
 \subsection{Future Work}
-Future investigations will focus on three primary avenues:
-\begin{itemize}
-    \item \textit{CUDA-Parallel DTW Accelerators}: Implementing parallel dynamic programming kernels in JAX/PyTorch for up to 100$\times$ GPU speedups.
-    \item \textit{Reference Prototype Pruning}: Integrating reference editing algorithms (e.g., $k$-medoids) to compress prototype sets and speed up classification.
-    \item \textit{Multivariate Extension}: Generalizing structural granule extraction and similarity metrics to multivariate time series archive benchmarks.
-\end{itemize}
+Future investigations will focus on three primary avenues: developing CUDA-parallel dynamic programming kernels in JAX or PyTorch to accelerate pairwise DTW computations by up to $100\times$ on modern GPUs; incorporating reference prototype editing algorithms (such as $k$-medoids or condensed nearest neighbors) to prune the comparison database; and generalizing granular feature extraction and hybrid metric fusion to multivariate time series classification benchmarks.
 
 \begin{thebibliography}{10}
 

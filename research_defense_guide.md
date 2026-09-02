@@ -218,15 +218,27 @@ For a test time series $Z$:
 
 ---
 
-### E2. Fast-DTW is your primary baseline, but Fast-DTW is an *approximation* to exact DTW. Isn't comparing your (exact, granule-level) DTW against an approximate raw-signal DTW an apples-to-oranges speed comparison?
+### E2. How can you compare Nested CV directly with single-split DTW-1NN, ROCKET, and MiniROCKET? Is it a fair comparison?
 
-**Answer:** Comparing against Fast-DTW is actually a conservative choice. Because exact raw-signal DTW is computationally slower than Fast-DTW, comparing our granular DTW against Fast-DTW underrepresents our speed gains. Even against this faster baseline, our pipeline runs up to **15x faster** (e.g. GunPoint completes in 10.97s vs 163.75s) because we compress sequence lengths from $N$ to $S \ll N$ before DTW alignment.
+**Answer:** 
+Directly comparing a 5-fold nested CV score against single-split baselines is **not** a 1:1 identical protocol comparison because the training set size differs (80% in 5-fold CV vs. 5%–25% in official UCR single splits like Chinatown or SonyAIBORobotSurface1).
+To guarantee complete scientific rigor and fairness, our paper presents **two complementary protocols side-by-side in Table VI**:
+1. **1:1 Fair Direct Baseline Comparison (Official Single Split):** We benchmark our `Proposed (10D Acc)` directly against `DTW-1NN`, `ROCKET`, and `MiniROCKET` on the identical official train/test partition. All statistical tests (Friedman test $p < 0.0001$ and Demšar Critical Difference diagram) are strictly computed on these single splits.
+2. **Cross-Validated Stability & Generalization:** We report `Proposed (Nested CV)` ($\text{Mean} \pm \text{SD}$) to show the model's true generalization capacity when not artificially constrained by tiny 20-sample splits, with all hyperparameters tuned strictly on inner training folds without test leakage.
+
+**Resolution:** Standardized Table VI in the LaTeX manuscript and documentation with explicit column headers and explanatory text distinguishing the 1:1 single-split baseline ranking from the multi-fold generalization bounds.
+
+---
+
+### E3. Fast-DTW is your primary baseline, but Fast-DTW is an *approximation* to exact DTW. Isn't comparing your (exact, granule-level) DTW against an approximate raw-signal DTW an apples-to-oranges speed comparison?
+
+**Answer:** Comparing against Fast-DTW is actually a conservative choice. Because exact raw-signal DTW is computationally slower than Fast-DTW, comparing our granular DTW against Fast-DTW underrepresents our speed gains. Even against this faster baseline, our pipeline runs up to **14.2x faster** (e.g. GunPoint completes in 11.78s vs 167.46s) because we compress sequence lengths from $N$ to $S \ll N$ before DTW alignment.
 
 **Resolution:** Documented in the paper that the runtime speedup comparisons are evaluated against Fast-DTW, making our speedup claims precise and mathematically conservative.
 
 ---
 
-### E3. Why wasn't ROCKET/MiniROCKET included as a baseline in the original 5-dataset results, given they're extremely fast and strong on UCR benchmarks?
+### E4. Why wasn't ROCKET/MiniROCKET included as a baseline in the original 5-dataset results, given they're extremely fast and strong on UCR benchmarks?
 
 **Answer:** They were excluded from the initial draft due to implementation scheduling, but have been fully integrated in our final GPU benchmark. We reproduced ROCKET, MiniROCKET, and DTW-1NN baselines under identical evaluation protocols using the `aeon` library. 
 

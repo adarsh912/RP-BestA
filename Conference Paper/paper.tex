@@ -370,10 +370,14 @@ Feature Descriptor & Mean Delta ($\Delta = \text{Full} - \text{Ablated}$) & 95\%
 \end{table}
 
 \subsection{Scaling to 20 UCR Datasets \& Dem\v{s}ar Critical Difference Analysis}
-To establish robust statistical validation, we scale our evaluation to a catalog of 20 UCR datasets spanning six distinct domains, comparing our Proposed Adaptive LFIG model (single-split 10D and 5-fold Nested CV) against reproduced DTW-1NN, ROCKET, and MiniROCKET baselines. The complete results are summarized in Table \ref{tab:complete_20_results}.
+To establish complete empirical transparency and rigor, Table \ref{tab:complete_20_results} reports two complementary evaluation protocols side-by-side across all 20 UCR benchmark datasets:
+\begin{enumerate}
+    \item \textbf{Direct 1:1 Baseline Ranking (Official Single Split)}: For a strict apples-to-apples comparison against published literature baselines, the \textbf{Proposed (10D)} column evaluates our model trained strictly on the official UCR training split and tested on the official test split, matching the exact protocol of DTW-1NN, ROCKET, and MiniROCKET.
+    \item \textbf{Stability and Generalization (5-Fold Nested CV)}: The \textbf{Proposed (Nested CV)} column reports the unbiased generalization capacity ($\text{Mean} \pm \text{SD}$) across 5 outer folds with per-fold inner hyperparameter tuning, filtering out partition-specific single-split variance.
+\end{enumerate}
 
 \begin{table*}[!t]
-\caption{Complete 20-Dataset Benchmark Results: Proposed Framework vs. Reproduced Baselines}
+\caption{Complete 20-Dataset Benchmark: 1:1 Single-Split Baseline Comparison and Nested CV Generalization}
 \label{tab:complete_20_results}
 \centering
 \footnotesize
@@ -405,9 +409,9 @@ Wafer & 0.9455 & 0.9782 $\pm$ 0.0038 & 0.9799 & 0.9985 & 0.9994 & MiniROCKET (0.
 \end{tabularx}
 \end{table*}
 
-We conducted a Friedman chi-square test followed by Nemenyi post-hoc analysis ($\alpha = 0.05$) \cite{demsar2006} using the cross-validated ranks:
+We conducted a Friedman chi-square test followed by Nemenyi post-hoc analysis ($\alpha = 0.05$) \cite{demsar2006} strictly using the 1:1 single-split baseline ranks:
 \begin{itemize}
-    \item \textbf{Friedman Test Statistic}: 45.8254 ($p = 0.000000$), confirming statistically significant differences.
+    \item \textbf{Friedman Test Statistic}: 45.8254 ($p = 0.000000$), confirming statistically significant differences across models.
     \item \textbf{Average Ranks (Lower is Better)}: ROCKET (1.5000), MiniROCKET (1.6750), DTW-1NN (3.0500), and Proposed Adaptive LFIG (Single-Split) (3.7750).
     \item \textbf{Critical Difference (CD) Threshold}: 1.0488. The Critical Difference diagram is plotted in Fig. \ref{fig:cd_diagram}.
 \end{itemize}

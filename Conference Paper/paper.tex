@@ -21,31 +21,36 @@
 \makeatother
 
 \newcolumntype{Y}{>{\centering\arraybackslash}X}
+\newcommand{\ieeetableformat}{%
+  \footnotesize
+  \setlength{\tabcolsep}{3pt}%
+  \renewcommand{\arraystretch}{1.05}%
+}
 
 \begin{document}
 
 \title{Adaptive Multi-Feature Linear Fuzzy Information Granulation with Hybrid Similarity Learning for Time Series Classification}
 
 \author{\IEEEauthorblockN{Adarsh Dewanand Fulzele}
-\textit{Intelligent Data Analytics}\\
-\textit{Laboratory,}
-\IEEEauthorblockA{\textit{Computer Science and Engineering} \\
+\IEEEauthorblockA{\textit{Intelligent Data Analytics}\\
+\textit{Laboratory,}\\
+\textit{Computer Science and Engineering} \\
 \textit{National Institute of Technology}\\
 Rourkela, India \\
 adarshdewanand912@gmail.com}
 \and
 \IEEEauthorblockN{Souveek Roy}
-\textit{Intelligent Data Analytics}\\
-\textit{Laboratory,}
-\IEEEauthorblockA{\textit{Computer Science and Engineering} \\
+\IEEEauthorblockA{\textit{Intelligent Data Analytics}\\
+\textit{Laboratory,}\\
+\textit{Computer Science and Engineering} \\
 \textit{National Institute of Technology}\\
 Rourkela, India \\
 524cs1007@nitrkl.ac.in}
 \and
 \IEEEauthorblockN{Sibarama Panigrah}
-\textit{Intelligent Data Analytics}\\
-\textit{Laboratory,}
-\IEEEauthorblockA{\textit{Computer Science and Engineering} \\
+\IEEEauthorblockA{\textit{Intelligent Data Analytics}\\
+\textit{Laboratory,}\\
+\textit{Computer Science and Engineering} \\
 \textit{National Institute of Technology}\\
 Rourkela, India \\
 panigrahis@nitrkl.ac.in}
@@ -78,24 +83,25 @@ Our structural differentiation against prior LFIG competitors is summarized in T
 \caption{Structural Differentiation Against Prior LFIG Competitors}
 \label{tab:structural_diff}
 \centering
-\footnotesize
-\setlength{\tabcolsep}{3pt}
-\begin{tabularx}{\textwidth}{|Y|Y|Y|Y|Y|Y|}
+\ieeetableformat
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{|c|c|c|c|c|c|}
 \hline
-Study / Model & Segmentation Strategy & Granule Features & Similarity Metric Space & Weight Learning Mechanism & Primary Target Task \\ \hline
+\shortstack{\textbf{Study /}\\\textbf{Model}} & \shortstack{\textbf{Segmentation}\\\textbf{Strategy}} & \shortstack{\textbf{Granule}\\\textbf{Features}} & \shortstack{\textbf{Similarity}\\\textbf{Metric Space}} & \shortstack{\textbf{Weight Learning}\\\textbf{Mechanism}} & \shortstack{\textbf{Primary}\\\textbf{Target Task}} \\ \hline
 Yang et al. \cite{yang2017} & Fixed Sliding Window & Standard 3D ($[L, U, a]$) & Euclidean / Error Distance & None (Unweighted) & Long-Term Forecasting \\
 Duan et al. \cite{duan2018} & Fixed / Constrained & Standard 3D ($[L, U, a]$) & Hausdorff + Slope DTW ($D_H + D_{DTW}$) & None (Static Sum) & Time Series Clustering \\
 Gao and Yu \cite{gao2019} & Fixed / Heuristic Unequal & Standard 3D ($[L, U, a]$) & Generalized LFIG-DTW & Static Equal Weights & Classification (Unequal Length) \\
 He and Yu \cite{he2023} & Recurrence Matrix Splitting & 2D Recurrence Images & SVM Precomputed Kernel & None (Implicit Margin) & Noise-Robust Classification \\
 Proposed Framework & Adaptive CPD vs. Fixed ($\sigma^2_r$) & Enhanced 10D Multi-Feature & 3-Way Hybrid ($D_H + D_{DTW} + D_{Cos}$) & Grid Search / Inner CV & Time Series Classification (TSC) \\ \hline
-\end{tabularx}
+\end{tabular}%
+}
 \end{table*}
 
 \section{Technical Methodology and Implementation}
 
 The complete architectural workflow of the proposed Adaptive Multi-Feature LFIG framework is illustrated in Fig. \ref{fig:architecture}. The pipeline dynamically windows signals, constructs high-dimensional granules, and computes hybrid similarity metrics for classification.
 
-\begin{figure*}[htbp]
+\begin{figure*}[!t]
 \centering
 \includegraphics[width=\textwidth]{plots/architecture_diagram.jpg}
 \caption{Complete architectural workflow of the proposed Adaptive Multi-Feature LFIG Time Series Classification framework, showing stages from raw input signal to distance-space classification.}
@@ -127,7 +133,7 @@ t_j = j \cdot \left\lfloor \frac{N}{S} \right\rfloor
 
 The partitioning strategies are visually compared in Fig. \ref{fig:segmentation_comparison}.
 
-\begin{figure}[htbp]
+\begin{figure}[!t]
 \centering
 \includegraphics[width=\linewidth]{plots/fig2_segmentation_comparison.png}
 \caption{Visual comparison of windowing strategies (Fixed and Change Point Detection) on a sample GunPoint signal. CPD boundaries align perfectly with signal transitions.}
@@ -152,7 +158,7 @@ L_j(t) = T_j(t) - z \cdot \sigma_j, \quad U_j(t) = T_j(t) + z \cdot \sigma_j
 \end{equation}
 The parameter $z$ determines the envelope width (e.g., $z=1.0$ covers $68.2\%$ of variance, and $z=1.96$ covers $95.0\%$ of variance). The resulting OLS trend lines and envelope bounds are shown in Fig. \ref{fig:lfig_granulation}.
 
-\begin{figure}[htbp]
+\begin{figure}[!t]
 \centering
 \includegraphics[width=\linewidth]{plots/fig1_lfig_granulation.png}
 \caption{Fitted OLS trend lines and residual envelope bounds (L, U) on the segmented GunPoint series, illustrating the interval representation.}
@@ -207,12 +213,10 @@ The proposed framework is evaluated across a benchmark catalog of 20 datasets fr
 \caption{Characteristics of the 20 Evaluated UCR Datasets}
 \label{tab:dataset_sizes}
 \centering
-\footnotesize
-\setlength{\tabcolsep}{1.4pt}
-\renewcommand{\arraystretch}{0.98}
-\begin{tabularx}{\columnwidth}{|c|>{\raggedright\arraybackslash}X|c|c|c|c|}
+\ieeetableformat
+\begin{tabular*}{\columnwidth}{@{\extracolsep{\fill}}|c|l|c|c|c|c|}
 \hline
-No. & Dataset & Domain & Train/Test & Length & Classes \\ \hline
+\textbf{No.} & \textbf{Dataset} & \textbf{Domain} & \shortstack{\textbf{Train/}\\\textbf{Test}} & \textbf{Length} & \textbf{Classes} \\ \hline
 1 & GunPoint & Motion & 50/150 & 150 & 2 \\
 2 & Coffee & Spectro & 28/28 & 286 & 2 \\
 3 & ArrowHead & Image & 36/175 & 251 & 3 \\
@@ -233,7 +237,7 @@ No. & Dataset & Domain & Train/Test & Length & Classes \\ \hline
 18 & CBF & Sim. & 30/900 & 128 & 3 \\
 19 & TwoPatterns & Sim. & 1000/4000 & 128 & 4 \\
 20 & Wafer & Sensor & 1000/6164 & 152 & 2 \\ \hline
-\end{tabularx}
+\end{tabular*}
 \end{table}
 
 The experimental benchmark incorporates reproduced implementations of DTW-1NN, ROCKET, and MiniROCKET \cite{dempster2021}, alongside established literature results for HIVE-COTE 2.0 \cite{middlehurst2021}. All experiments were executed on a dedicated Dell Precision 3650 Tower workstation equipped with an 11th Gen Intel Core i9-11900K processor @ 3.50 GHz (16 logical CPUs), 32 GB RAM, and an NVIDIA GeForce RTX 3070 GPU (8 GB VRAM) running 64-bit Windows 11 Pro. A global random seed of \texttt{42} was enforced across all splits, cross-validations, and classifier initializations to guarantee strict reproducibility. All raw benchmark datasets were obtained directly from the official UCR Time Series Classification Archive.
@@ -248,7 +252,7 @@ To compare detailed execution profiles, we evaluate precision, recall, macro F1,
 
 The learned distance-fusion weight configurations grouped by domain are illustrated in Fig. \ref{fig:fusion_weights}.
 
-\begin{figure}[htbp]
+\begin{figure}[!t]
 \centering
 \includegraphics[width=\linewidth]{plots/fig4_fusion_weights.png}
 \caption{Learned distance-fusion weight priority profiles ($w_{\text{Hausdorff}}$, $w_{\text{DTW}}$, $w_{\text{Cosine\_DTW}}$) across signal domains, illustrating domain-level physical alignment preferences.}
@@ -257,7 +261,7 @@ The learned distance-fusion weight configurations grouped by domain are illustra
 
 The classification accuracy comparison across the core UCR datasets is shown in Fig. \ref{fig:accuracy_comparison}.
 
-\begin{figure}[htbp]
+\begin{figure}[!t]
 \centering
 \includegraphics[width=\linewidth]{plots/accuracy_comparison.png}
 \caption{Classification accuracy comparison of the proposed LFIG model (Single-Split 10D and Nested CV) against the DTW-1NN baseline across core UCR datasets.}
@@ -274,34 +278,33 @@ The choice between fixed windowing and CPD is evaluated by inspecting the granul
 \caption{Segmentation Boundary and Granule Breakdown (Proof 1)}
 \label{tab:segmentation_breakdown}
 \centering
-\footnotesize
-\setlength{\tabcolsep}{2.5pt}
-\begin{tabularx}{\textwidth}{|l|c|c|>{\raggedright\arraybackslash}X|c|>{\raggedright\arraybackslash}X|}
+\ieeetableformat
+\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}|l|c|c|c|c|c|}
 \hline
-Dataset & Strategy Selected & Param & Detected Boundaries & Granules & Granule Length Breakdown \\ \hline
+\textbf{Dataset} & \shortstack{\textbf{Strategy}\\\textbf{Selected}} & \textbf{Param} & \shortstack{\textbf{Detected}\\\textbf{Boundaries}} & \textbf{Granules} & \shortstack{\textbf{Granule Length}\\\textbf{Breakdown}} \\ \hline
 \textbf{GunPoint} & CPD & 1.5 & $[0, 25, 55, 60, 95, 100, 150]$ & 6 & $[25, 30, 5, 35, 5, 50]$ \\
-\textbf{Coffee} & FIXED & 28 & \shortstack[l]{$[0,28,56,84,112,140,$\\$168,196,224,252,280,286]$} & 11 & \shortstack[l]{$[28,28,28,28,28,28,$\\$28,28,28,28,6]$} \\
-\textbf{ArrowHead} & FIXED & 25 & \shortstack[l]{$[0,25,50,75,100,125,$\\$150,175,200,225,250,251]$} & 11 & \shortstack[l]{$[25,25,25,25,25,25,$\\$25,25,25,25,1]$} \\
+\textbf{Coffee} & FIXED & 28 & $[0,28,56,84,112,140,168,196,224,252,280,286]$ & 11 & $[28,28,28,28,28,28,28,28,28,28,6]$ \\
+\textbf{ArrowHead} & FIXED & 25 & $[0,25,50,75,100,125,150,175,200,225,250,251]$ & 11 & $[25,25,25,25,25,25,25,25,25,25,1]$ \\
 \textbf{ECG200} & CPD & 1.5 & $[0, 20, 45, 60, 75, 96]$ & 5 & $[20, 25, 15, 15, 21]$ \\ \hline
-\end{tabularx}
+\end{tabular*}
 \end{table*}
 
 \subsubsection{Proof 2: Single-Split Representation Accuracy Boost (3D vs 10D LFIG)}
-To verify the impact of the 10-dimensional granule feature representation across distinct physical signal archetypes (Motion, Image Contours, ECG Telemetry, Spectrograms) without table repetition, Table \ref{tab:dimension_comparison} highlights four representative diagnostic case studies. The comprehensive 20-dataset cohort feature sensitivity is evaluated in Table \ref{tab:lofo_matrix} (Proof 3), while complete classification benchmarks are reported in Table \ref{tab:complete_20_results}.
+To verify the impact of the 10-dimensional granule feature representation across distinct physical signal archetypes (Motion, Image Contours, ECG Telemetry, Spectrograms) without table repetition, Table \ref{tab:dimension_comparison} highlights four representative diagnostic case studies. The comprehensive 20-dataset cohort feature sensitivity is evaluated in Table \ref{tab:lofo_matrix} (Proof 3), while complete classification benchmarks are reported in Table \ref{tab:single_split_benchmark}.
 
 \begin{table}[!t]
 \caption{Performance Impact of 10D Multi-Feature vs. 3D LFIG on Representative Diagnostic Archetypes (Proof 2)}
 \label{tab:dimension_comparison}
 \centering
-\small
-\begin{tabularx}{\columnwidth}{|X|Y|Y|Y|}
+\ieeetableformat
+\begin{tabular*}{\columnwidth}{@{\extracolsep{\fill}}|l|c|c|c|}
 \hline
-Dataset & Standard 3D LFIG Acc & Proposed 10D Multi-Feature LFIG Acc & Improvement Delta \\ \hline
+\textbf{Dataset} & \shortstack{\textbf{Standard 3D}\\\textbf{LFIG Acc.}} & \shortstack{\textbf{Proposed 10D}\\\textbf{LFIG Acc.}} & \textbf{Improvement} \\ \hline
 \textbf{GunPoint} & 0.8267 & \textbf{0.8533} & \textbf{+0.0267 (+2.67\%)} \\
 \textbf{ArrowHead} & 0.6857 & \textbf{0.7086} & \textbf{+0.0229 (+2.29\%)} \\
 \textbf{ECG200} & 0.8000 & \textbf{0.7200} & \textbf{-0.0800 (-8.00\%)} \\
 \textbf{Coffee} & 0.9286 & \textbf{0.9286} & +0.0000 \\ \hline
-\end{tabularx}
+\end{tabular*}
 \end{table}
 
 Expanding from 3D descriptors (lower, upper, slope) to 10D descriptors (adding Shannon entropy, volatility, curvature, energy, skewness, variance, intercept) provides a +2.67\% accuracy boost on motion datasets (\texttt{GunPoint}) and +2.29\% on shape outline datasets (\texttt{ArrowHead}). However, for short phase-shifted signals (specifically \texttt{ECG200}), extracting 10 descriptors over a brief sequence of only 5 CPD-segmented granules introduces representation noise, leading to an accuracy decrease (-8.00\%).
@@ -314,7 +317,7 @@ To inspect the individual contributions of the 10 structural features, we perfor
 \label{tab:lofo_matrix}
 \centering
 \footnotesize
-\begin{tabularx}{\columnwidth}{|X|Y|Y|X|}
+\begin{tabularx}{\columnwidth}{|X|>{\centering\arraybackslash}p{0.88cm}|>{\centering\arraybackslash}p{2.143cm}|X|}
 \hline
 Feature Descriptor & Mean Delta ($\Delta = \text{Full} - \text{Ablated}$) & 95\% Confidence Interval & Representation Role \\ \hline
 \textbf{Energy} ($E_{n}$) & -0.0279 & [-0.0533, -0.0024] & Global representation stabilizer \\
@@ -337,15 +340,15 @@ To empirically validate the computational efficiency gains of fuzzy information 
 \caption{Empirical Computational Complexity and Memory Reduction Profile (Proof 4)}
 \label{tab:runtime_memory_proof}
 \centering
-\small
-\begin{tabularx}{\columnwidth}{|X|c|c|c|c|c|}
+\ieeetableformat
+\begin{tabular*}{\columnwidth}{@{\extracolsep{\fill}}|l|c|c|c|c|c|}
 \hline
-Dataset & Length ($N$) & Granules ($S$) & Fast-DTW & Proposed 10D & Speedup \\ \hline
+\textbf{Dataset} & \shortstack{\textbf{Length}\\$\boldsymbol{(N)}$} & \shortstack{\textbf{Granules}\\$\boldsymbol{(S)}$} & \textbf{Fast-DTW} & \shortstack{\textbf{Proposed}\\\textbf{10D}} & \textbf{Speedup} \\ \hline
 \textbf{GunPoint} & 150 & 6 & 167.46s & \textbf{11.78s} & \textbf{14.2$\times$} \\
 \textbf{Coffee}   & 286 & 11 & 35.33s & \textbf{3.69s} & \textbf{9.5$\times$} \\
 \textbf{ArrowHead}& 251 & 11 & 247.97s & \textbf{27.75s} & \textbf{8.9$\times$} \\
 \textbf{ECG200}   & 96  & 5  & 42.15s  & \textbf{6.84s} & \textbf{6.2$\times$} \\ \hline
-\end{tabularx}
+\end{tabular*}
 \end{table}
 
 \subsection{Official Single-Split SOTA Benchmark \& Dem\v{s}ar Critical Difference Analysis}
@@ -355,12 +358,11 @@ To establish strict protocol parity against published time series literature, Ta
 \caption{1:1 Official Single-Split Benchmark: Proposed 10D vs. SOTA Baselines with Individual Performance Gaps}
 \label{tab:single_split_benchmark}
 \centering
-\footnotesize
-\setlength{\tabcolsep}{2.5pt}
-\renewcommand{\arraystretch}{0.94}
-\begin{tabularx}{\textwidth}{|>\raggedright\arraybackslash}p{2.8cm}|c|c|c|c|c|c|c|>\centering\arraybackslash}X|}
+\ieeetableformat
+\setlength{\tabcolsep}{1.5pt}
+\begin{tabular}{|>{\raggedright\arraybackslash}p{3.6cm}|c|c|c|c|c|c|c|>{\raggedright\arraybackslash}p{3.1cm}|}
 \hline
-\textbf{Dataset} & \textbf{Proposed (10D)} & \textbf{DTW-1NN} & $\Delta_{\text{DTW}}$ & \textbf{ROCKET} & $\Delta_{\text{RCK}}$ & \textbf{MiniROCKET} & $\Delta_{\text{MRCK}}$ & \textbf{Best Baseline} \\ \hline
+\multicolumn{1}{|c|}{\textbf{Dataset}} & \shortstack{\textbf{Proposed}\\\textbf{(10D)}} & \textbf{DTW-1NN} & $\Delta_{\text{DTW}}$ & \textbf{ROCKET} & $\Delta_{\text{RCK}}$ & \textbf{MiniROCKET} & $\Delta_{\text{MRCK}}$ & \multicolumn{1}{c|}{\shortstack{\textbf{Best}\\\textbf{Baseline}}} \\ \hline
 GunPoint               & 0.8533 & 0.9067 & -0.0534 & 1.0000 & -0.1467 & 0.9933 & -0.1400 & ROCKET (1.0000) \\
 Coffee                 & 0.9286 & 1.0000 & -0.0714 & 1.0000 & -0.0714 & 1.0000 & -0.0714 & DTW-1NN (1.0000) \\
 ArrowHead              & 0.7086 & 0.7029 & \textbf{+0.0057} & 0.8057 & -0.0971 & 0.8514 & -0.1428 & HIVE-COTE 2.0 (0.8710) \\
@@ -381,14 +383,14 @@ SyntheticControl       & 0.9733 & 0.9933 & -0.0200 & 1.0000 & -0.0267 & 0.9833 &
 CBF                    & 0.9000 & 0.9967 & -0.0967 & 1.0000 & -0.1000 & 0.9989 & -0.0989 & ROCKET (1.0000) \\
 TwoPatterns            & 0.7775 & 1.0000 & -0.2225 & 1.0000 & -0.2225 & 0.9962 & -0.2187 & DTW-1NN (1.0000) \\
 Wafer                  & 0.9455 & 0.9799 & -0.0344 & 0.9985 & -0.0530 & 0.9994 & -0.0539 & MiniROCKET (0.9994) \\ \hline
-\end{tabularx}
+\end{tabular}
 \end{table*}
 
 Our Proposed Adaptive LFIG model demonstrates strong competitive parity with standard DTW-1NN, outperforming or matching DTW-1NN on five datasets—achieving positive accuracy deltas on \texttt{SonyAIBORobotSurface1} (+0.0582), \texttt{MoteStrain} (+0.0255), \texttt{ECGFiveDays} (+0.0116), \texttt{ArrowHead} (+0.0057), and matching on \texttt{OliveOil} (+0.0000)—while executing up to 14.2$\times$ faster than standard dynamic time warping. While large-scale convolutional models (ROCKET, MiniROCKET) and complex ensemble architectures (HIVE-COTE 2.0) lead on small single-split partitions due to higher parameter capacity, our framework achieves a highly performant accuracy-efficiency trade-off with full physical interpretability.
 
 We conducted a Friedman chi-square test followed by Nemenyi post-hoc analysis ($\alpha = 0.05$) \cite{demsar2006} strictly using the 1:1 single-split baseline ranks. The test yielded a Friedman statistic of 45.8254 ($p = 0.000000$), confirming statistically significant differences across models. The resulting average ranks (where lower is better) are: ROCKET (1.5000), MiniROCKET (1.6750), DTW-1NN (3.0500), and Proposed Adaptive LFIG (Single-Split) (3.7750). The critical difference threshold is $\text{CD} = 1.0488$. As visualized in the Critical Difference diagram (Fig. \ref{fig:cd_diagram}), our proposed single-split model and DTW-1NN lie within the same critical difference interval.
 
-\begin{figure}[htbp]
+\begin{figure}[!t]
 \centering
 \includegraphics[width=\linewidth]{plots/cd_diagram.png}
 \caption{Dem\v{s}ar Critical Difference diagram comparing average ranks of the Proposed Adaptive LFIG model, ROCKET, MiniROCKET, and DTW-1NN baselines across 20 UCR datasets.}
@@ -402,12 +404,11 @@ A critical methodological pitfall in time series classification benchmarks is \t
 \caption{Leakage-Free 5-Fold Nested Cross-Validation: Generalization Bounds, Macro F1, and Strategy Routing}
 \label{tab:nested_cv_generalization}
 \centering
-\footnotesize
-\setlength{\tabcolsep}{3.0pt}
-\renewcommand{\arraystretch}{0.94}
-\begin{tabularx}{\textwidth}{|>\raggedright\arraybackslash}p{2.8cm}|c|c|c|c|>\centering\arraybackslash}X|}
+\ieeetableformat
+\setlength{\tabcolsep}{2pt}
+\begin{tabular}{|>{\raggedright\arraybackslash}p{3.6cm}|>{\raggedright\arraybackslash}p{1.6cm}|c|c|c|c|}
 \hline
-\textbf{Dataset} & \textbf{Domain} & \textbf{Nested CV Acc (Mean $\pm$ SD)} & \textbf{Nested CV F1 (Mean $\pm$ SD)} & \textbf{Optimal Strategy} & \textbf{Tuned Weights ($w_H, w_{DTW}, w_{Cos}$)} \\ \hline
+\multicolumn{1}{|c|}{\textbf{Dataset}} & \multicolumn{1}{c|}{\textbf{Domain}} & \shortstack{\textbf{Nested CV Acc}\\\textbf{(Mean $\pm$ SD)}} & \shortstack{\textbf{Nested CV F1}\\\textbf{(Mean $\pm$ SD)}} & \shortstack{\textbf{Optimal}\\\textbf{Strategy}} & \shortstack{\textbf{Tuned Weights}\\$\boldsymbol{(w_H, w_{DTW}, w_{Cos})}$} \\ \hline
 GunPoint               & Motion    & 0.9300 $\pm$ 0.0100   & 0.9300 $\pm$ 0.0100   & CPD(1.5)    & (0.2, 0.4, 0.4) \\
 Coffee                 & Spectro   & 1.0000 $\pm$ 0.0000   & 1.0000 $\pm$ 0.0000   & Fixed(28)   & (0.1, 0.8, 0.1) \\
 ArrowHead              & Image     & 0.8910 $\pm$ 0.0241   & 0.8917 $\pm$ 0.0226   & Fixed(25)   & (0.8, 0.1, 0.1) \\
@@ -428,7 +429,7 @@ SyntheticControl       & Simulated & 0.9933 $\pm$ 0.0062   & 0.9933 $\pm$ 0.0062
 CBF                    & Simulated & 0.9817 $\pm$ 0.0111   & 0.9817 $\pm$ 0.0111   & CPD(1.5)    & (0.1, 0.1, 0.8) \\
 TwoPatterns            & Simulated & 0.7110 $\pm$ 0.0112   & 0.7107 $\pm$ 0.0116   & CPD(1.5)    & (0.1, 0.1, 0.8) \\
 Wafer                  & Sensor    & 0.9782 $\pm$ 0.0038   & 0.9393 $\pm$ 0.0113   & CPD(1.5)    & (0.1, 0.1, 0.8) \\ \hline
-\end{tabularx}
+\end{tabular}
 \end{table*}
 
 To guarantee unbiased, leakage-free evaluation, Table \ref{tab:nested_cv_generalization} reports the multi-fold generalization capacity of our Proposed Adaptive LFIG architecture under 5-fold outer / 3-fold inner nested cross-validation. All operational hyperparameters, windowing strategies, and distance fusion weights are selected strictly within inner training folds. Evaluating across held-out outer folds removes partition-specific single-split noise, revealing the true generalization capacity and stability of our proposed architecture—achieving 1.0000 $\pm$ 0.0000 on \texttt{Coffee}, 0.9807 $\pm$ 0.0140 on \texttt{Chinatown}, 0.9742 $\pm$ 0.0156 on \texttt{SonyAIBORobotSurface1}, and 0.9300 $\pm$ 0.0100 on \texttt{GunPoint}.
@@ -443,9 +444,9 @@ Our 10-feature granulation yields positive classification gains under both adapt
 
 The Leave-One-Feature-Out (LOFO) ablation results across the UCR cohort are displayed in Fig. \ref{fig:lofo_importance}.
 
-\begin{figure}[htbp]
+\begin{figure}[!t]
 \centering
-\includegraphics[width=\linewidth]{plots/fig3_lofo_importance.png}
+starting tw 
 \caption{Leave-One-Feature-Out (LOFO) ablated accuracy impact delta ($\Delta = \text{Full} - \text{Ablated}$) with 95\% confidence intervals across UCR datasets, illustrating the direct utility of primary features (positive deltas) and the stabilizing effect of global descriptors (negative deltas).}
 \label{fig:lofo_importance}
 \end{figure}

@@ -6,6 +6,7 @@
 \usepackage{xcolor}
 \usepackage{array}
 \usepackage{tabularx}
+\usepackage{multirow}
 \usepackage{etoolbox}
 
 \makeatletter
@@ -337,11 +338,12 @@ To establish complete empirical transparency and rigor, Table \ref{tab:complete_
 \label{tab:complete_20_results}
 \centering
 \footnotesize
-\setlength{\tabcolsep}{1.8pt}
-\renewcommand{\arraystretch}{0.92}
-\begin{tabularx}{\textwidth}{|>{\raggedright\arraybackslash}p{3.0cm}|c|c|c|c|c|>{\centering\arraybackslash}X|c|}
+\setlength{\tabcolsep}{2.2pt}
+\renewcommand{\arraystretch}{0.94}
+\begin{tabularx}{\textwidth}{|>{\raggedright\arraybackslash}p{2.8cm}|c|c|c|c|c|>{\centering\arraybackslash}X|c|}
 \hline
-Dataset & \textbf{Proposed (10D)} & \textbf{Proposed (Nested CV)} & DTW-1NN & ROCKET & MiniROCKET & Best Baseline & Gap \\ \hline
+\multirow{2}{*}{\textbf{Dataset}} & \multicolumn{2}{c|}{\textbf{Proposed Framework}} & \multicolumn{3}{c|}{\textbf{Reproduced Baselines (Official Split)}} & \multirow{2}{*}{\textbf{Best Baseline}} & \multirow{2}{*}{\textbf{1:1 Gap}} \\ \cline{2-6}
+ & \textbf{Single-Split (10D)} & \textbf{Nested CV (Mean $\pm$ SD)} & \textbf{DTW-1NN} & \textbf{ROCKET} & \textbf{MiniROCKET} & & \\ \hline
 GunPoint & 0.8533 & 0.9300 $\pm$ 0.0100 & 0.9067 & 1.0000 & 0.9933 & ROCKET (1.0000) & +0.0700 \\
 Coffee & 0.9286 & 1.0000 $\pm$ 0.0000 & 1.0000 & 1.0000 & 1.0000 & DTW-1NN (1.0000) & +0.0000 \\
 ArrowHead & 0.7086 & 0.8910 $\pm$ 0.0241 & 0.7029 & 0.8057 & 0.8514 & HIVE-COTE 2.0 (0.8710) & -0.0200 \\

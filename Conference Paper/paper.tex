@@ -101,20 +101,15 @@ Proposed Framework & Adaptive CPD vs. Fixed ($\sigma^2_r$) & Enhanced 10D Multi-
 
 The complete architectural workflow of the proposed Adaptive Multi-Feature LFIG framework is illustrated in Fig. \ref{fig:architecture}. The pipeline dynamically windows signals, constructs high-dimensional granules, and computes hybrid similarity metrics for classification.
 
-\begin{figure*}[!t]
+\begin{figure}[!t]
 \centering
-\includegraphics[width=\textwidth]{plots/architecture_diagram.jpg}
+\includegraphics[width=\linewidth,height=0.52\textheight,keepaspectratio]{plots/architecture_diagram.png}
 \caption{Complete architectural workflow of the proposed Adaptive Multi-Feature LFIG Time Series Classification framework, showing stages from raw input signal to distance-space classification.}
 \label{fig:architecture}
-\end{figure*}
+\end{figure}
 
 \subsection{Dynamic and Fixed Segmentation}
-A time series $X = \{x_1, x_2, \dots, x_N\}$ is segmented into $S$ intervals. To automatically determine the optimal windowing strategy for a given dataset without test leakage, we implement a training-split Complexity-Normalized Strategy Selector. For each training sequence $X_i \in \{X_1, \dots, X_{M_{\text{tr}}}\}$, we compute its lag-1 autocorrelation $\rho(X_i, 1)$ and evaluate the cohort-wide autocorrelation variance across all training instances:
-\begin{equation}
-\sigma^2_{\text{lag-1}} = \text{Var}\left( \left\{ \rho(X_i, 1) \right\}_{i=1}^{M_{\text{tr}}} \right).
-\label{eq:acf_variance}
-\end{equation}
-If $\sigma^2_{\text{lag-1}} > 0.05$ (indicating high shape volatility and variable phase offsets across samples), the entire dataset is routed to Bottom-Up Change Point Detection (CPD); otherwise ($\sigma^2_{\text{lag-1}} \le 0.05$), it is routed to Fixed-Window partitioning.
+A time series $X = \{x_1, x_2, \dots, x_N\}$ is segmented into $S$ intervals. We implement two distinct windowing strategies depending on signal alignment properties:
 
 \subsubsection{Bottom-Up Change Point Detection (CPD)}
 For non-stationary, phase-shifted signals, boundaries are located dynamically using Bottom-Up Change Point Detection (CPD) \cite{truong2020} by minimizing the global least-squares error of linear regressions plus a segment count penalty:
@@ -140,7 +135,7 @@ The partitioning strategies are visually compared in Fig. \ref{fig:segmentation_
 
 \begin{figure}[!t]
 \centering
-\includegraphics[width=\linewidth]{plots/fig2_segmentation_comparison.png}
+\includegraphics[width=\linewidth,height=0.72\textheight,keepaspectratio]{plots/fig2_segmentation_comparison.png}
 \caption{Visual comparison of windowing strategies (Fixed and Change Point Detection) on a sample GunPoint signal. CPD boundaries align perfectly with signal transitions.}
 \label{fig:segmentation_comparison}
 \end{figure}
@@ -198,17 +193,17 @@ D_{\text{Fused}} = w_H \cdot \overline{D}_H + w_S \cdot \overline{D}_{DTW} + w_C
 
 \section{Classifiers and Distance Space Mapping}
 
-For classification within the constructed metric space, we employ two non-parametric classifiers that operate directly on the normalized fused distance matrix $D_{\text{Fused}}$. The primary classification engine is a Distance-Space $k$-Nearest Neighbors ($k$-NN) classifier, which assigns class labels to test sequences based on majority voting over the $k$ nearest training references in the hybrid metric space (with $k \in \{1, 3, 5\}$ selected via inner cross-validation). Alternatively, the metric space is mapped into a dual Reproducing Kernel Hilbert Space via a precomputed Kernel Support Vector Machine (Kernel SVM). The pairwise distance $d_{\text{Fused}}(P, Q)$ is transformed into a positive semi-definite radial-basis similarity kernel:
+For distance-space custom KNN models, classification is performed directly on the fused pairwise distance matrix. For kernelized and ensemble classifiers, the distances are mapped into structured feature spaces. In precomputed Kernel SVM architectures, the fused pairwise distance is transformed into a radial-basis similarity kernel:
 \begin{equation}
 K(P, Q) = \exp\left( -\gamma \cdot d_{\text{Fused}}(P, Q)^2 \right),
 \label{eq:kernel_svm}
 \end{equation}
-where the scaling parameter $\gamma$ is dynamically determined via the training set median heuristic:
+where the scaling parameter $\gamma$ is determined dynamically via the training set median heuristic:
 \begin{equation}
 \gamma = \frac{1}{2 \cdot \text{median}(D_{\text{Fused, Train}})^2}.
 \label{eq:gamma_median}
 \end{equation}
-This dual formulation enables computationally lightweight instance-based classification while providing maximal margin separation for complex granular boundaries.
+For ensemble classifiers (Random Forest, XGBoost, LightGBM, CatBoost), each sample is represented either by its distance coordinate vector relative to all training references (distance-as-features) or by aggregate 20-dimensional summary statistics (computing the mean and standard deviation of each descriptor across all segments).
 
 \section{Experimental Setup}
 

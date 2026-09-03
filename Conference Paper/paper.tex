@@ -198,17 +198,17 @@ D_{\text{Fused}} = w_H \cdot \overline{D}_H + w_S \cdot \overline{D}_{DTW} + w_C
 
 \section{Classifiers and Distance Space Mapping}
 
-For distance-space custom KNN models, classification is performed directly on the fused pairwise distance matrix. For kernelized and ensemble classifiers, the distances are mapped into structured feature spaces. In precomputed Kernel SVM architectures, the fused pairwise distance is transformed into a radial-basis similarity kernel:
+For classification within the constructed metric space, we employ two non-parametric classifiers that operate directly on the normalized fused distance matrix $D_{\text{Fused}}$. The primary classification engine is a Distance-Space $k$-Nearest Neighbors ($k$-NN) classifier, which assigns class labels to test sequences based on majority voting over the $k$ nearest training references in the hybrid metric space (with $k \in \{1, 3, 5\}$ selected via inner cross-validation). Alternatively, the metric space is mapped into a dual Reproducing Kernel Hilbert Space via a precomputed Kernel Support Vector Machine (Kernel SVM). The pairwise distance $d_{\text{Fused}}(P, Q)$ is transformed into a positive semi-definite radial-basis similarity kernel:
 \begin{equation}
 K(P, Q) = \exp\left( -\gamma \cdot d_{\text{Fused}}(P, Q)^2 \right),
 \label{eq:kernel_svm}
 \end{equation}
-where the scaling parameter $\gamma$ is determined dynamically via the training set median heuristic:
+where the scaling parameter $\gamma$ is dynamically determined via the training set median heuristic:
 \begin{equation}
 \gamma = \frac{1}{2 \cdot \text{median}(D_{\text{Fused, Train}})^2}.
 \label{eq:gamma_median}
 \end{equation}
-For ensemble classifiers (Random Forest, XGBoost, LightGBM, CatBoost), each sample is represented either by its distance coordinate vector relative to all training references (distance-as-features) or by aggregate 20-dimensional summary statistics (computing the mean and standard deviation of each descriptor across all segments).
+This dual formulation enables computationally lightweight instance-based classification while providing maximal margin separation for complex granular boundaries.
 
 \section{Experimental Setup}
 

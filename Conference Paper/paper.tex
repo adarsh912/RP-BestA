@@ -109,7 +109,12 @@ The complete architectural workflow of the proposed Adaptive Multi-Feature LFIG 
 \end{figure*}
 
 \subsection{Dynamic and Fixed Segmentation}
-A time series $X = \{x_1, x_2, \dots, x_N\}$ is segmented into $S$ intervals. We implement two distinct windowing strategies depending on signal alignment properties:
+A time series $X = \{x_1, x_2, \dots, x_N\}$ is segmented into $S$ intervals. To automatically determine the optimal windowing strategy for a given dataset without test leakage, we implement a training-split Complexity-Normalized Strategy Selector. For each training sequence $X_i \in \{X_1, \dots, X_{M_{\text{tr}}}\}$, we compute its lag-1 autocorrelation $\rho(X_i, 1)$ and evaluate the cohort-wide autocorrelation variance across all training instances:
+\begin{equation}
+\sigma^2_{\text{lag-1}} = \text{Var}\left( \left\{ \rho(X_i, 1) \right\}_{i=1}^{M_{\text{tr}}} \right).
+\label{eq:acf_variance}
+\end{equation}
+If $\sigma^2_{\text{lag-1}} > 0.05$ (indicating high shape volatility and variable phase offsets across samples), the entire dataset is routed to Bottom-Up Change Point Detection (CPD); otherwise ($\sigma^2_{\text{lag-1}} \le 0.05$), it is routed to Fixed-Window partitioning.
 
 \subsubsection{Bottom-Up Change Point Detection (CPD)}
 For non-stationary, phase-shifted signals, boundaries are located dynamically using Bottom-Up Change Point Detection (CPD) \cite{truong2020} by minimizing the global least-squares error of linear regressions plus a segment count penalty:
@@ -312,12 +317,12 @@ Expanding from 3D descriptors (lower, upper, slope) to 10D descriptors (adding S
 \subsubsection{Proof 3: Cohort-Wide Leave-One-Feature-Out (LOFO) Impact Analysis}
 To inspect the individual contributions of the 10 structural features, we perform a cohort-wide Leave-One-Feature-Out (LOFO) ablation study across all 20 UCR datasets. For each dataset, we compute the accuracy difference $\Delta = \text{Full} - \text{Ablated}$. Under this definition, a positive mean delta (e.g., $+0.0243$ for Trend Slope, $+0.0110$ for Lower Bound) indicates that removing the feature degrades classification performance on average, confirming its direct discriminative utility. Conversely, a negative mean delta (e.g., $-0.0279$ for Energy, $-0.0091$ for Upper Bound) indicates that removing the feature increases test accuracy on average. This localized performance boost under ablation is a known artifact of fixed-weight evaluation, where zeroing a feature shifts the normalized distance metric in a way that happens to expand classification margins on specific test partitions. In practice, Energy and Upper Bound serve as global representation stabilizers, preventing overfitting to local phase shifts at the cost of slight single-split test variance. The aggregate results are detailed in Table \ref{tab:lofo_matrix} and visualized with 95\% confidence intervals in Fig. \ref{fig:lofo_importance}.
 
-\begin{table}[!t]
+\begin{table*}[!t]
 \caption{Cohort-Wide Leave-One-Feature-Out (LOFO) Feature Impact Matrix Across 20 UCR Datasets (Proof 3)}
 \label{tab:lofo_matrix}
 \centering
 \footnotesize
-\begin{tabularx}{\columnwidth}{|X|>{\centering\arraybackslash}p{0.88cm}|>{\centering\arraybackslash}p{2.143cm}|X|}
+\begin{tabularx}{\textwidth}{|X|>{\centering\arraybackslash}p{3.4cm}|>{\centering\arraybackslash}p{4.0cm}|X|}
 \hline
 Feature Descriptor & Mean Delta ($\Delta = \text{Full} - \text{Ablated}$) & 95\% Confidence Interval & Representation Role \\ \hline
 \textbf{Energy} ($E_{n}$) & -0.0279 & [-0.0533, -0.0024] & Global representation stabilizer \\
@@ -331,7 +336,7 @@ Feature Descriptor & Mean Delta ($\Delta = \text{Full} - \text{Ablated}$) & 95\%
 \textbf{Lower Bound} ($L$) & +0.0110 & [-0.0163, +0.0382] & Lower bounds level \\
 \textbf{Trend Slope} ($a$) & +0.0243 & [-0.0052, +0.0537] & Primary direction descriptor \\ \hline
 \end{tabularx}
-\end{table}
+\end{table*}
 
 \subsubsection{Proof 4: Measured Computational Complexity and Memory Reduction Profile}
 To empirically validate the computational efficiency gains of fuzzy information granulation, Table \ref{tab:runtime_memory_proof} profiles runtime execution latency and peak heap memory allocation against standard Fast-DTW across representative diagnostic archetypes. Standard Dynamic Time Warping on raw univariate time series requires evaluating an $N \times N$ dynamic programming matrix, imposing quadratic computational complexity ($O(N^2)$). By abstracting raw sequences of length $N$ into $S \ll N$ linear fuzzy granules, our hybrid distance space operates on an $S \times S$ matrix, yielding a theoretical $(N/S)^2$ reduction in alignment operations. On the \texttt{GunPoint} dataset ($N=150$, $S=6$), this corresponds to a theoretical $625\times$ reduction in cell evaluations, translating to an empirical runtime of 11.78 seconds compared to 167.46 seconds for Fast-DTW (a 14.2$\times$ execution speedup). Similarly, on \texttt{Coffee} ($N=286$, $S=11$) and \texttt{ArrowHead} ($N=251$, $S=11$), the framework achieves 9.5$\times$ (3.69s vs. 35.33s) and 8.9$\times$ (27.75s vs. 247.97s) speedups, respectively. Furthermore, heap memory tracking via Python's standard \texttt{tracemalloc} library confirms a 5.5$\times$ peak memory reduction on \texttt{Coffee} (0.17 MB vs. 0.93 MB), as each sequence is compressed into an ultra-compact $S \times 10$ matrix requiring only 800 bytes per series.

@@ -268,14 +268,14 @@ The classification accuracy comparison across the core UCR datasets is shown in 
 \label{fig:accuracy_comparison}
 \end{figure}
 
-\subsection{Automated Diagnostic Proofs and Leakage-Free Outer Fold Progression}
-To validate the statistical stability and consistency of the pipeline, three diagnostic empirical proofs and nested outer fold breakdowns are evaluated:
+\subsection{Automated Diagnostic Validation and Leakage-Free Outer Fold Progression}
+To validate the statistical stability and consistency of the pipeline, four diagnostic empirical validation studies and nested outer fold breakdowns are evaluated:
 
-\subsubsection{Proof 1: Segmentation Boundary \& Granule Length Breakdown}
+\subsubsection{Validation Study 1: Segmentation Boundary \& Granule Length Breakdown}
 The choice between fixed windowing and CPD is evaluated by inspecting the granule boundaries and sequence lengths. The details are shown in Table \ref{tab:segmentation_breakdown}.
 
 \begin{table*}[!t]
-\caption{Segmentation Boundary and Granule Breakdown (Proof 1)}
+\caption{Segmentation Boundary and Granule Breakdown (Validation Study 1)}
 \label{tab:segmentation_breakdown}
 \centering
 \ieeetableformat
@@ -289,11 +289,11 @@ The choice between fixed windowing and CPD is evaluated by inspecting the granul
 \end{tabular*}
 \end{table*}
 
-\subsubsection{Proof 2: Cohort-Wide Diagnostic Proofs: 3D vs. 10D Granular Ablation}
+\subsubsection{Validation Study 2: Cohort-Wide 3D vs. 10D Granular Ablation}
 To comprehensively quantify the empirical impact of expanding linear fuzzy information granules from conventional 3-dimensional representations (lower bound, upper bound, trend slope) to our enriched 10-dimensional statistical-structural feature space, Table \ref{tab:dimension_comparison} presents the complete cohort-wide ablation across all 20 UCR benchmark datasets.
 
 \begin{table*}[!t]
-\caption{Cohort-Wide Diagnostic Proofs: 3D vs. 10D Granular Ablation Across 20 UCR Datasets (Proof 2)}
+\caption{Cohort-Wide Empirical Validation: 3D vs. 10D Granular Ablation Across 20 UCR Datasets (Validation Study 2)}
 \label{tab:dimension_comparison}
 \centering
 \footnotesize
@@ -328,11 +328,11 @@ Wafer                  & 0.9400 & \textbf{0.9455} & \textbf{+0.0055 (+0.59\%)} \
 
 As detailed in Table \ref{tab:dimension_comparison}, expanding to 10D descriptors yields pronounced classification gains across kinematic motion series (e.g., \texttt{GunPoint} at +3.22\%), geometric image contours (e.g., \texttt{ArrowHead} at +3.34\%), and sensor telemetry (e.g., \texttt{SonyAIBORobotSurface1} at +3.75\%, \texttt{TwoLeadECG} at +6.64\%, and \texttt{SyntheticControl} at +0.68\%). The introduction of higher-order descriptors—specifically Shannon entropy ($H$), polynomial curvature ($c$), and volatility spread ($V_{ol}$)—enables the hybrid metric space to resolve complex intra-segment dynamics that remain indistinguishable under 3-parameter envelopes. Conversely, on heavily compressed short signals with low sample counts (such as \texttt{ECG200}, \texttt{Meat}, and \texttt{BeetleFly}), extracting 10 descriptors over brief segment lengths introduces localized feature collinearity and parameter variance under fixed-weight evaluation, whereas stationary phase-aligned datasets (e.g., \texttt{Coffee}, \texttt{BirdChicken}, \texttt{FaceFour}) maintain identical performance bounds.
 
-\subsubsection{Proof 3: Cohort-Wide Leave-One-Feature-Out (LOFO) Impact Analysis}
+\subsubsection{Validation Study 3: Cohort-Wide Leave-One-Feature-Out (LOFO) Impact Analysis}
 To inspect the individual contributions of the 10 structural features, we perform a cohort-wide Leave-One-Feature-Out (LOFO) ablation study across all 20 UCR datasets. For each dataset, we compute the accuracy difference $\Delta = \text{Full} - \text{Ablated}$. Under this definition, a positive mean delta (e.g., $+0.0243$ for Trend Slope, $+0.0110$ for Lower Bound) indicates that removing the feature degrades classification performance on average, confirming its direct discriminative utility. Conversely, a negative mean delta (e.g., $-0.0279$ for Energy, $-0.0091$ for Upper Bound) indicates that removing the feature increases test accuracy on average. This localized performance boost under ablation is a known artifact of fixed-weight evaluation, where zeroing a feature shifts the normalized distance metric in a way that happens to expand classification margins on specific test partitions. In practice, Energy and Upper Bound serve as global representation stabilizers, preventing overfitting to local phase shifts at the cost of slight single-split test variance. The aggregate results are detailed in Table \ref{tab:lofo_matrix} and visualized with 95\% confidence intervals in Fig. \ref{fig:lofo_importance}.
 
 \begin{table*}[!t]
-\caption{Cohort-Wide Leave-One-Feature-Out (LOFO) Feature Impact Matrix Across 20 UCR Datasets (Proof 3)}
+\caption{Cohort-Wide Leave-One-Feature-Out (LOFO) Feature Impact Matrix Across 20 UCR Datasets (Validation Study 3)}
 \label{tab:lofo_matrix}
 \centering
 \footnotesize
@@ -352,12 +352,12 @@ Feature Descriptor & Mean Delta ($\Delta = \text{Full} - \text{Ablated}$) & 95\%
 \end{tabularx}
 \end{table*}
 
-\subsubsection{Proof 4: Measured Computational Complexity and Memory Reduction Profile}
-To empirically validate the computational efficiency gains of fuzzy information granulation, Table \ref{tab:runtime_memory_proof} profiles runtime execution latency and peak heap memory allocation against standard Fast-DTW across representative diagnostic archetypes. Standard Dynamic Time Warping on raw univariate time series requires evaluating an $N \times N$ dynamic programming matrix, imposing quadratic computational complexity ($O(N^2)$). By abstracting raw sequences of length $N$ into $S \ll N$ linear fuzzy granules, our hybrid distance space operates on an $S \times S$ matrix, yielding a theoretical $(N/S)^2$ reduction in alignment operations. On the \texttt{GunPoint} dataset ($N=150$, $S=6$), this corresponds to a theoretical $625\times$ reduction in cell evaluations, translating to an empirical runtime of 11.78 seconds compared to 167.46 seconds for Fast-DTW (a 14.2$\times$ execution speedup). Similarly, on \texttt{Coffee} ($N=286$, $S=11$) and \texttt{ArrowHead} ($N=251$, $S=11$), the framework achieves 9.5$\times$ (3.69s vs. 35.33s) and 8.9$\times$ (27.75s vs. 247.97s) speedups, respectively. Furthermore, heap memory tracking via Python's standard \texttt{tracemalloc} library confirms a 5.5$\times$ peak memory reduction on \texttt{Coffee} (0.17 MB vs. 0.93 MB), as each sequence is compressed into an ultra-compact $S \times 10$ matrix requiring only 800 bytes per series.
+\subsubsection{Validation Study 4: Measured Computational Complexity and Memory Reduction Profile}
+To empirically validate the computational efficiency gains of fuzzy information granulation, Table \ref{tab:runtime_memory_validation} profiles runtime execution latency and peak heap memory allocation against standard Fast-DTW across representative diagnostic archetypes. Standard Dynamic Time Warping on raw univariate time series requires evaluating an $N \times N$ dynamic programming matrix, imposing quadratic computational complexity ($O(N^2)$). By abstracting raw sequences of length $N$ into $S \ll N$ linear fuzzy granules, our hybrid distance space operates on an $S \times S$ matrix, yielding a theoretical $(N/S)^2$ reduction in alignment operations. On the \texttt{GunPoint} dataset ($N=150$, $S=6$), this corresponds to a theoretical $625\times$ reduction in cell evaluations, translating to an empirical runtime of 11.78 seconds compared to 167.46 seconds for Fast-DTW (a 14.2$\times$ execution speedup). Similarly, on \texttt{Coffee} ($N=286$, $S=11$) and \texttt{ArrowHead} ($N=251$, $S=11$), the framework achieves 9.5$\times$ (3.69s vs. 35.33s) and 8.9$\times$ (27.75s vs. 247.97s) speedups, respectively. Furthermore, heap memory tracking via Python's standard \texttt{tracemalloc} library confirms a 5.5$\times$ peak memory reduction on \texttt{Coffee} (0.17 MB vs. 0.93 MB), as each sequence is compressed into an ultra-compact $S \times 10$ matrix requiring only 800 bytes per series.
 
 \begin{table}[!t]
-\caption{Empirical Computational Complexity and Memory Reduction Profile (Proof 4)}
-\label{tab:runtime_memory_proof}
+\caption{Empirical Computational Complexity and Memory Reduction Profile (Validation Study 4)}
+\label{tab:runtime_memory_validation}
 \centering
 \ieeetableformat
 \begin{tabular*}{\columnwidth}{@{\extracolsep{\fill}}|l|c|c|c|c|c|}

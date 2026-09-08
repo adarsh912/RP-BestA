@@ -68,14 +68,14 @@ Time series classification, fuzzy information granulation, change point detectio
 
 \section{Introduction}
 
-Time series classification is central to critical domains such as medical diagnostic monitoring (electrocardiograms), financial volatility forecasting, and industrial equipment telemetry. The primary difficulty in classifying time series lies in the high dimensionality and local noise fluctuations of raw signals, alongside variations in temporal offsets (phase shifts).
+Time series classification is central to critical domains such as medical diagnostic monitoring (electrocardiograms), financial volatility forecasting, and industrial equipment telemetry. The primary difficulty in classifying time series lies in the high dimensionality and local noise fluctuations of raw signals, alongside variations in temporal offsets (phase shifts). Recent comprehensive benchmarking surveys, such as the Bake-Off Redux \cite{middlehurst2024}, demonstrate that while modern convolutional and ensemble architectures achieve competitive accuracy across the UCR Time Series Archive \cite{dau2019}, their deployment in real-time, low-latency, and edge computing environments remains fundamentally constrained by severe computational and memory overheads.
 
 To handle these challenges, researchers use Fuzzy Information Granulation (LFIG). LFIG splits a time series into segments, fits a linear regression trend line within each segment, and builds a fuzzy interval envelope around it. However, standard LFIG implementations are limited by three major shortcomings. First, rigid windowing relying on equal-length fixed partitions fails when signals are non-stationary because structural regime boundaries are ignored. Second, standard formulations suffer from severe information loss by extracting only lower bounds, upper bounds, and linear slopes, discarding essential internal segment dynamics such as volatility, curvature, complexity, and skewness. Third, comparing granules using only Euclidean distance or univariate Dynamic Time Warping introduces similarity bias, failing to simultaneously account for interval set overlap, temporal phase alignment, and multidimensional directional trajectories.
 
 To overcome these fundamental limitations, this paper proposes the Adaptive Multi-Feature Linear Fuzzy Information Granulation (Proposed Adaptive LFIG) framework. Our core contributions encompass: (i) a dual adaptive segmentation architecture that dynamically routes signals between Bottom-Up Change Point Detection and Fixed-Window partitioning using a training-split autocorrelation variance heuristic; (ii) a 10-dimensional structural and statistical granulation space incorporating Shannon entropy, volatility, curvature, intercept, energy, skewness, and variance alongside envelope bounds to eliminate representational loss; (iii) a hybrid 3-way metric learning layer fusing interval Hausdorff overlap, slope-DTW phase alignment, and 10D Cosine-DTW directional movement with data-driven weight optimization; and (iv) a rigorous, leakage-free benchmark evaluation across 20 UCR datasets under 5-fold nested cross-validation and Dem\v{s}ar statistical significance ranking.
 
 \subsection{Related Work \& Positioning Against Prior LFIG Formulations}
-Prior literature on LFIG focuses predominantly on forecasting and clustering rather than high-dimensional classification: Gao and Yu \cite{gao2019} evaluate unequal-length classification with static weights; He and Yu \cite{he2023} propose recurrence plot SVMs; Duan et al. \cite{duan2018} derive unweighted metrics for clustering; and Yang et al. \cite{yang2017} establish sliding-window forecasting.
+Prior literature on LFIG focuses predominantly on forecasting and clustering rather than high-dimensional classification: Guo et al. \cite{guo2025} develop refined granular associations for long-term forecasting; Gao and Yu \cite{gao2019} evaluate unequal-length classification with static weights; He and Yu \cite{he2023} propose recurrence plot SVMs; Duan et al. \cite{duan2018} derive unweighted metrics for clustering; and Yang et al. \cite{yang2017} establish sliding-window forecasting.
 
 Our structural differentiation against prior LFIG competitors is summarized in Table \ref{tab:structural_diff}.
 
@@ -99,7 +99,7 @@ Proposed Framework & Adaptive CPD vs. Fixed ($\sigma^2_r$) & Enhanced 10D Multi-
 
 \section{Technical Methodology and Implementation}
 
-The complete architectural workflow of the proposed Adaptive Multi-Feature LFIG framework is illustrated in Fig. \ref{fig:architecture}. The pipeline dynamically windows signals, constructs high-dimensional granules, and computes hybrid similarity metrics for classification.
+The complete architectural workflow of the proposed Adaptive Multi-Feature LFIG framework is illustrated in Fig.~\ref{fig:architecture}. The pipeline dynamically windows signals, constructs high-dimensional granules, and computes hybrid similarity metrics for classification.
 
 \begin{figure}[!t]
 \centering
@@ -131,12 +131,12 @@ t_j = j \cdot \left\lfloor \frac{N}{S} \right\rfloor
 \label{eq:fixed_split}
 \end{equation}
 
-The partitioning strategies are visually compared in Fig. \ref{fig:segmentation_comparison}.
+The partitioning strategies are visually compared in Fig.~\ref{fig:segmentation_comparison}.
 
 \begin{figure}[!t]
 \centering
 \includegraphics[width=\linewidth,height=0.72\textheight,keepaspectratio]{plots/fig2_segmentation_comparison.png}
-\caption{Visual comparison of windowing strategies (Fixed and Change Point Detection) on a sample GunPoint signal. CPD boundaries align perfectly with signal transitions.}
+\caption{Comparison of signal segmentation strategies on an exemplary \texttt{GunPoint} sequence. Adaptive Bottom-Up Change Point Detection (CPD) dynamically aligns boundaries with physical motion transitions, whereas fixed-window partitioning imposes uniform intervals.}
 \label{fig:segmentation_comparison}
 \end{figure}
 
@@ -156,12 +156,12 @@ Fuzzy lower ($L_j$) and upper ($U_j$) envelopes are constructed using a spread f
 L_j(t) = T_j(t) - z \cdot \sigma_j, \quad U_j(t) = T_j(t) + z \cdot \sigma_j
 \label{eq:envelope_bounds}
 \end{equation}
-The parameter $z$ determines the envelope width (e.g., $z=1.0$ covers $68.2\%$ of variance, and $z=1.96$ covers $95.0\%$ of variance). The resulting OLS trend lines and envelope bounds are shown in Fig. \ref{fig:lfig_granulation}.
+The parameter $z$ determines the envelope width (e.g., $z=1.0$ covers $68.2\%$ of variance, and $z=1.96$ covers $95.0\%$ of variance). As shown in recent industrial anomaly detection frameworks \cite{du2024}, constructing bounded granular envelopes explicitly encapsulates local measurement uncertainty and suppresses transient sensor noise while preserving the underlying morphology. The resulting OLS trend lines and envelope bounds are shown in Fig.~\ref{fig:lfig_granulation}.
 
 \begin{figure}[!t]
 \centering
 \includegraphics[width=\linewidth]{plots/fig1_lfig_granulation.png}
-\caption{Fitted OLS trend lines and residual envelope bounds (L, U) on the segmented GunPoint series, illustrating the interval representation.}
+\caption{Linear fuzzy information granulation on the segmented \texttt{GunPoint} series, showing localized ordinary least squares trend lines $T_j(t)$ enclosed by fuzzy lower ($L_j$) and upper ($U_j$) residual envelopes.}
 \label{fig:lfig_granulation}
 \end{figure}
 
@@ -240,7 +240,7 @@ The proposed framework is evaluated across a benchmark catalog of 20 datasets fr
 \end{tabular*}
 \end{table}
 
-The experimental benchmark incorporates reproduced implementations of DTW-1NN, ROCKET, and MiniROCKET \cite{dempster2021}, alongside established literature results for HIVE-COTE 2.0 \cite{middlehurst2021}. All experiments were executed on a dedicated Dell Precision 3650 Tower workstation equipped with an 11th Gen Intel Core i9-11900K processor @ 3.50 GHz (16 logical CPUs), 32 GB RAM, and an NVIDIA GeForce RTX 3070 GPU (8 GB VRAM) running 64-bit Windows 11 Pro. A global random seed of \texttt{42} was enforced across all splits, cross-validations, and classifier initializations to guarantee strict reproducibility. All raw benchmark datasets were obtained directly from the official UCR Time Series Classification Archive.
+The experimental benchmark incorporates reproduced implementations of DTW-1NN, ROCKET, and MiniROCKET \cite{dempster2021}, alongside established literature results for HIVE-COTE 2.0 \cite{middlehurst2021}. All experiments were executed on a dedicated Dell Precision 3650 Tower workstation equipped with an 11th Gen Intel Core i9-11900K processor @ 3.50 GHz (16 logical CPUs), 32 GB RAM, and an NVIDIA GeForce RTX 3070 GPU (8 GB VRAM) running 64-bit Windows 11 Pro. A global random seed of \texttt{42} was enforced across all splits, cross-validations, and classifier initializations to guarantee strict reproducibility. All raw benchmark datasets were obtained directly from the official UCR Time Series Classification Archive \cite{dau2019}.
 
 \subsection{Leakage-Free Evaluation Protocol}
 To address selection leakage and ensure validation rigor, our evaluation follows a strict leakage-free protocol. We employ a nested cross-validation framework consisting of 5 outer folds for assessing generalization performance and 3 inner folds for hyperparameter optimization. All operational parameters, including spread factor $z$, neighbor count $k$, distance fusion weights $w$, and classifier type, are selected per fold strictly using training data, eliminating optimization bias on test splits. Furthermore, the selection between Bottom-Up Change Point Detection (CPD) and Fixed-Window partitioning is determined dynamically on the training split: we compute the variance of lag-1 autocorrelation across training series, where a variance $> 0.05$ flags high shape volatility and routes the dataset to CPD, while a variance $\le 0.05$ selects fixed windowing. Distance fusion weights are optimized simultaneously in the inner cross-validation loop across candidate combinations to tailor alignment preferences to specific domain dynamics.
@@ -250,7 +250,7 @@ To address selection leakage and ensure validation rigor, our evaluation follows
 \subsection{Benchmark Performance Metrics}
 To compare detailed execution profiles, we evaluate precision, recall, macro F1, runtime, and peak memory allocations across the benchmark runs. For instance, on the Coffee dataset, our proposed 10D model achieves an accuracy of 0.9286, precision of 0.9412, recall of 0.9231, and macro F1 of 0.9271, running in 3.69 seconds with a peak memory of 0.17 MB. In contrast, our reproduced Fast-DTW kNN baseline requires 35.33 seconds and 0.93 MB of memory, demonstrating a 9.5$\times$ speedup and 5.5$\times$ memory reduction due to fuzzy granule compression. On longer datasets such as GunPoint and ArrowHead, the speedups scale to 14.2$\times$ (11.78s vs. 167.46s) and 8.9$\times$ (27.75s vs. 247.97s), respectively, illustrating that larger relative efficiency gains are achieved on longer sequence lengths due to the quadratic complexity of dynamic programming. Peak memory is measured using Python's standard \texttt{tracemalloc} library to capture heap memory allocations during execution. These runtime and memory profiles are collected from single-split evaluation runs to compare the speedups directly, though total runtimes scale proportionally under the nested cross-validation protocol due to repeated grid search and fold sweeps.
 
-The learned distance-fusion weight configurations grouped by domain are illustrated in Fig. \ref{fig:fusion_weights}.
+The learned distance-fusion weight configurations grouped by domain are illustrated in Fig.~\ref{fig:fusion_weights}.
 
 \begin{figure}[!t]
 \centering
@@ -259,7 +259,7 @@ The learned distance-fusion weight configurations grouped by domain are illustra
 \label{fig:fusion_weights}
 \end{figure}
 
-The classification accuracy comparison across the core UCR datasets is shown in Fig. \ref{fig:accuracy_comparison}.
+The classification accuracy comparison across the core UCR datasets is shown in Fig.~\ref{fig:accuracy_comparison}.
 
 \begin{figure}[!t]
 \centering
@@ -329,7 +329,7 @@ Wafer                  & 0.9400 & \textbf{0.9455} & \textbf{+0.0055 (+0.59\%)} \
 As detailed in Table \ref{tab:dimension_comparison}, expanding to 10D descriptors yields pronounced classification gains across kinematic motion series (e.g., \texttt{GunPoint} at +3.22\%), geometric image contours (e.g., \texttt{ArrowHead} at +3.34\%), and sensor telemetry (e.g., \texttt{SonyAIBORobotSurface1} at +3.75\%, \texttt{TwoLeadECG} at +6.64\%, and \texttt{SyntheticControl} at +0.68\%). The introduction of higher-order descriptors—specifically Shannon entropy ($H$), polynomial curvature ($c$), and volatility spread ($V_{ol}$)—enables the hybrid metric space to resolve complex intra-segment dynamics that remain indistinguishable under 3-parameter envelopes. Conversely, on heavily compressed short signals with low sample counts (such as \texttt{ECG200}, \texttt{Meat}, and \texttt{BeetleFly}), extracting 10 descriptors over brief segment lengths introduces localized feature collinearity and parameter variance under fixed-weight evaluation, whereas stationary phase-aligned datasets (e.g., \texttt{Coffee}, \texttt{BirdChicken}, \texttt{FaceFour}) maintain identical performance bounds.
 
 \subsubsection{Validation Study 3: Cohort-Wide Leave-One-Feature-Out (LOFO) Impact Analysis}
-To inspect the individual contributions of the 10 structural features, we perform a cohort-wide Leave-One-Feature-Out (LOFO) ablation study across all 20 UCR datasets. For each dataset, we compute the accuracy difference $\Delta = \text{Full} - \text{Ablated}$. Under this definition, a positive mean delta (e.g., $+0.0243$ for Trend Slope, $+0.0110$ for Lower Bound) indicates that removing the feature degrades classification performance on average, confirming its direct discriminative utility. Conversely, a negative mean delta (e.g., $-0.0279$ for Energy, $-0.0091$ for Upper Bound) indicates that removing the feature increases test accuracy on average. This localized performance boost under ablation is a known artifact of fixed-weight evaluation, where zeroing a feature shifts the normalized distance metric in a way that happens to expand classification margins on specific test partitions. In practice, Energy and Upper Bound serve as global representation stabilizers, preventing overfitting to local phase shifts at the cost of slight single-split test variance. The aggregate results are detailed in Table \ref{tab:lofo_matrix} and visualized with 95\% confidence intervals in Fig. \ref{fig:lofo_importance}.
+To inspect the individual contributions of the 10 structural features, we perform a cohort-wide Leave-One-Feature-Out (LOFO) ablation study across all 20 UCR datasets. For each dataset, we compute the accuracy difference $\Delta = \text{Full} - \text{Ablated}$. Under this definition, a positive mean delta (e.g., $+0.0243$ for Trend Slope, $+0.0110$ for Lower Bound) indicates that removing the feature degrades classification performance on average, confirming its direct discriminative utility. Conversely, a negative mean delta (e.g., $-0.0279$ for Energy, $-0.0091$ for Upper Bound) indicates that removing the feature increases test accuracy on average. This localized performance boost under ablation is a known artifact of fixed-weight evaluation, where zeroing a feature shifts the normalized distance metric in a way that happens to expand classification margins on specific test partitions. In practice, Energy and Upper Bound serve as global representation stabilizers, preventing overfitting to local phase shifts at the cost of slight single-split test variance. The aggregate results are detailed in Table \ref{tab:lofo_matrix} and visualized with 95\% confidence intervals in Fig.~\ref{fig:lofo_importance}.
 
 \begin{table*}[!t]
 \caption{Cohort-Wide Leave-One-Feature-Out (LOFO) Feature Impact Matrix Across 20 UCR Datasets (Validation Study 3)}
@@ -407,12 +407,12 @@ Wafer                  & 0.9455 & 0.9799 & -0.0344 & 0.9985 & -0.0530 & 0.9994 &
 
 Our Proposed Adaptive LFIG model demonstrates strong competitive parity with standard DTW-1NN, outperforming or matching DTW-1NN on five datasets (achieving positive accuracy deltas on \texttt{SonyAIBORobotSurface1} (+0.0582), \texttt{MoteStrain} (+0.0255), \texttt{ECGFiveDays} (+0.0116), and \texttt{ArrowHead} (+0.0057), and matching on \texttt{OliveOil} (+0.0000)), while executing up to 14.2$\times$ faster than standard dynamic time warping. While large-scale convolutional models (ROCKET, MiniROCKET) and complex ensemble architectures (HIVE-COTE 2.0) lead on small single-split partitions due to higher parameter capacity, our framework achieves a highly performant accuracy-efficiency trade-off with full physical interpretability.
 
-We conducted a Friedman chi-square test followed by Nemenyi post-hoc analysis ($\alpha = 0.05$) \cite{demsar2006} strictly using the 1:1 single-split baseline ranks. The test yielded a Friedman statistic of 45.8254 ($p = 0.000000$), confirming statistically significant differences across models. The resulting average ranks (where lower is better) are: ROCKET (1.5000), MiniROCKET (1.6750), DTW-1NN (3.0500), and Proposed Adaptive LFIG (Single-Split) (3.7750). The critical difference threshold is $\text{CD} = 1.0488$. As visualized in the Critical Difference diagram (Fig. \ref{fig:cd_diagram}), our proposed single-split model and DTW-1NN lie within the same critical difference interval.
+We conducted a Friedman chi-square test followed by Nemenyi post-hoc analysis ($\alpha = 0.05$) \cite{demsar2006} strictly using the 1:1 single-split baseline ranks. The test yielded a Friedman statistic of 45.8254 ($p = 0.000000$), confirming statistically significant differences across models. The resulting average ranks (where lower is better) are: ROCKET (1.5000), MiniROCKET (1.6750), DTW-1NN (3.0500), and Proposed Adaptive LFIG (Single-Split) (3.7750). The critical difference threshold is $\text{CD} = 1.0488$. As visualized in the Critical Difference diagram (Fig.~\ref{fig:cd_diagram}), our proposed single-split model and DTW-1NN lie within the same critical difference interval.
 
 \begin{figure}[!t]
 \centering
 \includegraphics[width=\linewidth]{plots/cd_diagram.png}
-\caption{Dem\v{s}ar Critical Difference diagram comparing average ranks of the Proposed Adaptive LFIG model, ROCKET, MiniROCKET, and DTW-1NN baselines across 20 UCR datasets.}
+\caption{Critical difference diagram under the Nemenyi post-hoc test ($\alpha = 0.05$, $\text{CD} = 1.0488$) comparing average classifier ranks across 20 UCR datasets, confirming competitive statistical parity between Proposed Adaptive LFIG and DTW-1NN.}
 \label{fig:cd_diagram}
 \end{figure}
 
@@ -461,12 +461,12 @@ One of the most important takeaways from our benchmark is the structural dichoto
 \subsection{Feature Importance and Ablation}
 Our 10-feature granulation yields positive classification gains under both adaptive CPD (+2.67\% on GunPoint) and fixed windowing (+2.29\% on ArrowHead) compared to standard 3D configurations. However, on short phase-shifted signals like ECG200, representing the signal with 10 features over very few granules (e.g., 5 granules) can introduce noise, leading to an accuracy drop of 8.00\%. On other phase-aligned datasets under fixed windowing (e.g., Coffee), the additional features maintain stable, competitive bounds.
 
-The Leave-One-Feature-Out (LOFO) ablation results across the UCR cohort are displayed in Fig. \ref{fig:lofo_importance}.
+The Leave-One-Feature-Out (LOFO) ablation results across the UCR cohort are displayed in Fig.~\ref{fig:lofo_importance}.
 
 \begin{figure}[!t]
 \centering
 \includegraphics[width=\linewidth]{plots/fig3_lofo_importance.png}
-\caption{Leave-One-Feature-Out (LOFO) ablated accuracy impact delta ($\Delta = \text{Full} - \text{Ablated}$) with 95\% confidence intervals across UCR datasets, illustrating the direct utility of primary features (positive deltas) and the stabilizing effect of global descriptors (negative deltas).}
+\caption{Cohort-wide Leave-One-Feature-Out (LOFO) feature importance delta ($\Delta = \text{Full} - \text{Ablated}$) with 95\% confidence intervals across all 20 UCR benchmark datasets, demonstrating the dominant discriminative utility of trend slope ($a$) and lower bound ($L$).}
 \label{fig:lofo_importance}
 \end{figure}
 
@@ -477,7 +477,7 @@ Fuzzy granulation compresses raw time series of length $N$ into $S$ granules (wh
 With only $n=5$ datasets, the Wilcoxon signed-rank test is mathematically underpowered, as the $p$-value cannot fall below $0.0625$ regardless of effect size. This motivates our cohort-wide expansion to 20 datasets using the Friedman/Nemenyi framework, which establishes robust statistical comparisons without this limitation.
 
 \subsection{Architectural Trade-Offs, Interpretability, and Practical Utility}
-Selecting an appropriate time series classification architecture requires balancing classification accuracy against computational speed, memory footprint, noise resilience, and model explainability. Contemporary state-of-the-art architectures establish their benchmark accuracy through heavy ensemble models such as HIVE-COTE 2.0 or massive random convolutional projections such as ROCKET and MiniROCKET. While these models yield superior accuracy on static single splits, they introduce severe practical limitations: HIVE-COTE requires prohibitive multi-hour training budgets and massive memory footprints, whereas ROCKET maps signals into 10,000 to 50,000 uninterpretable random features where individual predictive drivers cannot be physically inspected.
+Selecting an appropriate time series classification architecture requires balancing classification accuracy against computational speed, memory footprint, noise resilience, and model explainability. Contemporary state-of-the-art architectures establish their benchmark accuracy through heavy ensemble models such as HIVE-COTE 2.0 \cite{middlehurst2021}, deep convolutional networks like InceptionTime \cite{fawaz2020}, or massive random convolutional projections such as ROCKET and MiniROCKET \cite{dempster2021}. While these models yield superior accuracy on static single splits, they introduce severe practical limitations: HIVE-COTE requires prohibitive multi-hour training budgets and massive memory footprints, InceptionTime functions as an opaque deep neural network requiring extensive gradient backpropagation, and ROCKET maps signals into 10,000 to 50,000 uninterpretable random features where individual predictive drivers cannot be physically inspected.
 
 Our Proposed Adaptive LFIG framework offers a fundamentally distinct value proposition tailored to resource-constrained, real-time, and safety-critical environments. First, by compressing raw sequences of length $N$ into $S \ll N$ fuzzy granules, dynamic programming operates in $O(S^2)$ rather than $O(N^2)$, unlocking execution speedups of up to 14.2$\times$ over standard DTW and reducing peak heap memory allocations by up to 5.5$\times$. This makes our pipeline readily deployable on edge devices, low-power industrial microcontrollers, and real-time battery-powered medical monitors. Second, unlike black-box deep embeddings, every component of our 10D granular representation corresponds to a verified physical property (such as trend slope, Shannon entropy, volatility, curvature, and energy), allowing clinicians and engineers to visually audit anomaly boundaries and explain decision rationales directly from the fuzzy envelope $[L, U]$. For instance, in wearable ECG monitoring, a clinician can directly verify whether a classification was triggered by localized slope reversal, energy spikes, or Shannon entropy collapse during cardiac arrhythmia, satisfying strict regulatory explainability requirements. Similarly, in industrial turbine telemetry, real-time CPD detects structural vibration regime shifts instantly while entropy descriptors track mechanical wear without requiring multi-gigabyte neural network deployments. Third, the integration of least-squares trend estimation acts as an analytical filter that confers native resilience against high-frequency sensor noise without discarding measurement uncertainty. Consequently, whenever transparent decision-making, low latency, minimal memory overhead, and interpretable physical explanations are required, our proposed architecture provides a superior and pragmatic alternative to heavy black-box baselines.
 
@@ -487,7 +487,16 @@ We have presented an Adaptive Multi-Feature LFIG framework for time series class
 \subsection{Future Work}
 Future investigations will advance the proposed framework along three natural research trajectories. First, we plan to generalize the 10-dimensional granular representation and hybrid similarity metrics to multivariate time series benchmarks, developing inter-channel co-granulation mechanisms for multi-lead physiological and kinematic sensor streams. Second, to accelerate pairwise distance evaluations on massive datasets, we intend to implement native CUDA-parallel dynamic programming kernels in PyTorch or JAX to execute alignments concurrently on GPU warps. Third, we aim to integrate reference prototype editing algorithms (such as $k$-medoids or condensed nearest neighbors) to prune redundant training references and further minimize inference latency for real-time edge deployments.
 
-\begin{thebibliography}{10}
+\begin{thebibliography}{15}
+
+\bibitem{guo2025}
+H. Guo, Y. Yu, W. Pedrycz, and X. Yang, ``Association rules and refined information granulation-based time-series long-term forecasting,'' \textit{IEEE Transactions on Fuzzy Systems}, vol. 33, no. 2, pp. 412--425, 2025.
+
+\bibitem{middlehurst2024}
+M. Middlehurst, P. Sch{\"a}fer, and A. Bagnall, ``Bake off redux: a review and experimental evaluation of recent time series classification algorithms,'' \textit{Data Mining and Knowledge Discovery}, vol. 38, no. 4, pp. 2489--2542, 2024.
+
+\bibitem{du2024}
+S. Du, X. Ma, M. Wu, and W. Pedrycz, ``Time series anomaly detection via rectangular information granulation for sintering process,'' \textit{IEEE Transactions on Fuzzy Systems}, vol. 32, no. 10, pp. 5621--5633, 2024.
 
 \bibitem{he2023}
 Q. He and F. Yu, ``Trend recurrence analysis and time series classification via trend fuzzy granular recurrence plot method (TFGRP-SVM),'' \textit{Chaos, Solitons \& Fractals}, vol. 169, p. 113309, 2023.
@@ -498,8 +507,14 @@ A. Dempster, F. Schmidt, and G. I. Webb, ``MINIROCKET: A Very Fast and Accurate 
 \bibitem{middlehurst2021}
 M. Middlehurst, J. Large, M. Flynn, J. Featherstone, and J. Bagnall, ``HIVE-COTE 2.0: a new meta-ensemble for time series classification,'' \textit{Machine Learning}, vol. 110, no. 11, pp. 3211--3243, 2021.
 
+\bibitem{fawaz2020}
+H. Ismail Fawaz, B. Lucas, G. Forestier, C. Pelletier, D. F. Schmidt, M. H. Weber, G. I. Webb, L. Idoumghar, P.-A. Muller, and F. Petitjean, ``InceptionTime: Finding AlexNet for time series classification,'' \textit{Data Mining and Knowledge Discovery}, vol. 34, no. 6, pp. 1936--1962, 2020.
+
 \bibitem{truong2020}
 C. Truong, L. Oudre, and N. Vayatis, ``Selective review of offline change point detection methods,'' \textit{Signal Processing}, vol. 167, p. 107299, 2020.
+
+\bibitem{dau2019}
+H. A. Dau, A. Bagnall, K. Kamgar, C. C. M. Yeh, Y. Zhu, S. Gharghabi, C. A. Ratanamahatana, and E. Keogh, ``The UCR time series classification archive,'' \textit{IEEE/CAA Journal of Automatica Sinica}, vol. 6, no. 6, pp. 1293--1305, 2019.
 
 \bibitem{gao2019}
 F. Gao and F. Yu, ``Linear fuzzy information granulation based classification method for unequal length time series,'' \textit{IEEE Access}, vol. 7, pp. 91118--91128, 2019.

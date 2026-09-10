@@ -296,12 +296,12 @@ To comprehensively quantify the empirical impact of expanding linear fuzzy infor
 \caption{Cohort-Wide Empirical Validation: 3D vs. 10D Granular Ablation Across 20 UCR Datasets (Validation Study 2)}
 \label{tab:dimension_comparison}
 \centering
-\footnotesize
-\setlength{\tabcolsep}{4.5pt}
-\renewcommand{\arraystretch}{0.94}
-\begin{tabularx}{\textwidth}{|>\raggedright\arraybackslash}p{3.5cm}|c|c|>\centering\arraybackslash}X|}
+\ieeetableformat
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.15}
+\begin{tabularx}{\textwidth}{|>{\raggedright\arraybackslash}p{3.5cm}|Y|Y|Y|}
 \hline
-\textbf{Dataset} & \textbf{Standard 3D LFIG Acc.} & \textbf{Proposed 10D Multi-Feature LFIG Acc.} & \textbf{Improvement Delta (10D vs. 3D)} \\ \hline
+\textbf{Dataset} & \shortstack{\textbf{Standard 3D LFIG}\\\textbf{Accuracy}} & \shortstack{\textbf{Proposed 10D}\\\textbf{Multi-Feature LFIG Accuracy}} & \shortstack{\textbf{Improvement Delta}\\\textbf{(10D vs. 3D)}} \\ \hline
 GunPoint               & 0.8267 & \textbf{0.8533} & \textbf{+0.0266 (+3.22\%)} \\
 Coffee                 & 0.9286 & 0.9286 & +0.0000 (+0.00\%) \\
 ArrowHead              & 0.6857 & \textbf{0.7086} & \textbf{+0.0229 (+3.34\%)} \\

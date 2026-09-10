@@ -354,7 +354,7 @@ To guarantee complete scientific rigor and fairness, our paper presents **two co
 6. **Middlehurst, M., Large, J., Flynn, M., Featherstone, J., & Bagnall, A. (2021)** — *HIVE-COTE 2.0: a new meta-ensemble for time series classification*, *Machine Learning*, 110(11), 3211–3243.
 7. **Ismail Fawaz, H., et al. (2020)** — *InceptionTime: Finding AlexNet for time series classification*, *Data Mining and Knowledge Discovery*, 34(6), 1936–1962.
 8. **Truong, C., Oudre, L., & Vayatis, N. (2020)** — *Selective review of offline change point detection methods*, *Signal Processing*, 167, 107299.
-9. **Dau, H. A., et al. (2019)** — *The UCR time series classification archive*, *IEEE/CAA Journal of Automatica Sinica*, 6(6), 1293–1305.
+9. **Dau, H. A., et al. (2019)** — *The UCR time series archive*, *IEEE/CAA Journal of Automatica Sinica*, 6(6), 1293–1305.
 10. **Gao, F., & Yu, F. (2019)** — *Linear Fuzzy Information Granulation Based Classification Method for Unequal Length Time Series*, *IEEE Access*, 7, 91118–91128.
 11. **Lubba, C. H., et al. (2019)** — *catch22: CAnonic time-series characteristics: Selected through highly comparative time-series analysis*, *Data Mining and Knowledge Discovery*, 33(6), 1821–1852.
 12. **Duan, L., Yu, F., Pedrycz, W., & Wang, Y. (2018)** — *Time-series clustering based on linear fuzzy information granules*, *Applied Soft Computing*, 73, 1053–1067.

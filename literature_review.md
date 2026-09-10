@@ -242,7 +242,7 @@ To rigorously establish novelty, the table below directly contrasts our proposed
 ### Tier 4: Methodological & Statistical Backbone
 11. **Middlehurst, Schäfer & Bagnall (2024)** — *Bake off redux: a review and experimental evaluation of recent time series classification algorithms* (Data Mining and Knowledge Discovery, Vol. 38, No. 4, pp. 2489–2542). The definitive modern benchmarking study for time series classification.
 12. **Ismail Fawaz et al. (2020)** — *InceptionTime: Finding AlexNet for time series classification* (Data Mining and Knowledge Discovery, Vol. 34, No. 6, pp. 1936–1962). Primary deep learning CNN baseline for time series classification.
-13. **Dau, Bagnall, Keogh et al. (2019)** — *The UCR time series classification archive* (IEEE/CAA Journal of Automatica Sinica, Vol. 6, No. 6, pp. 1293–1305). Official dataset repository reference.
+13. **Dau, Bagnall, Keogh et al. (2019)** — *The UCR time series archive* (IEEE/CAA Journal of Automatica Sinica, Vol. 6, No. 6, pp. 1293–1305). Official dataset repository reference.
 14. **Demšar, J. (2006)** — *Statistical Comparisons of Classifiers over Multiple Data Sets* (JMLR). Source for Friedman chi-square and Nemenyi critical difference diagrams.
 15. **Dempster et al. (2021)** — *MINIROCKET: A Very Fast (Almost) Deterministic Transform for Time Series Classification* (ACM SIGKDD). Primary convolutional baseline.
 16. **Middlehurst et al. (2021)** — *HIVE-COTE 2.0* (Machine Learning). Meta-ensemble accuracy target baseline.

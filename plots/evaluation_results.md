@@ -58,7 +58,7 @@ The table below reports the 1:1 single-split classification benchmark across all
 | **Coffee** | Spectro | 28/28 | Fixed(28) | (0.1, 0.8, 0.1) | 1.0000 $\pm$ 0.0000 | 1.0000 $\pm$ 0.0000 | 109.2 |
 | **ArrowHead** | Image | 36/175 | Fixed(25) | (0.8, 0.1, 0.1) | 0.8910 $\pm$ 0.0241 | 0.8917 $\pm$ 0.0226 | 298.5 |
 | **ECG200** | ECG | 100/100 | CPD(1.5) | (0.4, 0.2, 0.4) | 0.8000 $\pm$ 0.0671 | 0.7788 $\pm$ 0.0673 | 233.8 |
-| **Chinatown** | Sensor | 20/345 | Fixed(10) | (0.1, 0.8, 0.1) | 0.9807 $\pm$ 0.0140 | 0.9770 $\pm$ 0.0165 | 253.1 |
+| **Chinatown** | Sensor | 20/343 | Fixed(10) | (0.1, 0.8, 0.1) | 0.9807 $\pm$ 0.0140 | 0.9770 $\pm$ 0.0165 | 253.1 |
 | **ItalyPowerDemand** | Sensor | 67/1029 | CPD(1.5) | (0.1, 0.1, 0.8) | 0.9644 $\pm$ 0.0159 | 0.9644 $\pm$ 0.0159 | 888.9 |
 | **SonyAIBORobotSurface1** | Sensor | 20/601 | Fixed(10) | (0.2, 0.6, 0.2) | 0.9742 $\pm$ 0.0156 | 0.9739 $\pm$ 0.0158 | 712.4 |
 | **TwoLeadECG** | ECG | 23/1139 | Fixed(10) | (0.1, 0.1, 0.8) | 0.9845 $\pm$ 0.0034 | 0.9845 $\pm$ 0.0034 | 2014.1 |

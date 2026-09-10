@@ -113,10 +113,10 @@ This compresses the raw segment values into a fuzzy trend interval $[g_{\text{lo
 **Answer:** 
 - **Ambiguity in 3D LFIG:** Classic LFIG only extracts lower/upper envelope means and the linear slope ($3$ features). This acts as a pure trend interval but introduces severe **granule shape ambiguity** (e.g., an oscillating segment and a smooth segment can share the exact same average slope and bounds).
 - **The 10D Enhancement:** To resolve this, we added 7 statistical and geometric descriptors (entropy, variance, volatility, curvature, intercept, energy, and skewness).
-- **Empirical Validation:** In our comparative study across the datasets, the 10D model achieved significant accuracy gains over the standard 3D LFIG model (e.g., **+10.67%** on GunPoint, **+4.21%** on TwoLeadECG, and **+2.83%** on SonyAIBORobotSurface1).
+- **Empirical Validation:** In our comparative study across the datasets, the 10D model achieved notable accuracy gains over the standard 3D LFIG model on feature-rich datasets (e.g., **+4.22%** (+0.0422) on TwoLeadECG, **+2.83%** (+0.0283) on SonyAIBORobotSurface1, **+2.66%** (+0.0266) on GunPoint, and **+2.29%** (+0.0229) on ArrowHead).
 - **Why Not More?** Adding higher-order moments led to high multicollinearity (VIF > 30) and increased the Cosine distance calculation cost inside DTW without providing any statistical accuracy gains.
 
-**Resolution:** Reported the comparative results (comparing standard 3D vs. proposed 10D) in Table IV and the LOFO feature impact matrix in Table V of the paper.
+**Resolution:** Reported the comparative results (comparing standard 3D vs. proposed 10D) in Table III and the LOFO feature impact matrix in Table IV of the paper.
 
 ---
 

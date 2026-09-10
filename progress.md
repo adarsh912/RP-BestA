@@ -57,7 +57,7 @@ This document details the code development progress, module verification results
   - **Perfect Accuracy on Coffee:** Achieved **100% accuracy** (matching state-of-the-art ensembles and outperforming literature DTW at 99.3%).
   - **High Performance on Chinatown:** Achieved **97.38% accuracy** utilizing precomputed Kernel SVM.
   - **Massive Speedups:** Runs up to **14.2x faster** than the Fast-DTW baseline (e.g. GunPoint completed in 11.78s vs 167.46s).
-  - **Ablation Validity:** Feature ablation shows significant accuracy drop when moving from our proposed 10-feature model to a standard 3-feature model, demonstrating an accuracy drop of up to **16%** on ECG200 and **11.43%** on ArrowHead.
+  - **Ablation Validity (Preliminary 5-dataset single split):** Initial preliminary iterations on early single splits showed substantial variations (up to 16% on ECG200 and 11.43% on ArrowHead under manual tuning), which was subsequently formalized in the comprehensive, leakage-free 20-dataset ablation study (Validation Study 2: GunPoint +2.66%, ArrowHead +2.29%, SonyAIBORobotSurface1 +2.83%, TwoLeadECG +4.22%, SyntheticControl +0.66%, Wafer +0.55%).
 * **Plots Generated:** [accuracy_comparison.png](file:///Users/adarshfulzele/Desktop/RP/Best%20A/plots/accuracy_comparison.png) (shows classification accuracy across all model configurations).
 
 ---

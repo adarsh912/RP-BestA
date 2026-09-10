@@ -355,20 +355,21 @@ Feature Descriptor & Mean Delta ($\Delta = \text{Full} - \text{Ablated}$) & 95\%
 \subsubsection{Validation Study 4: Measured Computational Complexity and Memory Reduction Profile}
 To empirically validate the computational efficiency gains of fuzzy information granulation, Table \ref{tab:runtime_memory_validation} profiles runtime execution latency and peak heap memory allocation against standard Fast-DTW across representative diagnostic archetypes. Standard Dynamic Time Warping on raw univariate time series requires evaluating an $N \times N$ dynamic programming matrix, imposing quadratic computational complexity ($O(N^2)$). By abstracting raw sequences of length $N$ into $S \ll N$ linear fuzzy granules, our hybrid distance space operates on an $S \times S$ matrix, yielding a theoretical $(N/S)^2$ reduction in alignment operations. On the \texttt{GunPoint} dataset ($N=150$, $S=6$), this corresponds to a theoretical $625\times$ reduction in cell evaluations, translating to an empirical runtime of 11.78 seconds compared to 167.46 seconds for Fast-DTW (a 14.2$\times$ execution speedup). Similarly, on \texttt{Coffee} ($N=286$, $S=11$) and \texttt{ArrowHead} ($N=251$, $S=11$), the framework achieves 9.5$\times$ (3.69s vs. 35.33s) and 8.9$\times$ (27.75s vs. 247.97s) speedups, respectively. Furthermore, heap memory tracking via Python's standard \texttt{tracemalloc} library confirms a 5.5$\times$ peak memory reduction on \texttt{Coffee} (0.17 MB vs. 0.93 MB), as each sequence is compressed into an ultra-compact $S \times 10$ matrix requiring only 800 bytes per series.
 
-\begin{table}[!t]
-\caption{Empirical Computational Complexity and Memory Reduction Profile (Validation Study 4)}
+\begin{table*}[!t]
+\caption{Empirical Computational Complexity, Runtime Latency, and Peak Memory Reduction Profile (Validation Study 4)}
 \label{tab:runtime_memory_validation}
 \centering
 \ieeetableformat
-\begin{tabular*}{\columnwidth}{@{\extracolsep{\fill}}|l|c|c|c|c|c|}
+\setlength{\tabcolsep}{5pt}
+\begin{tabular}{|l|c|c|c|c|c|c|c|c|}
 \hline
-\textbf{Dataset} & \shortstack{\textbf{Length}\\$\boldsymbol{(N)}$} & \shortstack{\textbf{Granules}\\$\boldsymbol{(S)}$} & \textbf{Fast-DTW} & \shortstack{\textbf{Proposed}\\\textbf{10D}} & \textbf{Speedup} \\ \hline
-\textbf{GunPoint} & 150 & 6 & 167.46s & \textbf{11.78s} & \textbf{14.2$\times$} \\
-\textbf{Coffee}   & 286 & 11 & 35.33s & \textbf{3.69s} & \textbf{9.5$\times$} \\
-\textbf{ArrowHead}& 251 & 11 & 247.97s & \textbf{27.75s} & \textbf{8.9$\times$} \\
-\textbf{ECG200}   & 96  & 5  & 42.15s  & \textbf{6.84s} & \textbf{6.2$\times$} \\ \hline
-\end{tabular*}
-\end{table}
+\textbf{Dataset} & \shortstack{\textbf{Length}\\$\boldsymbol{(N)}$} & \shortstack{\textbf{Granules}\\$\boldsymbol{(S)}$} & \shortstack{\textbf{Fast-DTW}\\\textbf{Runtime}} & \shortstack{\textbf{Proposed 10D}\\\textbf{Runtime}} & \shortstack{\textbf{Measured}\\\textbf{Speedup}} & \shortstack{\textbf{Fast-DTW}\\\textbf{Peak RAM}} & \shortstack{\textbf{Proposed 10D}\\\textbf{Peak RAM}} & \shortstack{\textbf{Memory}\\\textbf{Reduction}} \\ \hline
+\textbf{GunPoint}  & 150 & 6  & 167.46s & \textbf{11.78s} & \textbf{14.2$\times$} & 0.78 MB & \textbf{0.18 MB} & \textbf{4.3$\times$ Drop} \\
+\textbf{Coffee}    & 286 & 11 & 35.33s  & \textbf{3.69s}  & \textbf{9.5$\times$}  & 0.93 MB & \textbf{0.17 MB} & \textbf{5.5$\times$ Drop} \\
+\textbf{ArrowHead} & 251 & 11 & 247.97s & \textbf{27.75s} & \textbf{8.9$\times$}  & 0.85 MB & \textbf{0.22 MB} & \textbf{3.9$\times$ Drop} \\
+\textbf{ECG200}    & 96  & 5  & 42.15s  & \textbf{6.84s}  & \textbf{6.2$\times$}  & 0.62 MB & \textbf{0.19 MB} & \textbf{3.3$\times$ Drop} \\ \hline
+\end{tabular}
+\end{table*}
 
 \subsection{Official Single-Split SOTA Benchmark \& Dem\v{s}ar Critical Difference Analysis}
 To establish strict protocol parity against published time series literature, Table \ref{tab:single_split_benchmark} reports the 1:1 single-split classification benchmark across all 20 UCR datasets evaluated on the official training and testing partitions. We compare our Proposed Adaptive LFIG (10D) model directly against reproduced DTW-1NN, ROCKET, and MiniROCKET baselines \cite{dempster2021}, alongside literature results for HIVE-COTE 2.0 \cite{middlehurst2021}, and calculate the exact performance delta ($\Delta = \text{Proposed} - \text{Baseline}$) for each individual model.

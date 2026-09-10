@@ -17,7 +17,7 @@ This roadmap outlines the critical upcoming steps to validate the integrity of o
 ---
 
 ### 📊 Step 2: Clean Benchmark Pass & result reports
-- **Protocol**: Run a clean, single-pass benchmark over all 23 datasets.
+- **Protocol**: Run a clean, single-pass benchmark over all 20 evaluated benchmark datasets (excluding FordA, Yoga, and SwedishLeaf due to compute limits).
 - **Reporting Rule**:
   - `_df_to_markdown_safe` is already restored and verified.
   - Report the **5-Fold Nested Cross-Validation (CV)** results as the primary metric.
@@ -38,7 +38,7 @@ This roadmap outlines the critical upcoming steps to validate the integrity of o
 ### 🔍 Step 4: Aggregate LOFO and Distance-Fusion Ablation
 - **Goal**: Provide empirical interpretability evidence for the proposed pipeline.
 - **Methodology**:
-  - Aggregate Leave-One-Feature-Out (LOFO) impact tables across all 23 datasets.
+  - Aggregate Leave-One-Feature-Out (LOFO) impact tables across all 20 datasets.
   - Chart which of the 10 granule features (e.g. Trend, Shannon Entropy) matter most for different domains.
   - Analyze the learned distance-fusion weights to show which distance components (Hausdorff, DTW, Cosine DTW) are prioritized on each dataset category.
 
@@ -47,7 +47,7 @@ This roadmap outlines the critical upcoming steps to validate the integrity of o
 ### 📈 Step 5: Significance Testing
 - **Goal**: Back up accuracy claims with rigorous statistical significance.
 - **Methodology**:
-  - Run the **Wilcoxon signed-rank test** comparing the 10D proposed features vs. 3D standard LFIG features across all 23 datasets.
+  - Run the **Demšar Critical Difference (CD) analysis** and **Wilcoxon signed-rank test** comparing the 10D proposed features vs. 3D standard LFIG features across all 20 datasets.
   - If not globally significant, frame and report it as evidence for our narrower claim (e.g., demonstrating significance specifically on alignment-sensitive subsets).
 
 ---
@@ -55,8 +55,9 @@ This roadmap outlines the critical upcoming steps to validate the integrity of o
 ### ⏱️ Step 6: Runtime Honesty
 - **Goal**: Maintain transparency on execution overhead.
 - **Methodology**:
-  - Report the runtimes for large datasets (e.g., `FordA` and `Wafer`) plainly.
+  - Report the runtimes and speedups across all 20 datasets plainly (e.g., `Wafer` and `TwoPatterns`).
   - Frame high runtimes constructively as future work opportunities (e.g., developing custom CUDA-compiled batched DTW solvers or scaling out GPU batching).
+
 
 ---
 

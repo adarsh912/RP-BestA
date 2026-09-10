@@ -210,14 +210,14 @@ Our proposed framework addresses the identified research gaps through **five cor
 
 To rigorously establish novelty, the table below directly contrasts our proposed framework against the four most closely competing LFIG studies in literature across five structural dimensions:
 
-| Study / Model | Segmentation Strategy | Granule Representation (# Features) | Similarity Metric Space | Weight Learning Mechanism | Primary Target Task |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| **Yang, Yu & Pedrycz (2017)** (*Int. J. Approx. Reason.*) | Fixed-Window Sliding | Standard 3D LFIG ($[L, U, a]$) | Euclidean / Error Distance | None (Unweighted) | Long-Term Forecasting |
-| **Duan, Yu, Pedrycz & Wang (2018)** (*Appl. Soft Comput.*) | Fixed-Window / Constrained | Standard 3D LFIG ($[L, U, a]$) | Hausdorff + Slope DTW ($D_H + D_{DTW}$) | None (Unweighted / Static Sum) | Time Series Clustering |
-| **Gao & Yu (2019)** (*IEEE Access*) | Fixed / Heuristic Unequal | Standard 3D LFIG ($[L, U, a]$) | Generalized LFIG-DTW | Static Equal Weights | Classification (Unequal Length) |
-| **He & Yu (2023)** (*Chaos Solitons & Fractals*) | Recurrence Matrix Splitting | 2D Recurrence Plot Images (TFGRP) | SVM Precomputed Kernel | None (Implicit SVM Margin) | Noise-Robust Classification |
-| **Applied Soft Computing (2023)** (*Follow-up*) | Constrained LFIG Variants | Standard 3D LFIG ($[L, U, a]$) | Constrained LFIG-DTW | Fixed Weights | Time Series Clustering |
-| **Our Proposed Framework** | **Adaptive CPD vs. Fixed (Autocorrelation $\sigma^2_r$)** | **Enhanced 10D Multi-Feature Descriptor** | **3-Way Hybrid ($D_H + D_{DTW} + D_{Cos}$)** | **Grid Search / Inner CV** | **Time Series Classification (TSC)** |
+| Study / Model | Segmentation Strategy | Granule Representation (# Features) | Similarity Metric Space | Weight Learning Mechanism | Alignment Complexity | Primary Target Task |
+| :--- | :--- | :--- | :--- | :--- | :---: | :--- |
+| **Yang, Yu & Pedrycz (2017)** (*Int. J. Approx. Reason.*) | Fixed-Window Sliding | Standard 3D LFIG ($[L, U, a]$) | Euclidean / Error Distance | None (Unweighted) | $\mathcal{O}(N)$ | Long-Term Forecasting |
+| **Duan, Yu, Pedrycz & Wang (2018)** (*Appl. Soft Comput.*) | Fixed-Window / Constrained | Standard 3D LFIG ($[L, U, a]$) | Hausdorff + Slope DTW ($D_H + D_{DTW}$) | None (Unweighted / Static Sum) | $\mathcal{O}(S^2)$ | Time Series Clustering |
+| **Gao & Yu (2019)** (*IEEE Access*) | Fixed / Heuristic Unequal | Standard 3D LFIG ($[L, U, a]$) | Generalized LFIG-DTW | Static Equal Weights | $\mathcal{O}(S^2)$ | Classification (Unequal Length) |
+| **He & Yu (2023)** (*Chaos Solitons & Fractals*) | Recurrence Matrix Splitting | 2D Recurrence Plot Images (TFGRP) | SVM Precomputed Kernel | None (Implicit SVM Margin) | $\mathcal{O}(N^2)$ | Noise-Robust Classification |
+| **Our Proposed Framework** | **Adaptive CPD vs. Fixed (Autocorrelation $\sigma^2_r$)** | **Enhanced 10D Multi-Feature Descriptor** | **3-Way Hybrid ($D_H + D_{DTW} + D_{Cos}$)** | **Grid Search / Inner CV** | $\boldsymbol{\mathcal{O}(S^2)}$ **(Up to 14.2$\times$ Speedup)** | **Time Series Classification (TSC)** |
+
 
 ---
 

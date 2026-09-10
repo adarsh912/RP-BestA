@@ -10,7 +10,7 @@ This document compiles the **Phase 1 Literature Review** deliverables for the pr
 1. **Bagnall, J., Lines, J., Bostrom, A., Large, J., & Keogh, E. (2017)** — *The great time series classification bake-off: a review and experimental evaluation of recent algorithmic advances*
    - **Focus:** Systematic review and evaluation of 18 classifiers on 85 UCR datasets. Established that collective ensembles (e.g., COTE) outperform single-representation algorithms.
    - **Key Finding:** No single representation (interval, shapelet, dictionary, frequency) dominates; combination is key.
-2. **Dempster, A., Schmidt, D. F., & Webb, G. I. (2021)** — *MINIROCKET: A Very Fast and Accurate Language for Time Series Classification*
+2. **Dempster, A., Schmidt, D. F., & Webb, G. I. (2021)** — *MINIROCKET: A Very Fast (Almost) Deterministic Transform for Time Series Classification*
    - **Focus:** MiniROCKET builds on ROCKET by using a fixed set of convolutional kernels, substantially reducing training time while maintaining high classification accuracy.
    - **Key Finding:** MiniROCKET is deterministic and scales linearly, making it a powerful baseline for large benchmarks.
 3. **Dempster, A., Conyers, T., Schmidt, D. F., & Webb, G. I. (2022)** — *MultiROCKET: Multiple pooling operators and transformations for fast and accurate time series classification*
@@ -134,7 +134,7 @@ This document compiles the **Phase 1 Literature Review** deliverables for the pr
 33. **Hyndman, R. J., Wang, E., & Laptev, N. (2015)** — *Large-Scale Unusual Time Series Detection*
     - **Focus:** Defining a low-dimensional feature space (spectral entropy, trend, seasonality, curvature, spikiness) for anomaly detection in streams.
     - **Key Finding:** Curvature and spikiness features are highly indicative of structural dynamics.
-34. **Lubba, C. H., Sethi, S. S., Knaute, P., Schultz, S. R., Fulcher, B. D., & Jones, N. S. (2019)** — *catch22: CAnonic Time-series CHaracteristics on 22 non-redundant features*
+34. **Lubba, C. H., Sethi, S. S., Knaute, P., Schultz, S. R., Fulcher, B. D., & Jones, N. S. (2019)** — *catch22: CAnonic time-series characteristics: Selected through highly comparative time-series analysis*
     - **Focus:** Down-selecting the 7,000 hctsa features to 22 highly informative, non-redundant, computationally efficient features.
     - **Key Finding:** Statistically selected small feature sets achieve similar classification accuracy to massive feature libraries at a fraction of the computational cost.
 35. **Esling, P., & Agon, C. (2012)** — *Time-series data mining*
@@ -244,7 +244,7 @@ To rigorously establish novelty, the table below directly contrasts our proposed
 12. **Ismail Fawaz et al. (2020)** — *InceptionTime: Finding AlexNet for time series classification* (Data Mining and Knowledge Discovery, Vol. 34, No. 6, pp. 1936–1962). Primary deep learning CNN baseline for time series classification.
 13. **Dau, Bagnall, Keogh et al. (2019)** — *The UCR time series classification archive* (IEEE/CAA Journal of Automatica Sinica, Vol. 6, No. 6, pp. 1293–1305). Official dataset repository reference.
 14. **Demšar, J. (2006)** — *Statistical Comparisons of Classifiers over Multiple Data Sets* (JMLR). Source for Friedman chi-square and Nemenyi critical difference diagrams.
-15. **Dempster et al. (2021)** — *MINIROCKET: A Very Fast and Accurate Language for Time Series Classification* (ACM SIGKDD). Primary convolutional baseline.
+15. **Dempster et al. (2021)** — *MINIROCKET: A Very Fast (Almost) Deterministic Transform for Time Series Classification* (ACM SIGKDD). Primary convolutional baseline.
 16. **Middlehurst et al. (2021)** — *HIVE-COTE 2.0* (Machine Learning). Meta-ensemble accuracy target baseline.
 17. **Sakoe & Chiba (1978)** — *Dynamic programming algorithm optimization for spoken word recognition* (IEEE TASSP). Canonical DTW baseline reference.
 18. **Truong, Oudre & Vayatis (2020)** — *Selective review of offline change point detection methods* (Signal Processing). Benchmark reference for Bottom-Up change point detection.

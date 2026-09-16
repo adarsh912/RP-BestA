@@ -125,9 +125,9 @@ The table below specifies the characteristics and data dimensions for each of th
   - **Cohort Mean:** **0.7857** (10D) vs. **0.8199** (3D) $\rightarrow$ **-0.0342 (-4.17%)**
 - **[Proof 3] Leave-One-Feature-Out (LOFO) Feature Impact Matrix:** Measures individual sensitivity by zeroing out each of the 10 descriptors (Lower Bound, Upper Bound, Slope, Shannon Entropy, Variance, Volatility, Curvature, Intercept, Energy, Skewness).
 - **[Proof 4] Empirical Computational Complexity & Memory Reduction Profile:** Compares our **Proposed 10D Adaptive LFIG model** against Fast-DTW and SOTA baselines:
-  - Theoretical matrix evaluation drop of up to **2166$\times$** (averaging **812$\times$** cohort-wide).
-  - Empirical wall-clock speedup of up to **14.2$\times$** (averaging **9.5$\times$** cohort-wide).
-  - Peak heap RAM allocation reduction of up to **5.5$\times$** (averaging **4.2$\times$** cohort-wide).
+  - Theoretical matrix evaluation drop of up to **2166$\times$** (averaging **665$\times$** cohort-wide).
+  - Empirical wall-clock speedup of up to **14.2$\times$** (averaging **9.4$\times$** cohort-wide).
+  - Peak heap RAM allocation reduction of up to **5.5$\times$** (cohort mean **4.1$\times$**, **4.2$\times$** aggregate).
 
 ### 2. Leakage-Free Evaluation Protocol
 - **Nested Cross-Validation:** Hyperparameters ($z$, $k$, distance fusion weights, KNN vs Kernel SVM) are selected per-fold using an inner CV loop with progress bars to eliminate selection leakage.
